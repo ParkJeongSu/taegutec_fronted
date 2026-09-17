@@ -18,7 +18,7 @@
       elevation="4"
       v-on:click.stop="panelStore.togglePanel"
     >
-      <v-icon color="white" size="large">{{ panelStore.isOpen ? '$next' : '$prev' }}</v-icon>
+      <v-icon :icon="panelStore.isOpen ? '$next' : '$prev'" color="white" size="large" />
     </v-btn>
 
     <!-- [카드] 실제 내용물 (450px) -->
@@ -38,7 +38,7 @@
           :data="panelStore.selectedItem"
         />
         <div v-else class="empty-state">
-          <v-icon icon="$info" size="large" class="mb-2"></v-icon>
+          <v-icon icon="$info" size="large" class="mb-2" />
           <p>데이터 테이블에서 항목을 선택해주세요.</p>
         </div>
       </v-card-text>

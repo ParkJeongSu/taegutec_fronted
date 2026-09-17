@@ -1,7 +1,7 @@
 <template>
   <v-card flat class="content-card">
     <v-card-title class="text-h5 font-weight-bold">
-      <v-icon icon="$calendarCheck" class="mr-2" color="primary"></v-icon>
+      <v-icon icon="$calendarCheck" class="mr-2" color="primary" />
       일일 생산계획 수립
     </v-card-title>
     <v-divider></v-divider>

@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:insert": "vite --mode insert",
+    "dev:powder": "vite --mode powder",
     "build": "vite build",
+    "build:insert": "vite build --mode insert",
+    "build:powder": "vite build --mode powder",
     "preview": "vite preview",
     "lint": "run-s lint:*",
     "lint:oxlint": "oxlint . --fix",

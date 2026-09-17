@@ -123,6 +123,7 @@ const aliases = {
   progressCheck: mdiProgressCheck,
   packageVariant: mdiPackageVariant,
   chevronLeft: mdiChevronLeft,
+  chevronRight: mdiChevronRight,
   dashboard: mdiViewDashboard,
   logout: mdiLogout,
   bellOutline: mdiBellOutline,

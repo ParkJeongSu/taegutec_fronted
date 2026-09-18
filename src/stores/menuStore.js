@@ -13,16 +13,196 @@ export const useMenuStore = defineStore('menu', function () {
           title: '운영 모니터링',
           children: [
             {
-              id: 'WORK_STATION',
-              title: '워크스테이션',
-              componentName: 'WorkStationView',
-              path: '/dashboard/workstation',
-            },
-            {
-              id: 'WAREHOUSE',
-              title: '창고 모니터링',
+              id: 'WAREHOUSE_ROOT',
+              title: '창고',
               componentName: 'WarehouseView',
               path: '/dashboard/warehouse',
+            },
+            {
+              id: 'WAREHOUSE_1',
+              title: '창고1',
+              children: [
+                {
+                  id: 'WORK_STATION_311',
+                  title: 'workstation311',
+                  componentName: 'WorkStation311View',
+                  path: '/dashboard/warehouse1/ws311',
+                },
+                {
+                  id: 'WORK_STATION_312',
+                  title: 'workstation312',
+                  componentName: 'WorkStation312View',
+                  path: '/dashboard/warehouse1/ws312',
+                },
+                {
+                  id: 'WORK_STATION_313',
+                  title: 'workstation313',
+                  componentName: 'WorkStation313View',
+                  path: '/dashboard/warehouse1/ws313',
+                },
+                {
+                  id: 'WORK_STATION_314',
+                  title: 'workstation314',
+                  componentName: 'WorkStation314View',
+                  path: '/dashboard/warehouse1/ws314',
+                },
+                {
+                  id: 'WORK_STATION_315',
+                  title: 'workstation315',
+                  componentName: 'WorkStation315View',
+                  path: '/dashboard/warehouse1/ws315',
+                },
+                {
+                  id: 'WORK_STATION_316',
+                  title: 'workstation316',
+                  componentName: 'WorkStation316View',
+                  path: '/dashboard/warehouse1/ws316',
+                },
+              ],
+            },
+            {
+              id: 'WAREHOUSE_2',
+              title: '창고2',
+              children: [
+                {
+                  id: 'WORK_STATION_321',
+                  title: 'workstation321',
+                  componentName: 'WorkStation321View',
+                  path: '/dashboard/warehouse2/ws321',
+                },
+                {
+                  id: 'WORK_STATION_322',
+                  title: 'workstation322',
+                  componentName: 'WorkStation322View',
+                  path: '/dashboard/warehouse2/ws322',
+                },
+                {
+                  id: 'WORK_STATION_323',
+                  title: 'workstation323',
+                  componentName: 'WorkStation323View',
+                  path: '/dashboard/warehouse2/ws323',
+                },
+                {
+                  id: 'WORK_STATION_324',
+                  title: 'workstation324',
+                  componentName: 'WorkStation324View',
+                  path: '/dashboard/warehouse2/ws324',
+                },
+                {
+                  id: 'WORK_STATION_325',
+                  title: 'workstation325',
+                  componentName: 'WorkStation325View',
+                  path: '/dashboard/warehouse2/ws325',
+                },
+                {
+                  id: 'WORK_STATION_326',
+                  title: 'workstation326',
+                  componentName: 'WorkStation326View',
+                  path: '/dashboard/warehouse2/ws326',
+                },
+              ],
+            },
+            {
+              id: 'WAREHOUSE_3',
+              title: '창고3',
+              children: [
+                {
+                  id: 'WORK_STATION_331',
+                  title: 'workstation331',
+                  componentName: 'WorkStation331View',
+                  path: '/dashboard/warehouse3/ws331',
+                },
+              ],
+            },
+            {
+              id: 'WAREHOUSE_4',
+              title: '창고4',
+              children: [
+                {
+                  id: 'WORK_STATION_341',
+                  title: 'workstation341',
+                  componentName: 'WorkStation341View',
+                  path: '/dashboard/warehouse4/ws341',
+                },
+                {
+                  id: 'WORK_STATION_342',
+                  title: 'workstation342',
+                  componentName: 'WorkStation342View',
+                  path: '/dashboard/warehouse4/ws342',
+                },
+                {
+                  id: 'WORK_STATION_343',
+                  title: 'workstation343',
+                  componentName: 'WorkStation343View',
+                  path: '/dashboard/warehouse4/ws343',
+                },
+                {
+                  id: 'WORK_STATION_344',
+                  title: 'workstation344',
+                  componentName: 'WorkStation344View',
+                  path: '/dashboard/warehouse4/ws344',
+                },
+              ],
+            },
+            {
+              id: 'WAREHOUSE_5',
+              title: '창고5',
+              children: [
+                {
+                  id: 'WORK_STATION_351',
+                  title: 'workstation351',
+                  componentName: 'WorkStation351View',
+                  path: '/dashboard/warehouse5/ws351',
+                },
+                {
+                  id: 'WORK_STATION_352',
+                  title: 'workstation352',
+                  componentName: 'WorkStation352View',
+                  path: '/dashboard/warehouse5/ws352',
+                },
+              ],
+            },
+            {
+              id: 'WAREHOUSE_6',
+              title: '창고6',
+              children: [
+                {
+                  id: 'WORK_STATION_361',
+                  title: 'workstation361',
+                  componentName: 'WorkStation361View',
+                  path: '/dashboard/warehouse6/ws361',
+                },
+                {
+                  id: 'WORK_STATION_362',
+                  title: 'workstation362',
+                  componentName: 'WorkStation362View',
+                  path: '/dashboard/warehouse6/ws362',
+                },
+                {
+                  id: 'WORK_STATION_363',
+                  title: 'workstation363',
+                  componentName: 'WorkStation363View',
+                  path: '/dashboard/warehouse6/ws363',
+                },
+              ],
+            },
+            {
+              id: 'WAREHOUSE_7',
+              title: '창고7',
+              children: [
+                {
+                  id: 'WORK_STATION_371',
+                  title: 'workstation371',
+                  componentName: 'WorkStation371View',
+                  path: '/dashboard/warehouse7/ws371',
+                },
+                {
+                  id: 'WORK_STATION_372',
+                  title: 'workstation372',
+                  componentName: 'WorkStation372View',
+                  path: '/dashboard/warehouse7/ws372',
+                },
+              ],
             },
           ],
         },
@@ -144,7 +324,7 @@ export const useMenuStore = defineStore('menu', function () {
     },
     {
       id: 'SETTINGS',
-      title: '설정',
+      title: '관리자 설정',
       children: [
         {
           id: 'AUTH_USER',

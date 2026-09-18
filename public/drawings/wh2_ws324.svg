@@ -1,0 +1,194 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 460" width="100%" height="100%">
+  <defs>
+    <style>
+      .svg-bg { fill: #f8fafc; }
+      .grid-line { stroke: #e2e8f0; stroke-width: 0.5; }
+      .rack-boundary { fill: #f1f5f9; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 4, 2; }
+      .rack-text { font-size: 13px; font-weight: 700; fill: #64748b; font-family: sans-serif; }
+      .aisle-boundary { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.5; }
+      .rail-center-line { stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 6, 4; }
+      .rail-side-line { stroke: #cbd5e1; stroke-width: 1; }
+      .aisle-label { font-size: 11px; font-weight: 600; fill: #94a3b8; letter-spacing: 0.5px; font-family: sans-serif; }
+      .crane-body { fill: #3b82f6; stroke: #1d4ed8; stroke-width: 2; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15)); }
+      .crane-inner { fill: #60a5fa; stroke: #2563eb; stroke-width: 1; }
+      .crane-cross { stroke: #ffffff; stroke-width: 1; opacity: 0.7; }
+      .crane-center-dot { fill: #ffffff; }
+      .crane-label { font-size: 10px; font-weight: 800; fill: #1e3a8a; font-family: sans-serif; }
+      .conveyor-lane { fill: #e2e8f0; stroke: #94a3b8; stroke-width: 1.5; }
+      .conveyor-label { font-size: 10px; font-weight: 700; fill: #475569; font-family: sans-serif; }
+      .ws-boundary { fill: #ffffff; stroke: #2e7d32; stroke-width: 2; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.05)); }
+      .ws-title { font-size: 13px; font-weight: 700; fill: #2e7d32; letter-spacing: 0.3px; font-family: sans-serif; }
+      .tray-rect { fill: #f8fafc; stroke: #94a3b8; stroke-width: 1.5; transition: all 0.2s ease; }
+      .tray-inbound { fill: #ecfdf5; stroke: #10b981; }
+      .tray-outbound { fill: #eff6ff; stroke: #3b82f6; }
+      .tray-active { fill: #fef3c7; stroke: #f59e0b; stroke-width: 2; filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.4)); }
+      .tray-title { font-size: 12px; font-weight: 700; fill: #334155; font-family: sans-serif; pointer-events: none; }
+      .tray-sub { font-size: 10px; font-weight: 500; fill: #64748b; font-family: sans-serif; pointer-events: none; }
+      .active-title { fill: #92400e; }
+      .active-sub { fill: #b45309; }
+      .clickable { cursor: pointer; }
+      .clickable:hover .tray-rect { filter: brightness(0.92); stroke-width: 2; }
+      .clickable:hover.tray-active .tray-rect { filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.7)); }
+      .operator-icon-bg { fill: #e0f2fe; stroke: #0284c7; stroke-width: 1.5; }
+      .operator-icon { font-size: 10px; font-weight: 800; fill: #0369a1; font-family: sans-serif; }
+      .operator-text { font-size: 10px; font-weight: 600; fill: #0369a1; font-family: sans-serif; }
+      .flow-arrow { stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 3, 2; fill: none; }
+      .legend-crane { fill: #3b82f6; stroke: #1d4ed8; }
+      .legend-inbound { fill: #ecfdf5; stroke: #10b981; }
+      .legend-active { fill: #fef3c7; stroke: #f59e0b; }
+      .legend-outbound { fill: #eff6ff; stroke: #3b82f6; }
+      .legend-text { font-size: 10px; font-weight: 500; fill: #64748b; font-family: sans-serif; }
+    </style>
+    <pattern id="gridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" class="grid-line" />
+    </pattern>
+  </defs>
+
+  <!-- 배경 그리드 -->
+  <rect width="100%" height="100%" fill="url(#gridPattern)" class="svg-bg" />
+
+  <!-- 랙 보관 구역 (좌측 상단 & 하단) -->
+  <g class="rack-group">
+    <rect x="20" y="30" width="80" height="180" class="rack-boundary" />
+    <text x="60" y="125" class="rack-text" text-anchor="middle">RACK-A</text>
+
+    <rect x="20" y="250" width="80" height="180" class="rack-boundary" />
+    <text x="60" y="345" class="rack-text" text-anchor="middle">RACK-B</text>
+  </g>
+
+  <!-- 크레인 주행 레일 및 통로 (중앙) -->
+  <g class="crane-aisle-group">
+    <rect x="130" y="20" width="140" height="420" class="aisle-boundary" />
+    <line x1="200" y1="20" x2="200" y2="440" class="rail-center-line" />
+    <line x1="140" y1="20" x2="140" y2="440" class="rail-side-line" />
+    <line x1="260" y1="20" x2="260" y2="440" class="rail-side-line" />
+    <text x="200" y="40" class="aisle-label" text-anchor="middle">
+      CRANE AISLE (주행 통로)
+    </text>
+
+    <!-- 실시간 크레인 캐리지 블록 (id="crane-unit") -->
+    <g id="crane-unit" class="crane-unit" transform="translate(200, 190)">
+      <rect x="-35" y="-30" width="70" height="60" rx="4" class="crane-body" />
+      <rect x="-25" y="-20" width="50" height="40" rx="2" class="crane-inner" />
+      <line x1="-25" y1="-20" x2="25" y2="20" class="crane-cross" />
+      <line x1="-25" y1="20" x2="25" y2="-20" class="crane-cross" />
+      <circle cx="0" cy="0" r="5" class="crane-center-dot" />
+      <text x="0" y="38" class="crane-label" text-anchor="middle">CRANE #1</text>
+    </g>
+  </g>
+
+  <!-- 컨베이어 레인 및 워크스테이션 구역 (우측) -->
+  <g class="conveyor-ws-group">
+    <!-- 입고 컨베이어 레인 (상단) -->
+    <rect x="270" y="100" width="160" height="60" class="conveyor-lane" />
+    <text x="350" y="135" class="conveyor-label" text-anchor="middle">
+      INBOUND CONVEYOR
+    </text>
+    <path d="M 280 130 L 420 130" class="flow-arrow" />
+
+    <!-- 출고 컨베이어 레인 (하단) -->
+    <rect x="270" y="300" width="160" height="60" class="conveyor-lane" />
+    <text x="350" y="335" class="conveyor-label" text-anchor="middle">
+      OUTBOUND CONVEYOR
+    </text>
+    <path d="M 420 330 L 280 330" class="flow-arrow" />
+
+    <!-- 워크스테이션 메인 영역 (324) -->
+    <rect x="430" y="50" width="280" height="360" rx="6" class="ws-boundary" />
+    <text x="570" y="80" class="ws-title" text-anchor="middle">
+      GR324 WORKSTATION
+    </text>
+
+    <!-- 포지션 32401 (입고 대기 버퍼 1) -->
+    <g
+      id="pos-32401"
+      class="tray-position tray-inbound clickable"
+      data-position="32401"
+      transform="translate(450, 100)"
+    >
+      <rect width="110" height="60" rx="4" class="tray-rect" />
+      <text x="55" y="26" class="tray-title" text-anchor="middle">POS 32401</text>
+      <text x="55" y="44" class="tray-sub" text-anchor="middle">입고 대기 #1</text>
+    </g>
+
+    <!-- 포지션 32402 (입고 대기 버퍼 2) -->
+    <g
+      id="pos-32402"
+      class="tray-position tray-inbound clickable"
+      data-position="32402"
+      transform="translate(580, 100)"
+    >
+      <rect width="110" height="60" rx="4" class="tray-rect" />
+      <text x="55" y="26" class="tray-title" text-anchor="middle">POS 32402</text>
+      <text x="55" y="44" class="tray-sub" text-anchor="middle">입고 대기 #2</text>
+    </g>
+
+    <!-- 작업자 피킹 / 작업대 영역 (중앙) -->
+    <g class="operator-area" transform="translate(450, 190)">
+      <rect width="240" height="80" rx="4" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5" />
+      <circle cx="50" cy="40" r="20" class="operator-icon-bg" />
+      <text x="50" y="44" class="operator-icon" text-anchor="middle">OP</text>
+      <text x="145" y="35" class="operator-text" font-weight="700">
+        작업자 피킹/검수존
+      </text>
+      <text x="145" y="55" class="legend-text">
+        트레이 투입 및 피킹 처리
+      </text>
+    </g>
+
+    <!-- 포지션 32403 (현재 작업 처리 트레이) -->
+    <g
+      id="pos-32403"
+      class="tray-position tray-active clickable"
+      data-position="32403"
+      transform="translate(450, 300)"
+    >
+      <rect width="80" height="60" rx="4" class="tray-rect" />
+      <text x="40" y="24" class="tray-title active-title" text-anchor="middle">
+        POS 32403
+      </text>
+      <text x="40" y="42" class="tray-sub active-sub" text-anchor="middle">
+        작업중
+      </text>
+    </g>
+
+    <!-- 포지션 32404 (출고 대기 1) -->
+    <g
+      id="pos-32404"
+      class="tray-position tray-outbound clickable"
+      data-position="32404"
+      transform="translate(540, 300)"
+    >
+      <rect width="80" height="60" rx="4" class="tray-rect" />
+      <text x="40" y="24" class="tray-title" text-anchor="middle">POS 32404</text>
+      <text x="40" y="42" class="tray-sub" text-anchor="middle">출고대기1</text>
+    </g>
+
+    <!-- 포지션 32405 (출고 완료/배출 2) -->
+    <g
+      id="pos-32405"
+      class="tray-position tray-outbound clickable"
+      data-position="32405"
+      transform="translate(630, 300)"
+    >
+      <rect width="80" height="60" rx="4" class="tray-rect" />
+      <text x="40" y="24" class="tray-title" text-anchor="middle">POS 32405</text>
+      <text x="40" y="42" class="tray-sub" text-anchor="middle">출고대기2</text>
+    </g>
+  </g>
+
+  <!-- 하단 범례 표시 -->
+  <g class="legend-group" transform="translate(30, 435)">
+    <rect x="0" y="0" width="12" height="12" rx="2" class="legend-crane" />
+    <text x="18" y="10" class="legend-text">크레인</text>
+
+    <rect x="75" y="0" width="12" height="12" rx="2" class="legend-inbound" />
+    <text x="93" y="10" class="legend-text">입고 대기</text>
+
+    <rect x="160" y="0" width="12" height="12" rx="2" class="legend-active" />
+    <text x="178" y="10" class="legend-text">작업중</text>
+
+    <rect x="235" y="0" width="12" height="12" rx="2" class="legend-outbound" />
+    <text x="253" y="10" class="legend-text">출고 대기</text>
+  </g>
+</svg>

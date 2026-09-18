@@ -2,29 +2,35 @@
 <template>
   <v-data-table-server
     v-model="selectedItems"
-    v-model:items-per-page="itemsPerPage"
+    v-model:items-per-page="internalItemsPerPage"
     :headers="headers"
     :items="items"
     :items-length="totalItems"
     :loading="loading"
     :density="density"
+    :hover="hover"
+    :fixed-header="fixedHeader"
     :item-value="itemValue"
+    :show-select="showSelect"
     return-object
-    show-select
     :class="['base-data-table', { 'hide-footer-table': hideFooter }]"
     v-on:update:options="onUpdateOptions"
+    v-on:update:items-per-page="onUpdateItemsPerPage"
+    v-on:click:row="onRowClick"
   >
-    <!-- [Best Practice] 슬롯을 동적으로 넘겨주어 각 화면에서 셀 내용을 커스텀할 수 있게 함 -->
-    <template v-for="(_, slotName) in $slots" v-slot:[slotName]="slotProps">
-      <slot :name="slotName" v-bind="slotProps"></slot>
+    <!-- dynamic slot 전달 (부모에서 특정 컬럼 및 템플릿 커스텀 지원) -->
+    <template v-for="slotName in Object.keys($slots)" :key="slotName" #[slotName]="slotProps">
+      <slot :name="slotName" v-bind="slotProps || {}"></slot>
     </template>
 
-    <!-- 하단 페이지네이션 숨김 처리 -->
-    <template v-if="hideFooter" v-slot:bottom></template>
+    <!-- 하단 페이지네이션 숨김 처리 (hideFooter가 true이고 $slots['bottom']이 정의되지 않았을 때) -->
+    <template v-if="hideFooter && !$slots['bottom']" #bottom></template>
 
-    <!-- 데이터가 없을 때 표시 -->
-    <template v-slot:no-data>
-      <v-alert type="warning" variant="tonal" class="ma-4"> 조회된 데이터가 없습니다. </v-alert>
+    <!-- 데이터가 없을 때 기본 표시 -->
+    <template v-if="!$slots['no-data']" #no-data>
+      <v-alert type="warning" variant="tonal" class="ma-4">
+        조회된 데이터가 없습니다.
+      </v-alert>
     </template>
   </v-data-table-server>
 </template>
@@ -32,37 +38,84 @@
 <script setup>
 import { ref, watch } from 'vue'
 
-// 1. Props 정의
 const props = defineProps({
-  headers: { type: Array, required: true },
+  headers: {
+    type: Array,
+    required: true,
+  },
   items: {
     type: Array,
     default: function () {
       return []
     },
   },
-  totalItems: { type: Number, default: 0 },
-  loading: { type: Boolean, default: false },
-  density: { type: String, default: 'compact' },
+  totalItems: {
+    type: Number,
+    default: 0,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+  itemsPerPage: {
+    type: Number,
+    default: 10,
+  },
+  density: {
+    type: String,
+    default: 'compact',
+  },
+  hover: {
+    type: Boolean,
+    default: true,
+  },
+  fixedHeader: {
+    type: Boolean,
+    default: true,
+  },
   modelValue: {
     type: Array,
     default: function () {
       return []
     },
-  }, // 외부 v-model 연동
-  // [추가] 테이블마다 고유한 PK 속성명을 받기 위한 프롭 (기본값은 id)
-  itemValue: { type: String, default: 'id' },
-  hideFooter: { type: Boolean, default: false },
+  },
+  itemValue: {
+    type: String,
+    default: 'id',
+  },
+  showSelect: {
+    type: Boolean,
+    default: false,
+  },
+  hideFooter: {
+    type: Boolean,
+    default: false,
+  },
 })
 
-// 2. Emits 정의
-const emit = defineEmits(['update:options', 'update:modelValue'])
+const emit = defineEmits(['update:options', 'update:modelValue', 'update:itemsPerPage', 'click:row'])
 
-// 3. 내부 상태
-const itemsPerPage = ref(10)
-const selectedItems = ref([])
+const internalItemsPerPage = ref(props.itemsPerPage)
+const selectedItems = ref(props.modelValue || [])
 
-// 내부 선택 상태를 외부 v-model과 동기화
+watch(
+  function () {
+    return props.itemsPerPage
+  },
+  function (newVal) {
+    internalItemsPerPage.value = newVal
+  },
+)
+
+watch(
+  function () {
+    return props.modelValue
+  },
+  function (newVal) {
+    selectedItems.value = newVal || []
+  },
+)
+
 watch(
   function () {
     return selectedItems.value
@@ -72,33 +125,38 @@ watch(
   },
 )
 
-// 4. 옵션 변경 핸들러 (페이징, 정렬 등 발생 시)
 function onUpdateOptions(options) {
   emit('update:options', options)
+}
+
+function onUpdateItemsPerPage(val) {
+  internalItemsPerPage.value = val
+  emit('update:itemsPerPage', val)
+}
+
+function onRowClick(event, row) {
+  emit('click:row', event, row)
 }
 </script>
 
 <style scoped>
-/* 따뜻한 초록색 테마를 위한 테이블 스타일링 */
 .base-data-table {
   border-top: 2px solid rgb(var(--v-theme-primary));
 }
 
-/* 헤더 배경색 및 폰트 설정 */
 :deep(.v-data-table-header) {
-  background-color: #f1f8e9; /* 연한 초록색 */
+  background-color: #f1f8e9;
 }
 
 :deep(.v-data-table-header th) {
   font-weight: bold !important;
-  color: #2e7d32 !important; /* 진한 초록색 */
+  color: #2e7d32 !important;
 }
 
-/* 마우스 오버 시 색상 */
 :deep(.v-data-table__tr:hover) {
   background-color: #f9fbe7 !important;
 }
-/* 하단 여백 최적화 */
+
 .hide-footer-table :deep(.v-table__wrapper) {
   margin-bottom: 0;
 }

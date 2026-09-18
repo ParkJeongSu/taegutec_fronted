@@ -5,6 +5,91 @@ export const componentMap = {
   WorkStationView: defineAsyncComponent(function () {
     return import('@/views/Dashboard/WorkStationView.vue')
   }),
+  WorkStation311View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation311View.vue')
+  }),
+  WorkStation312View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation312View.vue')
+  }),
+  WorkStation313View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation313View.vue')
+  }),
+  WorkStation314View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation314View.vue')
+  }),
+  WorkStation315View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation315View.vue')
+  }),
+  WorkStation316View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation316View.vue')
+  }),
+
+  // 창고 2 (WAREHOUSE_2)
+  WorkStation321View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation321View.vue')
+  }),
+  WorkStation322View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation322View.vue')
+  }),
+  WorkStation323View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation323View.vue')
+  }),
+  WorkStation324View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation324View.vue')
+  }),
+  WorkStation325View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation325View.vue')
+  }),
+  WorkStation326View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation326View.vue')
+  }),
+
+  // 창고 3 (WAREHOUSE_3)
+  WorkStation331View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation331View.vue')
+  }),
+
+  // 창고 4 (WAREHOUSE_4)
+  WorkStation341View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation341View.vue')
+  }),
+  WorkStation342View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation342View.vue')
+  }),
+  WorkStation343View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation343View.vue')
+  }),
+  WorkStation344View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation344View.vue')
+  }),
+
+  // 창고 5 (WAREHOUSE_5)
+  WorkStation351View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation351View.vue')
+  }),
+  WorkStation352View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation352View.vue')
+  }),
+
+  // 창고 6 (WAREHOUSE_6)
+  WorkStation361View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation361View.vue')
+  }),
+  WorkStation362View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation362View.vue')
+  }),
+  WorkStation363View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation363View.vue')
+  }),
+
+  // 창고 7 (WAREHOUSE_7)
+  WorkStation371View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation371View.vue')
+  }),
+  WorkStation372View: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WorkStation372View.vue')
+  }),
+
   WarehouseView: defineAsyncComponent(function () {
     return import('@/views/Dashboard/WarehouseView.vue')
   }),

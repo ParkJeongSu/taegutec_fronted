@@ -60,13 +60,13 @@
       </div>
 
       <!-- 데이터 테이블 영역 -->
-      <v-data-table
+      <BaseDataTable
         :headers="headers"
         :items="items"
+        :total-items="items.length"
         :loading="isLoading"
+        item-value="stationId"
         density="compact"
-        class="border rounded"
-        hover
       >
         <template #[`item.status`]="{ item }">
           <v-chip
@@ -84,13 +84,14 @@
             <div>등록된 워크스테이션 데이터가 없습니다.</div>
           </div>
         </template>
-      </v-data-table>
+      </BaseDataTable>
     </v-card>
   </v-container>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import BaseDataTable from '@/components/common/BaseDataTable.vue'
 
 const searchKeyword = ref('')
 const statusFilter = ref('전체')

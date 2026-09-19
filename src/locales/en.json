@@ -622,5 +622,38 @@
       "transportState": "Transport State",
       "carrierName": "Carrier Name"
     }
+  },
+  "zone": {
+    "title": "Zone Management & Shelf Map",
+    "breadcrumb": "Transfer > Equipment Control > Zone Allocation",
+    "stocker": "Stocker / Warehouse",
+    "bank": "Bank",
+    "search": "Search",
+    "refresh": "Refresh",
+    "export": "Export Status",
+    "totalCells": "Total Shelf Cells",
+    "occupiedCells": "Tray Loaded Cells",
+    "emptyCells": "Empty Cells",
+    "modifiedCells": "Pending Modifications",
+    "selectMode": "Selection Mode",
+    "dragSelect": "Drag Select",
+    "dragDeselect": "Drag Deselect",
+    "selectAll": "Select All",
+    "clearSelect": "Clear Selection",
+    "invertSelect": "Invert Selection",
+    "selectedCells": "{count} Cells Selected",
+    "targetZone": "Target Zone to Apply",
+    "applyZone": "Batch Apply Zone",
+    "save": "Save",
+    "legend": "Zone Legend",
+    "carrierLoaded": "Carrier Loaded",
+    "guideText": "Drag mouse to select rectangular areas of shelf cells.",
+    "zoom": "Zoom",
+    "fit": "Fit to Screen",
+    "saveSuccess": "Zone changes successfully saved.",
+    "applySuccess": "Batch updated {count} cells to Zone '{zone}'.",
+    "noChange": "No modified cells to save.",
+    "cellsLoaded": "Loaded {count} shelf cells data."
   }
 }
+

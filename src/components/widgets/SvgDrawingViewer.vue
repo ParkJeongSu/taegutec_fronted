@@ -172,4 +172,9 @@ watch(
   height: 100%;
   display: block;
 }
+
+:deep(.crane-unit) {
+  transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+  will-change: transform;
+}
 </style>

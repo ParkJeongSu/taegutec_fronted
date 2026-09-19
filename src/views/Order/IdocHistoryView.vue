@@ -57,13 +57,13 @@
         </v-row>
       </div>
 
-      <v-data-table
+      <BaseDataTable
         :headers="headers"
         :items="items"
+        :total-items="items.length"
         :loading="isLoading"
+        item-value="idocNumber"
         density="compact"
-        class="border rounded"
-        hover
       >
         <template #[`item.status`]="{ item }">
           <v-chip :color="item.status === 'SUCCESS' ? 'success' : 'error'" size="x-small" variant="flat">
@@ -76,13 +76,14 @@
             <div>등록된 Idoc 인터페이스 데이터가 없습니다.</div>
           </div>
         </template>
-      </v-data-table>
+      </BaseDataTable>
     </v-card>
   </v-container>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import BaseDataTable from '@/components/common/BaseDataTable.vue'
 
 const searchKeyword = ref('')
 const statusFilter = ref('전체')

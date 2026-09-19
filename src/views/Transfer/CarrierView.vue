@@ -57,13 +57,13 @@
         </v-row>
       </div>
 
-      <v-data-table
+      <BaseDataTable
         :headers="headers"
         :items="items"
+        :total-items="items.length"
         :loading="isLoading"
+        item-value="carrierId"
         density="compact"
-        class="border rounded"
-        hover
       >
         <template #[`item.battery`]="{ item }">
           <span class="font-weight-bold" :class="item.battery < 20 ? 'text-error' : 'text-success'">
@@ -76,13 +76,14 @@
             <div>등록된 캐리어 데이터가 없습니다.</div>
           </div>
         </template>
-      </v-data-table>
+      </BaseDataTable>
     </v-card>
   </v-container>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import BaseDataTable from '@/components/common/BaseDataTable.vue'
 
 const searchKeyword = ref('')
 const statusFilter = ref('전체')

@@ -622,5 +622,38 @@
       "transportState": "이동 상태",
       "carrierName": "캐리어명"
     }
+  },
+  "zone": {
+    "title": "존(Zone) 관리 및 랙 맵",
+    "breadcrumb": "반송 > 설비 제어 > 존 할당",
+    "stocker": "스토커 / 창고 (Stocker)",
+    "bank": "Bank",
+    "search": "조회",
+    "refresh": "새로고침",
+    "export": "현황 내보내기",
+    "totalCells": "총 랙 셀 수",
+    "occupiedCells": "트레이 적재 셀",
+    "emptyCells": "빈 셀 (Empty)",
+    "modifiedCells": "수정 대기 셀",
+    "selectMode": "선택 모드",
+    "dragSelect": "드래그 선택",
+    "dragDeselect": "드래그 해제",
+    "selectAll": "전체 선택",
+    "clearSelect": "선택 해제",
+    "invertSelect": "선택 반전",
+    "selectedCells": "{count}개 셀 선택됨",
+    "targetZone": "변경할 대상 Zone",
+    "applyZone": "Zone 일괄 적용",
+    "save": "저장",
+    "legend": "Zone 범례",
+    "carrierLoaded": "Carrier 적재",
+    "guideText": "마우스 드래그로 사각형 영역을 지정하여 일괄 선택할 수 있습니다.",
+    "zoom": "확대/축소",
+    "fit": "화면 맞춤",
+    "saveSuccess": "Zone 변경 사항이 성공적으로 저장되었습니다.",
+    "applySuccess": "{count}개 셀의 Zone을 '{zone}'(으)로 일괄 변경했습니다.",
+    "noChange": "변경된 셀이 없습니다.",
+    "cellsLoaded": "{count}개 랙 셀 데이터를 조회했습니다."
   }
 }
+

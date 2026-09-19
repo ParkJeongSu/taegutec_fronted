@@ -57,13 +57,13 @@
         </v-row>
       </div>
 
-      <v-data-table
+      <BaseDataTable
         :headers="headers"
         :items="items"
+        :total-items="items.length"
         :loading="isLoading"
+        item-value="menuName"
         density="compact"
-        class="border rounded"
-        hover
       >
         <template #[`item.canRead`]="{ item }">
           <v-icon :icon="item.canRead ? '$check' : '$close'" :color="item.canRead ? 'success' : 'grey'" />
@@ -80,13 +80,14 @@
             <div>등록된 메뉴 권한 데이터가 없습니다.</div>
           </div>
         </template>
-      </v-data-table>
+      </BaseDataTable>
     </v-card>
   </v-container>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import BaseDataTable from '@/components/common/BaseDataTable.vue'
 
 const searchKeyword = ref('')
 const statusFilter = ref('전체')

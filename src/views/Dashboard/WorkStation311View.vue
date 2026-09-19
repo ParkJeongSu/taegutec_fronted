@@ -23,9 +23,14 @@
         </div>
 
         <div class="d-flex align-center">
-          <v-chip color="grey" variant="flat" size="small" class="font-weight-medium">
+          <v-chip
+            :color="isConnected ? 'success' : 'grey'"
+            variant="flat"
+            size="small"
+            class="font-weight-medium"
+          >
             <v-icon icon="$radioboxBlank" size="12" class="mr-1 pulse-dot" />
-            WebSocket 연결 대기
+            {{ isConnected ? 'WebSocket 실시간 연결됨' : 'WebSocket 연결 대기' }}
           </v-chip>
         </div>
       </div>
@@ -148,21 +153,47 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import SvgDrawingViewer from '@/components/widgets/SvgDrawingViewer.vue'
+import { useCraneSocket } from '@/composables/useCraneSocket'
 
-// 1. 크레인 실시간 위치 좌표 (반응형 상태)
+// 1. WebSocket 전용 Composable 연결
+const { isConnected, connectCraneSocket, disconnectCraneSocket } = useCraneSocket()
+
+// 2. 크레인 실시간 위치 좌표 (반응형 상태)
 const cranePos = ref({ x: 200, y: 190 })
 
-// 2. 선택된 트레이 포지션 ID
+// 3. 실시간 크레인 좌표 수신 핸들러
+function handleCraneMovement(payload) {
+  if (!payload) {
+    return
+  }
+  if (typeof payload.x === 'number' && typeof payload.y === 'number') {
+    cranePos.value = {
+      x: payload.x,
+      y: payload.y,
+    }
+  }
+}
+
+// 라이프사이클: 웹소켓 연결 및 해제
+onMounted(function () {
+  connectCraneSocket('1', handleCraneMovement)
+})
+
+onBeforeUnmount(function () {
+  disconnectCraneSocket()
+})
+
+// 4. 선택된 트레이 포지션 ID
 const selectedPosition = ref(null)
 
-// 3. 활성 오더 탭 상태
+// 5. 활성 오더 탭 상태
 const activeTab = ref('inbound')
 const isLoading = ref(false)
 
-// 4. 오더 테이블 컬럼 정의
+// 6. 오더 테이블 컬럼 정의
 const orderHeaders = [
   { title: '오더번호', key: 'orderNo', align: 'start' },
   { title: '트레이 ID', key: 'trayId', align: 'start' },

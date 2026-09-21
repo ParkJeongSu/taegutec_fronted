@@ -113,9 +113,7 @@
 
       <!-- 하단 카피라이트 -->
       <div class="text-center mt-6">
-        <p class="text-caption text-disabled mb-0">
-          &copy; TaeguTec Ltd. All rights reserved.
-        </p>
+        <p class="text-caption text-disabled mb-0">&copy; TaeguTec Ltd. All rights reserved.</p>
       </div>
     </v-card>
   </v-container>
@@ -125,6 +123,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { loginApi } from '@/api/auth'
+import { useApi } from '@/composables/useApi'
 import { APP_TITLE, PLANT_TYPE, isInsert, isPowder } from '@/constants/plant'
 
 const router = useRouter()
@@ -135,12 +135,14 @@ const employeeId = ref('')
 const password = ref('')
 const rememberMe = ref(false)
 const showPassword = ref(false)
-const isLoading = ref(false)
 const isFormValid = ref(false)
 const errorMessage = ref('')
 
 const plantCode = PLANT_TYPE
 const currentPlantTitle = APP_TITLE
+
+// useApi 컴포저블을 활용한 로그인 API 바인딩
+const { loading: isLoading, execute: executeLogin } = useApi(loginApi)
 
 const plantChipColor = computed(function () {
   if (isInsert()) {
@@ -197,34 +199,55 @@ async function handleLogin() {
     return
   }
 
-  isLoading.value = true
   errorMessage.value = ''
 
   try {
-    // 1. 사번 저장 옵션 처리
-    if (rememberMe.value) {
-      localStorage.setItem('saved_employee_id', employeeId.value)
+    const payload = {
+      factoryName: plantCode,
+      userId: employeeId.value,
+      password: password.value,
+    }
+
+    const res = await executeLogin(payload)
+
+    // 백엔드 응답 규격인 result === 'SUCCESS' 로 판별
+    if (res && res.result === 'SUCCESS') {
+      // 1. 사번 저장 옵션 처리
+      if (rememberMe.value) {
+        localStorage.setItem('saved_employee_id', employeeId.value)
+      } else {
+        localStorage.removeItem('saved_employee_id')
+      }
+
+      // 2. data 객체 추출
+      const resData = res.data || {}
+      const accessToken = resData.accessToken || ''
+
+      const userInfo = {
+        userId: resData.userId || employeeId.value,
+        userName: resData.userName || employeeId.value,
+        factoryName: resData.factoryName || plantCode,
+        departmentName: resData.departmentName || '',
+        userGroups: resData.roles || [], // 백엔드의 roles 배열 매핑
+      }
+
+      authStore.setAuth(accessToken, userInfo)
+
+      // 3. 메인 업무 화면으로 이동
+      router.push('/')
     } else {
-      localStorage.removeItem('saved_employee_id')
+      errorMessage.value =
+        (res && res.message) || '로그인에 실패했습니다. 사번과 비밀번호를 확인해주세요.'
     }
-
-    // 2. 인증 토큰 및 사용자 정보 저장
-    const token = 'tegutec-token-' + Date.now()
-    const userInfo = {
-      employeeId: employeeId.value,
-      plant: plantCode,
-      loginAt: new Date().toISOString(),
-    }
-
-    authStore.setAuth(token, userInfo)
-
-    // 3. 메인 업무 화면으로 이동
-    router.push('/')
   } catch (error) {
-    errorMessage.value = '로그인 중 오류가 발생했습니다. 다시 시도해주세요.'
     console.error('Login error:', error)
-  } finally {
-    isLoading.value = false
+    if (error && error.response && error.response.data && error.response.data.message) {
+      errorMessage.value = error.response.data.message
+    } else if (error && error.response && error.response.status === 401) {
+      errorMessage.value = '사번 또는 비밀번호가 올바르지 않습니다.'
+    } else {
+      errorMessage.value = '로그인 서버와 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+    }
   }
 }
 

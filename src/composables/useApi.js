@@ -23,11 +23,15 @@ export function useApi(apiFunc, initialData = null) {
 
     try {
       const response = await apiFunc(params)
-      if (response && response.data !== undefined) {
+
+      // Axios의 원본 HTTP Response 객체인 경우에만 1회 unwrap (status와 config 존재 여부로 판별)
+      if (response && response.status !== undefined && response.config !== undefined) {
         data.value = response.data
       } else {
+        // apiFunc에서 이미 response.data를 return했거나 일반 객체인 경우 그대로 유지
         data.value = response
       }
+
       return data.value
     } catch (err) {
       error.value = err

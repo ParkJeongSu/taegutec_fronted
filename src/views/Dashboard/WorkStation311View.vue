@@ -58,7 +58,7 @@
           <!-- 공통 SVG 도면 뷰어 컴포넌트 -->
           <div class="flex-grow-1 d-flex">
             <SvgDrawingViewer
-              src="/drawings/wh1_ws311.svg"
+              :src="drawingSrc"
               :crane-pos="cranePos"
               v-on:click-position="handlePositionClick"
             />
@@ -71,12 +71,7 @@
         <v-card class="elevation-1 rounded-lg pa-4 h-100 d-flex flex-column">
           <!-- 탭 선택 바 (입고 오더 / 출고 오더) -->
           <div class="d-flex align-center justify-space-between mb-2">
-            <v-tabs
-              v-model="activeTab"
-              color="primary"
-              density="compact"
-              class="order-tabs"
-            >
+            <v-tabs v-model="activeTab" color="primary" density="compact" class="order-tabs">
               <v-tab value="inbound" class="font-weight-bold">
                 <v-icon icon="$trayArrowDown" size="18" class="mr-1" />
                 입고 오더 목록 ({{ inboundOrders.length }})
@@ -157,6 +152,10 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import SvgDrawingViewer from '@/components/widgets/SvgDrawingViewer.vue'
 import { useCraneSocket } from '@/composables/useCraneSocket'
+
+// script setup 영역
+const baseUrl = import.meta.env.BASE_URL // '/wcs-web/' (로컬 개발 서버에선 '/')
+const drawingSrc = baseUrl + 'drawings/wh1_ws311.svg'
 
 // 1. WebSocket 전용 Composable 연결
 const { isConnected, connectCraneSocket, disconnectCraneSocket } = useCraneSocket()

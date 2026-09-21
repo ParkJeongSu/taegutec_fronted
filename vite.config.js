@@ -16,6 +16,11 @@ export default defineConfig(function (configEnv) {
   const env = loadEnv(mode, process.cwd(), '')
 
   return {
+    // ----------------------------------------------------
+    // [추가] 배포 서브패스 기준 경로 설정
+    // 빌드 시 index.html 내부의 JS/CSS/정적 파일 경로가 '/wcs-web/assets/...' 로 생성됩니다.
+    // ----------------------------------------------------
+    base: '/wcs-web/',
     plugins: [
       vue(),
       vuetify(),

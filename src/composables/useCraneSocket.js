@@ -25,7 +25,8 @@ export function useCraneSocket() {
       return
     }
 
-    const wsUrl = import.meta.env.VITE_WS_URL || 'http://localhost:11421/wcs-web/ws-stomp'
+    // ✅ 수정 코드: 상대 경로 지정 (접속 중인 도메인/IP의 80번 포트 Nginx로 전달됨)
+    const wsUrl = import.meta.env.VITE_WS_URL || '/wcs-web/ws-stomp'
     const topicPath = '/topic/warehouse/' + warehouseId + '/crane'
 
     connectionStatusText.value = 'WebSocket 연결 시도 중...'

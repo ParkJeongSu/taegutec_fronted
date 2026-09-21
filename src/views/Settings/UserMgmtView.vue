@@ -108,7 +108,7 @@
         :items="userItems"
         :total-items="totalItems"
         :loading="isLoading"
-        item-value="userId"
+        item-value="id"
         density="compact"
         v-on:click:row="onRowClick"
       >
@@ -160,15 +160,15 @@ const stateFilterOptions = ['전체', 'ACTIVE', 'INACTIVE']
 const userItems = ref([])
 const totalItems = ref(0)
 
-// 테이블 컬럼 정의
+// 테이블 컬럼 정의 (id는 헤더에 미노출, departmentName 추가)
 const headers = [
   { title: '사번 (USER_ID)', key: 'userId', align: 'start' },
   { title: '성명 (USER_NAME)', key: 'userName', align: 'start' },
-  { title: '소속 공장 (FACTORY)', key: 'factoryName', align: 'center' },
-  { title: '부서 (DEPARTMENT)', key: 'departmentId', align: 'start' },
-  { title: '이메일 (EMAIL)', key: 'email', align: 'start' },
-  { title: '전화번호 (PHONE)', key: 'phone', align: 'center' },
-  { title: '상태 (USER_STATE)', key: 'userState', align: 'center' },
+  { title: '부서명', key: 'departmentName', align: 'start' },
+  { title: '소속 공장', key: 'factoryName', align: 'center' },
+  { title: '상태', key: 'userState', align: 'center' },
+  { title: '이메일', key: 'email', align: 'start' },
+  { title: '전화번호', key: 'phone', align: 'center' },
   { title: '최종 로그인', key: 'lastLoginAt', align: 'center' },
 ]
 
@@ -210,7 +210,6 @@ async function fetchUsers() {
     const response = await executeFetchUsers(params)
 
     if (response) {
-      // 응답 구조 대응: response.data.content 또는 response.content 또는 response.data 또는 response
       if (response.data && Array.isArray(response.data.content)) {
         userItems.value = response.data.content
         totalItems.value = response.data.totalElements || response.data.content.length
@@ -256,7 +255,7 @@ function onAddUser() {
   })
 }
 
-// 행(Row) 클릭 시 수정 모드로 우측 패널 오픈
+// 행(Row) 클릭 시 수정 모드로 우측 패널 오픈 (id 포함 데이터 전달)
 function onRowClick(event, row) {
   const itemData = (row && row.item) ? row.item : row
   panelStore.openPanel(markRaw(UserMgmtViewForm), {

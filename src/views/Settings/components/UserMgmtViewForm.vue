@@ -56,13 +56,14 @@
           ></v-text-field>
         </v-col>
 
-        <!-- 부서 ID / 부서명 -->
+        <!-- 부서명 -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model="formData.departmentId"
-            label="부서 (DEPARTMENT_ID)"
+            v-model="formData.departmentName"
+            label="부서명"
             variant="outlined"
             density="compact"
+            placeholder="부서명을 입력하세요"
           ></v-text-field>
         </v-col>
 
@@ -155,10 +156,20 @@ import { useApi } from '@/composables/useApi'
 import { createUserApi, updateUserApi, deleteUserApi } from '@/api/user'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
+const props = defineProps({
+  data: {
+    type: Object,
+    default: null,
+  },
+})
+
 const panelStore = usePanelStore()
 const formRef = ref(null)
 const showPassword = ref(false)
 const deleteConfirmDialog = ref(false)
+
+// 식별자 TSID 대리키 보관 상태
+const currentId = ref(null)
 
 const plantOptions = ['INSERT', 'POWDER', 'COMMON']
 const statusOptions = [
@@ -185,17 +196,20 @@ const formData = reactive({
   password: '',
   factoryName: 'INSERT',
   departmentId: '',
+  departmentName: '',
   email: '',
   phone: '',
   userState: 'ACTIVE',
 })
 
 function resetForm() {
+  currentId.value = null
   formData.userId = ''
   formData.userName = ''
   formData.password = ''
   formData.factoryName = 'INSERT'
   formData.departmentId = ''
+  formData.departmentName = ''
   formData.email = ''
   formData.phone = ''
   formData.userState = 'ACTIVE'
@@ -203,15 +217,17 @@ function resetForm() {
 
 watch(
   function () {
-    return panelStore.selectedItem
+    return props.data || panelStore.selectedItem
   },
   function (newVal) {
     if (newVal) {
+      currentId.value = newVal.id || null
       formData.userId = newVal.userId || newVal.USER_ID || ''
       formData.userName = newVal.userName || newVal.USER_NAME || ''
       formData.password = ''
       formData.factoryName = newVal.factoryName || newVal.FACTORY_NAME || newVal.plant || 'INSERT'
-      formData.departmentId = newVal.departmentId || newVal.DEPARTMENT_ID || newVal.deptName || ''
+      formData.departmentId = newVal.departmentId || newVal.DEPARTMENT_ID || ''
+      formData.departmentName = newVal.departmentName || newVal.deptName || ''
       formData.email = newVal.email || ''
       formData.phone = newVal.phone || ''
       formData.userState = newVal.userState || newVal.USER_STATE || newVal.status || 'ACTIVE'
@@ -267,6 +283,7 @@ async function onHandleSave() {
       userName: formData.userName,
       factoryName: formData.factoryName,
       departmentId: formData.departmentId,
+      departmentName: formData.departmentName,
       email: formData.email,
       phone: formData.phone,
       userState: formData.userState,
@@ -281,7 +298,9 @@ async function onHandleSave() {
       await executeCreate(payload)
       alert('신규 사용자가 등록되었습니다.')
     } else {
-      await executeUpdate(payload)
+      // 대리키 id 기준으로 수정 요청 수행
+      const targetId = currentId.value || formData.userId
+      await executeUpdate(targetId, payload)
       alert('사용자 정보가 수정되었습니다.')
     }
 
@@ -300,7 +319,9 @@ async function onHandleSave() {
 
 async function onConfirmDelete() {
   try {
-    await executeDelete(formData.userId)
+    // 대리키 id 기준으로 삭제 요청 수행
+    const targetId = currentId.value || formData.userId
+    await executeDelete(targetId)
     alert('사용자가 삭제되었습니다.')
 
     if (typeof panelStore.onSuccess === 'function') {

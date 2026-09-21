@@ -22,27 +22,34 @@ export async function createUserApi(userData) {
 }
 
 /**
- * 사용자 정보 수정
- * @param {Object} userData - 수정할 사용자 정보 (userId 포함)
+ * 사용자 정보 수정 (대리키 id 기준)
+ * @param {string|number|Object} id - TSID 식별자 또는 수정할 데이터 객체
+ * @param {Object} [payload] - 수정할 사용자 정보
  * @returns {Promise<Object>} API 응답 데이터
  */
-export async function updateUserApi(userData) {
-  const targetId = userData && (userData.userId || userData.id)
-  const url = targetId
-    ? '/wcs-web/api/v1/mng/user/' + encodeURIComponent(targetId)
-    : '/wcs-web/api/users'
-  const response = await axios.put(url, userData)
+export async function updateUserApi(id, payload) {
+  let targetId = id
+  let data = payload
+
+  // 첫 번째 인자가 객체로 전달된 경우 대응
+  if (typeof id === 'object' && id !== null && payload === undefined) {
+    targetId = id.id || id.userId
+    data = id
+  }
+
+  const url = '/wcs-web/api/users/' + encodeURIComponent(targetId)
+  const response = await axios.put(url, data)
   return response.data
 }
 
 /**
- * 사용자 삭제
- * @param {string|number|Object} userId - 삭제할 사용자 사번 또는 객체
+ * 사용자 삭제 (대리키 id 기준)
+ * @param {string|number|Object} id - 삭제할 사용자 TSID 식별자 또는 객체
  * @returns {Promise<Object>} API 응답 데이터
  */
-export async function deleteUserApi(userId) {
-  const targetId =
-    typeof userId === 'object' && userId !== null ? userId.userId || userId.id : userId
-  const response = await axios.delete('/wcs-web/api/v1/mng/user/' + encodeURIComponent(targetId))
+export async function deleteUserApi(id) {
+  const targetId = typeof id === 'object' && id !== null ? id.id || id.userId : id
+  const url = '/wcs-web/api/users/' + encodeURIComponent(targetId)
+  const response = await axios.delete(url)
   return response.data
 }

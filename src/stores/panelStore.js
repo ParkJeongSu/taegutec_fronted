@@ -29,6 +29,19 @@ export const usePanelStore = defineStore('panel', function () {
     onSuccess.value = null
   }
 
+  // 3. 패널 열기 및 데이터 설정 통합 헬퍼 함수
+  function openPanel(component, options) {
+    const opts = options || {}
+    selectedItem.value = opts.data || null
+    formComponent.value = component
+    title.value = opts.title || (opts.mode === 'CREATE' || opts.mode === 'add' ? '신규 등록' : '상세 정보')
+    mode.value = opts.mode || 'view'
+    if (opts.onSuccess) {
+      onSuccess.value = opts.onSuccess
+    }
+    isOpen.value = true
+  }
+
   return {
     isOpen,
     selectedItem,
@@ -39,5 +52,6 @@ export const usePanelStore = defineStore('panel', function () {
     setSelectedItem,
     togglePanel,
     closePanel,
+    openPanel,
   }
 })

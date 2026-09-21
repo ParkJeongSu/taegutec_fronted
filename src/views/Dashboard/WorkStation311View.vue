@@ -30,7 +30,7 @@
             class="font-weight-medium"
           >
             <v-icon icon="$radioboxBlank" size="12" class="mr-1 pulse-dot" />
-            {{ isConnected ? 'WebSocket 실시간 연결됨' : 'WebSocket 연결 대기' }}
+            {{ connectionStatusText }}
           </v-chip>
         </div>
       </div>
@@ -151,19 +151,24 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import SvgDrawingViewer from '@/components/widgets/SvgDrawingViewer.vue'
-import { useCraneSocket } from '@/composables/useCraneSocket'
+import { useStompSocket } from '@/composables/useStompSocket'
 
 // script setup 영역
 const baseUrl = import.meta.env.BASE_URL // '/wcs-web/' (로컬 개발 서버에선 '/')
 const drawingSrc = baseUrl + 'drawings/wh1_ws311.svg'
 
-// 1. WebSocket 전용 Composable 연결
-const { isConnected, connectCraneSocket, disconnectCraneSocket } = useCraneSocket()
+// 1. 범용 STOMP WebSocket Composable 연결
+const { isConnected, connectionStatusText, subscribe, unsubscribe } = useStompSocket()
 
-// 2. 크레인 실시간 위치 좌표 (반응형 상태)
+// 2. 구독할 토픽 경로 정의
+const warehouseId = '1'
+const craneTopic = '/topic/warehouse/' + warehouseId + '/crane'
+const conveyorTopic = '/topic/warehouse/' + warehouseId + '/conveyor'
+
+// 3. 크레인 실시간 위치 좌표 (반응형 상태)
 const cranePos = ref({ x: 200, y: 190 })
 
-// 3. 실시간 크레인 좌표 수신 핸들러
+// 4. 실시간 크레인 좌표 수신 핸들러
 function handleCraneMovement(payload) {
   if (!payload) {
     return
@@ -176,13 +181,23 @@ function handleCraneMovement(payload) {
   }
 }
 
-// 라이프사이클: 웹소켓 연결 및 해제
+// 5. 실시간 컨베이어 상태 수신 핸들러 (확장용 뼈대)
+function handleConveyorStatus(payload) {
+  if (!payload) {
+    return
+  }
+  console.log('[WorkStation311] 컨베이어 상태 수신:', payload)
+}
+
+// 라이프사이클: 웹소켓 토픽 구독 및 해제
 onMounted(function () {
-  connectCraneSocket('1', handleCraneMovement)
+  subscribe(craneTopic, handleCraneMovement)
+  subscribe(conveyorTopic, handleConveyorStatus)
 })
 
 onBeforeUnmount(function () {
-  disconnectCraneSocket()
+  unsubscribe(craneTopic)
+  unsubscribe(conveyorTopic)
 })
 
 // 4. 선택된 트레이 포지션 ID

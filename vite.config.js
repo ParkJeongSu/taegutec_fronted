@@ -14,6 +14,7 @@ import vuetify from 'vite-plugin-vuetify'
 export default defineConfig(function (configEnv) {
   const mode = configEnv.mode
   const env = loadEnv(mode, process.cwd(), '')
+  const targetUrl = env.VITE_BACKEND_URL || 'http://localhost:11421'
 
   return {
     // ----------------------------------------------------
@@ -48,10 +49,16 @@ export default defineConfig(function (configEnv) {
     },
     server: {
       proxy: {
-        // '/api' 로 시작하는 요청은 전부 target 으로 프록시해준다.
-        '/api': {
-          target: env.VITE_BACKEND_URL || 'http://localhost:11421', // Spring 백엔드 서버 주소
-          changeOrigin: true, // cross origin 허용
+        // REST API
+        '/wcs-web/api': {
+          target: targetUrl,
+          changeOrigin: true,
+        },
+        // WebSocket (STOMP)
+        '/wcs-web/ws-stomp': {
+          target: targetUrl,
+          changeOrigin: true,
+          ws: true, // 필수
         },
       },
     },

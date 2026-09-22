@@ -56,15 +56,21 @@
           ></v-text-field>
         </v-col>
 
-        <!-- 부서명 -->
+        <!-- 소속 부서 선택 (v-autocomplete) -->
         <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.departmentName"
-            label="부서명"
+          <v-autocomplete
+            v-model="formData.departmentId"
+            :items="departmentOptions"
+            item-title="departmentName"
+            item-value="id"
+            label="소속 부서"
+            placeholder="부서를 선택하세요"
             variant="outlined"
             density="compact"
-            placeholder="부서명을 입력하세요"
-          ></v-text-field>
+            clearable
+            :loading="isDeptLoading"
+            v-on:update:model-value="onDepartmentChange"
+          ></v-autocomplete>
         </v-col>
 
         <!-- 상태 -->
@@ -107,13 +113,7 @@
 
     <!-- 하단 액션 버튼 영역 -->
     <v-card-actions class="pa-4 action-buttons-container">
-      <v-btn
-        variant="outlined"
-        color="secondary"
-        v-on:click="onClose"
-      >
-        취소
-      </v-btn>
+      <v-btn variant="outlined" color="secondary" v-on:click="onClose"> 취소 </v-btn>
 
       <v-spacer></v-spacer>
 
@@ -130,12 +130,7 @@
       </v-btn>
 
       <!-- 저장 / 수정 실행 버튼 -->
-      <v-btn
-        color="primary"
-        variant="elevated"
-        :loading="isSaving"
-        v-on:click="onHandleSave"
-      >
+      <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave">
         {{ isCreateMode ? '저장' : '수정' }}
       </v-btn>
     </v-card-actions>
@@ -150,10 +145,11 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useApi } from '@/composables/useApi'
 import { createUserApi, updateUserApi, deleteUserApi } from '@/api/user'
+import { fetchDepartmentsApi } from '@/api/department'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const props = defineProps({
@@ -177,7 +173,15 @@ const statusOptions = [
   { title: '잠금/비활성 (INACTIVE)', value: 'INACTIVE' },
 ]
 
+// 부서 옵션 상태 목록
+const departmentOptions = ref([])
+
 // useApi를 통한 API 바인딩
+const {
+  data: deptData,
+  loading: isDeptLoading,
+  execute: executeFetchDepts,
+} = useApi(fetchDepartmentsApi)
 const { loading: isCreating, execute: executeCreate } = useApi(createUserApi)
 const { loading: isUpdating, execute: executeUpdate } = useApi(updateUserApi)
 const { loading: isDeleting, execute: executeDelete } = useApi(deleteUserApi)
@@ -215,6 +219,85 @@ function resetForm() {
   formData.userState = 'ACTIVE'
 }
 
+/**
+ * 부서 선택 시 호출되는 체인지 핸들러
+ * @param {string|number|null} selectedId - 선택된 부서 ID
+ */
+function onDepartmentChange(selectedId) {
+  if (!selectedId) {
+    formData.departmentId = ''
+    formData.departmentName = ''
+    return
+  }
+
+  let matchedDeptName = ''
+  for (let i = 0; i < departmentOptions.value.length; i = i + 1) {
+    const item = departmentOptions.value[i]
+    if (item && String(item.id) === String(selectedId)) {
+      matchedDeptName = item.departmentName
+      break
+    }
+  }
+
+  formData.departmentId = selectedId
+  formData.departmentName = matchedDeptName
+}
+
+/**
+ * 부서 목록 API 조회 및 옵션 목록 구성
+ */
+async function loadDepartments() {
+  try {
+    const response = await executeFetchDepts({ page: 0, size: 100, useState: 'USE' })
+    const targetData = response || deptData.value
+    let contentList = []
+
+    if (targetData) {
+      if (targetData.data && Array.isArray(targetData.data.content)) {
+        contentList = targetData.data.content
+      } else if (targetData.content && Array.isArray(targetData.content)) {
+        contentList = targetData.content
+      } else if (targetData.data && Array.isArray(targetData.data)) {
+        contentList = targetData.data
+      } else if (Array.isArray(targetData)) {
+        contentList = targetData
+      }
+    }
+
+    const options = []
+    for (let i = 0; i < contentList.length; i = i + 1) {
+      const dept = contentList[i]
+      if (dept) {
+        options.push({
+          id: dept.id || dept.deptCode || dept.departmentId,
+          departmentName: dept.departmentName || dept.deptName || '',
+        })
+      }
+    }
+    departmentOptions.value = options
+
+    // formData에 이미 부서 정보가 있는 경우 동기화 보정
+    if (formData.departmentId && !formData.departmentName) {
+      for (let i = 0; i < options.length; i = i + 1) {
+        if (String(options[i].id) === String(formData.departmentId)) {
+          formData.departmentName = options[i].departmentName
+          break
+        }
+      }
+    } else if (!formData.departmentId && formData.departmentName) {
+      for (let i = 0; i < options.length; i = i + 1) {
+        if (options[i].departmentName === formData.departmentName) {
+          formData.departmentId = options[i].id
+          break
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Fetch departments error:', error)
+    departmentOptions.value = []
+  }
+}
+
 watch(
   function () {
     return props.data || panelStore.selectedItem
@@ -226,17 +309,40 @@ watch(
       formData.userName = newVal.userName || newVal.USER_NAME || ''
       formData.password = ''
       formData.factoryName = newVal.factoryName || newVal.FACTORY_NAME || newVal.plant || 'INSERT'
-      formData.departmentId = newVal.departmentId || newVal.DEPARTMENT_ID || ''
+      formData.departmentId = newVal.departmentId || newVal.DEPARTMENT_ID || newVal.deptCode || ''
       formData.departmentName = newVal.departmentName || newVal.deptName || ''
       formData.email = newVal.email || ''
       formData.phone = newVal.phone || ''
       formData.userState = newVal.userState || newVal.USER_STATE || newVal.status || 'ACTIVE'
+
+      // 부서 목록이 이미 로드되어 있다면 동기화 검증
+      if (departmentOptions.value.length > 0) {
+        if (formData.departmentId && !formData.departmentName) {
+          for (let i = 0; i < departmentOptions.value.length; i = i + 1) {
+            if (String(departmentOptions.value[i].id) === String(formData.departmentId)) {
+              formData.departmentName = departmentOptions.value[i].departmentName
+              break
+            }
+          }
+        } else if (!formData.departmentId && formData.departmentName) {
+          for (let i = 0; i < departmentOptions.value.length; i = i + 1) {
+            if (departmentOptions.value[i].departmentName === formData.departmentName) {
+              formData.departmentId = departmentOptions.value[i].id
+              break
+            }
+          }
+        }
+      }
     } else {
       resetForm()
     }
   },
   { immediate: true },
 )
+
+onMounted(function () {
+  loadDepartments()
+})
 
 function validateRequired(value) {
   if (value !== null && value !== undefined && String(value).trim() !== '') {
@@ -282,8 +388,8 @@ async function onHandleSave() {
       userId: formData.userId,
       userName: formData.userName,
       factoryName: formData.factoryName,
-      departmentId: formData.departmentId,
-      departmentName: formData.departmentName,
+      departmentId: formData.departmentId || null,
+      departmentName: formData.departmentName || null,
       email: formData.email,
       phone: formData.phone,
       userState: formData.userState,

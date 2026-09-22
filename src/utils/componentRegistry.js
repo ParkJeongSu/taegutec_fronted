@@ -140,6 +140,9 @@ export const componentMap = {
   DeptMgmtView: defineAsyncComponent(function () {
     return import('@/views/Settings/DeptMgmtView.vue')
   }),
+  UserGroupMgmtView: defineAsyncComponent(function () {
+    return import('@/views/Settings/UserGroupMgmtView.vue')
+  }),
   MenuMgmtView: defineAsyncComponent(function () {
     return import('@/views/Settings/MenuMgmtView.vue')
   }),

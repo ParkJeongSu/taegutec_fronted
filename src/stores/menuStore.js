@@ -343,6 +343,12 @@ export const useMenuStore = defineStore('menu', function () {
               path: '/settings/dept',
             },
             {
+              id: 'USER_GROUP_MGMT',
+              title: '사용자 그룹',
+              componentName: 'UserGroupMgmtView',
+              path: '/settings/user-group',
+            },
+            {
               id: 'MENU_MGMT',
               title: '메뉴',
               componentName: 'MenuMgmtView',

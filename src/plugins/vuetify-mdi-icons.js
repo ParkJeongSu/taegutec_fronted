@@ -124,6 +124,8 @@ const aliases = {
   packageVariant: mdiPackageVariant,
   chevronLeft: mdiChevronLeft,
   chevronRight: mdiChevronRight,
+  chevronDown: mdiChevronDown,
+  chevronUp: mdiChevronUp,
   dashboard: mdiViewDashboard,
   logout: mdiLogout,
   bellOutline: mdiBellOutline,

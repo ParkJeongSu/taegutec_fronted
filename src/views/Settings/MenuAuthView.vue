@@ -226,7 +226,7 @@
                   </v-chip>
 
                   <v-icon
-                    :icon="node1.iconName || (node1.children && node1.children.length > 0 ? '$folder' : '$fileDocument')"
+                    :icon="resolveMenuIcon(node1.iconName, Boolean(node1.children && node1.children.length > 0), isExpanded(node1.id))"
                     size="18"
                     color="primary"
                     class="mr-2"
@@ -268,7 +268,7 @@
                       </v-chip>
 
                       <v-icon
-                        :icon="node2.iconName || (node2.children && node2.children.length > 0 ? '$folderOpen' : '$fileDocument')"
+                        :icon="resolveMenuIcon(node2.iconName, Boolean(node2.children && node2.children.length > 0), isExpanded(node2.id))"
                         size="18"
                         color="info"
                         class="mr-2"
@@ -310,7 +310,7 @@
                           </v-chip>
 
                           <v-icon
-                            :icon="node3.iconName || (node3.children && node3.children.length > 0 ? '$folderOpen' : '$fileDocument')"
+                            :icon="resolveMenuIcon(node3.iconName, Boolean(node3.children && node3.children.length > 0), isExpanded(node3.id))"
                             size="18"
                             color="secondary"
                             class="mr-2"
@@ -345,7 +345,7 @@
                               </v-chip>
 
                               <v-icon
-                                :icon="node4.iconName || '$fileDocument'"
+                                :icon="resolveMenuIcon(node4.iconName, false, false)"
                                 size="16"
                                 color="grey-darken-1"
                                 class="mr-2"
@@ -380,6 +380,7 @@ import { useApi } from '@/composables/useApi'
 import { fetchUserGroupsApi } from '@/api/userGroup'
 import { fetchMenusApi } from '@/api/menu'
 import { fetchMenuAuthsByGroupApi, saveBatchMenuAuthApi } from '@/api/menuAuth'
+import { resolveMenuIcon } from '@/utils/menuIconUtils'
 
 const factoryList = ['INSERT', 'POWDER', 'COMMON']
 const selectedFactory = ref('INSERT')

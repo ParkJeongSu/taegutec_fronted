@@ -90,6 +90,15 @@ import {
   mdiPlay,
   mdiStop,
   mdiRefresh,
+  mdiWarehouse,
+  mdiHomeOutline,
+  mdiFolder,
+  mdiFolderOpen,
+  mdiFileDocumentOutline,
+  mdiShieldCheck,
+  mdiContentSave,
+  mdiAccountSearch,
+  mdiMouse,
 } from '@mdi/js'
 
 // 아이콘 별칭(alias)을 만듭니다.
@@ -190,6 +199,15 @@ const aliases = {
   play: mdiPlay,
   stop: mdiStop,
   refresh: mdiRefresh,
+  warehouse: mdiWarehouse,
+  homeOutline: mdiHomeOutline,
+  folder: mdiFolder,
+  folderOpen: mdiFolderOpen,
+  fileDocument: mdiFileDocumentOutline,
+  shieldCheck: mdiShieldCheck,
+  contentSave: mdiContentSave,
+  accountSearch: mdiAccountSearch,
+  mouse: mdiMouse,
 }
 
 // 설정들을 export 합니다.

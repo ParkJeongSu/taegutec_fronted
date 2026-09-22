@@ -149,8 +149,11 @@
 
                   <v-icon
                     :icon="
-                      node1.iconName ||
-                      (node1.children && node1.children.length > 0 ? '$folder' : '$fileDocument')
+                      resolveMenuIcon(
+                        node1.iconName,
+                        Boolean(node1.children && node1.children.length > 0),
+                        isExpanded(node1.id)
+                      )
                     "
                     size="18"
                     color="primary"
@@ -201,10 +204,11 @@
 
                       <v-icon
                         :icon="
-                          node2.iconName ||
-                          (node2.children && node2.children.length > 0
-                            ? '$folderOpen'
-                            : '$fileDocument')
+                          resolveMenuIcon(
+                            node2.iconName,
+                            Boolean(node2.children && node2.children.length > 0),
+                            isExpanded(node2.id)
+                          )
                         "
                         size="18"
                         color="info"
@@ -257,10 +261,11 @@
 
                           <v-icon
                             :icon="
-                              node3.iconName ||
-                              (node3.children && node3.children.length > 0
-                                ? '$folderOpen'
-                                : '$fileDocument')
+                              resolveMenuIcon(
+                                node3.iconName,
+                                Boolean(node3.children && node3.children.length > 0),
+                                isExpanded(node3.id)
+                              )
                             "
                             size="18"
                             color="secondary"
@@ -302,7 +307,7 @@
                               </v-chip>
 
                               <v-icon
-                                :icon="node4.iconName || '$fileDocument'"
+                                :icon="resolveMenuIcon(node4.iconName, false, false)"
                                 size="16"
                                 color="grey-darken-1"
                                 class="mr-2"
@@ -569,6 +574,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useApi } from '@/composables/useApi'
 import { fetchMenusApi, createMenuApi, updateMenuApi, deleteMenuApi } from '@/api/menu'
+import { resolveMenuIcon } from '@/utils/menuIconUtils'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 // 공장 옵션 목록

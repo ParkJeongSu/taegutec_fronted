@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // 1. Axios 인스턴스 생성
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/wcs-web/api',
   timeout: 5000,
   headers: {
     'Content-Type': 'application/json',

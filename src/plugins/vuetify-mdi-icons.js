@@ -1,3 +1,4 @@
+//src/plugins/vuetify-mdi-icons.js
 // vuetify의 mdi-svg 설정과 사용할 아이콘을 @mdi/js에서 직접 가져옵니다.
 // https://pictogrammers.com/library/mdi/
 import { mdi } from 'vuetify/iconsets/mdi-svg'
@@ -101,6 +102,7 @@ import {
   mdiMouse,
   mdiTrayArrowDown,
   mdiTrayArrowUp,
+  mdiRadioboxBlank,
 } from '@mdi/js'
 
 // 아이콘 별칭(alias)을 만듭니다.
@@ -212,6 +214,7 @@ const aliases = {
   mouse: mdiMouse,
   trayArrowDown: mdiTrayArrowDown,
   trayArrowUp: mdiTrayArrowUp,
+  radioboxBlank: mdiRadioboxBlank,
 }
 
 // 설정들을 export 합니다.

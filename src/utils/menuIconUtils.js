@@ -61,6 +61,9 @@ export function resolveMenuIcon(iconName, isFolder, isExpanded) {
       return '$trayArrowDown'
     case 'mdi-tray-arrow-up':
       return '$trayArrowUp'
+    case 'mdi-radiobox-blank':
+    case 'radioboxBlank':
+      return '$radioboxBlank'
     default:
       // 매핑되지 않은 임의의 mdi 클래스는 SVG path 에러 방지를 위해 기본 아이콘으로 fallback
       if (isFolder) {

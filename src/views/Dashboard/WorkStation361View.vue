@@ -1,10 +1,10 @@
 <template>
-  <v-container fluid class="pa-4 ws-monitoring-container">
-    <!-- 상단 헤더 카드: 워크스테이션 타이틀 및 상태 배지 -->
-    <v-card class="elevation-1 rounded-lg mb-4 pa-4 header-card">
-      <div class="d-flex flex-wrap align-center justify-space-between ga-3">
-        <div class="d-flex align-center flex-wrap">
-          <v-icon icon="$desktopTowerMonitor" size="28" color="primary" class="mr-3" />
+  <v-container fluid class="pa-4 workstation-view-container">
+    <!-- 상단: 타이틀 및 웹소켓 연결 상태 바 -->
+    <v-card class="elevation-1 rounded-lg pa-4 mb-4">
+      <div class="d-flex flex-wrap align-center justify-space-between">
+        <div class="d-flex align-center">
+          <v-icon icon="$robotIndustrial" size="24" color="primary" class="mr-2" />
           <span class="text-h6 font-weight-bold text-high-emphasis">
             창고 6 &gt; WorkStation 361 모니터링
           </span>
@@ -23,9 +23,14 @@
         </div>
 
         <div class="d-flex align-center">
-          <v-chip color="grey" variant="flat" size="small" class="font-weight-medium">
+          <v-chip
+            :color="isConnected ? 'success' : 'grey'"
+            variant="flat"
+            size="small"
+            class="font-weight-medium"
+          >
             <v-icon icon="$radioboxBlank" size="12" class="mr-1 pulse-dot" />
-            WebSocket 연결 대기
+            {{ connectionStatusText }}
           </v-chip>
         </div>
       </div>
@@ -53,7 +58,7 @@
           <!-- 공통 SVG 도면 뷰어 컴포넌트 -->
           <div class="flex-grow-1 d-flex">
             <SvgDrawingViewer
-              src="/drawings/wh6_ws361.svg"
+              :src="drawingSrc"
               :crane-pos="cranePos"
               v-on:click-position="handlePositionClick"
             />
@@ -66,12 +71,7 @@
         <v-card class="elevation-1 rounded-lg pa-4 h-100 d-flex flex-column">
           <!-- 탭 선택 바 (입고 오더 / 출고 오더) -->
           <div class="d-flex align-center justify-space-between mb-2">
-            <v-tabs
-              v-model="activeTab"
-              color="primary"
-              density="compact"
-              class="order-tabs"
-            >
+            <v-tabs v-model="activeTab" color="primary" density="compact" class="order-tabs">
               <v-tab value="inbound" class="font-weight-bold">
                 <v-icon icon="$trayArrowDown" size="18" class="mr-1" />
                 입고 오더 목록 ({{ inboundOrders.length }})
@@ -148,123 +148,191 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import SvgDrawingViewer from '@/components/widgets/SvgDrawingViewer.vue'
+import { useStompSocket } from '@/composables/useStompSocket'
 
-// 1. 크레인 실시간 위치 좌표 (반응형 상태)
+// script setup 영역
+const baseUrl = import.meta.env.BASE_URL // '/wcs-web/' (로컬 개발 서버에선 '/')
+const warehouseId = '6'
+const wsNo = '361'
+
+const drawingSrc = baseUrl + 'drawings/wh' + warehouseId + '_ws' + wsNo + '.svg'
+const craneTopic = '/topic/warehouse/' + warehouseId + '/crane'
+const conveyorTopic = '/topic/warehouse/' + warehouseId + '/conveyor'
+
+// 1. 범용 STOMP WebSocket Composable 연결
+const { isConnected, connectionStatusText, subscribe, unsubscribe } = useStompSocket()
+
+// 2. 구독할 토픽 경로 정의 (상단 선언 참조)
+
+// 3. 크레인 실시간 위치 좌표 (반응형 상태)
 const cranePos = ref({ x: 200, y: 190 })
 
-// 2. 선택된 트레이 포지션 ID
+// 4. 실시간 크레인 좌표 수신 핸들러
+function handleCraneMovement(payload) {
+  if (!payload) {
+    return
+  }
+  if (typeof payload.x === 'number' && typeof payload.y === 'number') {
+    cranePos.value = {
+      x: payload.x,
+      y: payload.y,
+    }
+  }
+}
+
+// 5. 실시간 컨베이어 상태 수신 핸들러 (확장용 뼈대)
+function handleConveyorStatus(payload) {
+  if (!payload) {
+    return
+  }
+  console.log('[WorkStation361] 컨베이어 상태 수신:', payload)
+}
+
+// 라이프사이클: 웹소켓 토픽 구독 및 해제
+onMounted(function () {
+  subscribe(craneTopic, handleCraneMovement)
+  subscribe(conveyorTopic, handleConveyorStatus)
+})
+
+onBeforeUnmount(function () {
+  unsubscribe(craneTopic, handleCraneMovement)
+  unsubscribe(conveyorTopic, handleConveyorStatus)
+})
+
+// 4. 선택된 트레이 포지션 ID
 const selectedPosition = ref(null)
 
-// 3. 활성 오더 탭 상태
+// 5. 활성 오더 탭 상태
 const activeTab = ref('inbound')
 const isLoading = ref(false)
 
-// 4. 오더 테이블 컬럼 정의
+// 6. 오더 테이블 컬럼 정의
 const orderHeaders = [
   { title: '오더번호', key: 'orderNo', align: 'start' },
   { title: '트레이 ID', key: 'trayId', align: 'start' },
-  { title: '품목코드', key: 'itemCode', align: 'start' },
-  { title: '수량', key: 'qty', align: 'end' },
+  { title: '자재코드', key: 'matCode', align: 'start' },
   { title: '상태', key: 'status', align: 'center' },
-  { title: '위치', key: 'pos', align: 'center' },
+  { title: '발생시간', key: 'timestamp', align: 'center' },
 ]
 
-// 5. 입고 오더 목 데이터
+// 5. 입고 오더 목데이터 (Inbound Mock Data)
 const inboundOrders = ref([
   {
-    orderNo: 'ORD-361-IN-001',
-    trayId: 'TRY-36110',
-    itemCode: 'CNMG-120408-TT8115',
-    qty: 120,
-    status: '입고대기',
-    pos: 'POS 36101',
+    orderNo: 'ORD-IN-361-01',
+    trayId: 'TRAY-36101',
+    matCode: 'CNMG 120408',
+    status: '진행중',
+    timestamp: '2026-09-18 09:30:12',
   },
   {
-    orderNo: 'ORD-361-IN-002',
-    trayId: 'TRY-36111',
-    itemCode: 'WNMG-080404-TT5100',
-    qty: 80,
-    status: '입고대기',
-    pos: 'POS 36102',
+    orderNo: 'ORD-IN-361-02',
+    trayId: 'TRAY-36102',
+    matCode: 'WNMG 080408',
+    status: '대기',
+    timestamp: '2026-09-18 09:35:40',
   },
   {
-    orderNo: 'ORD-361-IN-003',
-    trayId: 'TRY-36112',
-    itemCode: 'TNMG-160408-TT9080',
-    qty: 50,
-    status: '작업중',
-    pos: 'POS 36103',
+    orderNo: 'ORD-IN-361-03',
+    trayId: 'TRAY-36103',
+    matCode: 'TNMG 160404',
+    status: '대기',
+    timestamp: '2026-09-18 09:42:15',
+  },
+  {
+    orderNo: 'ORD-IN-361-04',
+    trayId: 'TRAY-36104',
+    matCode: 'SNMG 120412',
+    status: '대기',
+    timestamp: '2026-09-18 09:50:00',
   },
 ])
 
-// 6. 출고 오더 목 데이터
+// 6. 출고 오더 목데이터 (Outbound Mock Data)
 const outboundOrders = ref([
   {
-    orderNo: 'ORD-361-OUT-001',
-    trayId: 'TRY-36120',
-    itemCode: 'DCMT-11T304-TT7015',
-    qty: 30,
-    status: '출고대기',
-    pos: 'POS 36104',
+    orderNo: 'ORD-OUT-361-01',
+    trayId: 'TRAY-36104',
+    matCode: 'DNMG 150608',
+    status: '진행중',
+    timestamp: '2026-09-18 09:28:05',
   },
   {
-    orderNo: 'ORD-361-OUT-002',
-    trayId: 'TRY-36121',
-    itemCode: 'VBMT-160408-TT8020',
-    qty: 60,
-    status: '출고대기',
-    pos: 'POS 36105',
+    orderNo: 'ORD-OUT-361-02',
+    trayId: 'TRAY-36105',
+    matCode: 'CCMT 09T304',
+    status: '대기',
+    timestamp: '2026-09-18 09:33:20',
+  },
+  {
+    orderNo: 'ORD-OUT-361-03',
+    trayId: 'TRAY-36106',
+    matCode: 'VBMT 160404',
+    status: '대기',
+    timestamp: '2026-09-18 09:45:10',
+  },
+  {
+    orderNo: 'ORD-OUT-361-04',
+    trayId: 'TRAY-36107',
+    matCode: 'DCMT 11T308',
+    status: '대기',
+    timestamp: '2026-09-18 09:52:45',
   },
 ])
 
-// 7. 상태값에 따른 Vuetify Chip 색상 매핑 함수
+// 7. 상태 칩 색상 변환 함수
 function getStatusColor(status) {
-  if (status === '작업중') {
+  if (status === '진행중') {
+    return 'primary'
+  }
+  if (status === '대기') {
     return 'warning'
   }
-  if (status === '입고대기') {
-    return 'success'
-  }
-  if (status === '출고대기') {
-    return 'info'
-  }
   if (status === '완료') {
-    return 'grey-darken-1'
+    return 'success'
   }
   return 'default'
 }
 
-// 8. 포지션 클릭 이벤트 핸들러
-function handlePositionClick(posId) {
-  selectedPosition.value = posId
-}
-
-// 9. 오더 목록 새로고침 핸들러
+// 8. 새로고침 핸들러
 function handleRefreshOrders() {
   isLoading.value = true
   setTimeout(function () {
     isLoading.value = false
   }, 400)
 }
+
+// 9. 트레이 포지션 클릭 핸들러 (이벤트 위임 수신)
+function handlePositionClick(posId) {
+  selectedPosition.value = posId
+  console.log('[WorkStation361] 트레이 포지션 클릭:', posId)
+}
 </script>
 
 <style scoped>
-.ws-monitoring-container {
-  max-width: 100%;
+.workstation-view-container {
+  min-height: calc(100vh - 120px);
 }
 
-.header-card {
-  border-left: 4px solid rgb(var(--v-theme-primary));
+.pulse-dot {
+  animation: pulse 1.8s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
 }
 
 .order-tabs {
   border-bottom: none;
-}
-
-.pulse-dot {
-  color: #22c55e;
 }
 </style>

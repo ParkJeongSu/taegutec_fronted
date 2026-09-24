@@ -57,6 +57,10 @@ export function resolveMenuIcon(iconName, isFolder, isExpanded) {
       return '$shieldCheck'
     case 'mdi-desktop-classic':
       return '$device'
+    case 'mdi-tray-arrow-down':
+      return '$trayArrowDown'
+    case 'mdi-tray-arrow-up':
+      return '$trayArrowUp'
     default:
       // 매핑되지 않은 임의의 mdi 클래스는 SVG path 에러 방지를 위해 기본 아이콘으로 fallback
       if (isFolder) {

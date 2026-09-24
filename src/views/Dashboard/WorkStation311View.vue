@@ -196,8 +196,8 @@ onMounted(function () {
 })
 
 onBeforeUnmount(function () {
-  unsubscribe(craneTopic)
-  unsubscribe(conveyorTopic)
+  unsubscribe(craneTopic, handleCraneMovement)
+  unsubscribe(conveyorTopic, handleConveyorStatus)
 })
 
 // 4. 선택된 트레이 포지션 ID

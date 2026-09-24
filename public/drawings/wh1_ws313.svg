@@ -9,6 +9,10 @@
       .rail-center-line { stroke: #94a3b8; stroke-width: 2; stroke-dasharray: 6, 4; }
       .rail-side-line { stroke: #cbd5e1; stroke-width: 1; }
       .aisle-label { font-size: 11px; font-weight: 600; fill: #94a3b8; letter-spacing: 0.5px; font-family: sans-serif; }
+      .crane-unit {
+        transition: transform 1.2s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+        will-change: transform;
+      }
       .crane-body { fill: #3b82f6; stroke: #1d4ed8; stroke-width: 2; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15)); }
       .crane-inner { fill: #60a5fa; stroke: #2563eb; stroke-width: 1; }
       .crane-cross { stroke: #ffffff; stroke-width: 1; opacity: 0.7; }

@@ -23,9 +23,14 @@
         </div>
 
         <div class="d-flex align-center">
-          <v-chip color="grey" variant="flat" size="small" class="font-weight-medium">
+          <v-chip
+            :color="isConnected ? 'success' : 'grey'"
+            variant="flat"
+            size="small"
+            class="font-weight-medium"
+          >
             <v-icon icon="$radioboxBlank" size="12" class="mr-1 pulse-dot" />
-            WebSocket 연결 대기
+            {{ connectionStatusText }}
           </v-chip>
         </div>
       </div>
@@ -53,7 +58,7 @@
           <!-- 공통 SVG 도면 뷰어 컴포넌트 -->
           <div class="flex-grow-1 d-flex">
             <SvgDrawingViewer
-              src="/drawings/wh1_ws316.svg"
+              :src="drawingSrc"
               :crane-pos="cranePos"
               v-on:click-position="handlePositionClick"
             />
@@ -66,12 +71,7 @@
         <v-card class="elevation-1 rounded-lg pa-4 h-100 d-flex flex-column">
           <!-- 탭 선택 바 (입고 오더 / 출고 오더) -->
           <div class="d-flex align-center justify-space-between mb-2">
-            <v-tabs
-              v-model="activeTab"
-              color="primary"
-              density="compact"
-              class="order-tabs"
-            >
+            <v-tabs v-model="activeTab" color="primary" density="compact" class="order-tabs">
               <v-tab value="inbound" class="font-weight-bold">
                 <v-icon icon="$trayArrowDown" size="18" class="mr-1" />
                 입고 오더 목록 ({{ inboundOrders.length }})
@@ -148,21 +148,68 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import SvgDrawingViewer from '@/components/widgets/SvgDrawingViewer.vue'
+import { useStompSocket } from '@/composables/useStompSocket'
 
-// 1. 크레인 실시간 위치 좌표 (반응형 상태)
+// script setup 영역
+const baseUrl = import.meta.env.BASE_URL // '/wcs-web/' (로컬 개발 서버에선 '/')
+const warehouseId = '1'
+const wsNo = '316'
+
+const drawingSrc = baseUrl + 'drawings/wh' + warehouseId + '_ws' + wsNo + '.svg'
+const craneTopic = '/topic/warehouse/' + warehouseId + '/crane'
+const conveyorTopic = '/topic/warehouse/' + warehouseId + '/conveyor'
+
+// 1. 범용 STOMP WebSocket Composable 연결
+const { isConnected, connectionStatusText, subscribe, unsubscribe } = useStompSocket()
+
+// 2. 구독할 토픽 경로 정의 (상단 선언 참조)
+
+// 3. 크레인 실시간 위치 좌표 (반응형 상태)
 const cranePos = ref({ x: 200, y: 190 })
 
-// 2. 선택된 트레이 포지션 ID
+// 4. 실시간 크레인 좌표 수신 핸들러
+function handleCraneMovement(payload) {
+  if (!payload) {
+    return
+  }
+  if (typeof payload.x === 'number' && typeof payload.y === 'number') {
+    cranePos.value = {
+      x: payload.x,
+      y: payload.y,
+    }
+  }
+}
+
+// 5. 실시간 컨베이어 상태 수신 핸들러 (확장용 뼈대)
+function handleConveyorStatus(payload) {
+  if (!payload) {
+    return
+  }
+  console.log('[WorkStation316] 컨베이어 상태 수신:', payload)
+}
+
+// 라이프사이클: 웹소켓 토픽 구독 및 해제
+onMounted(function () {
+  subscribe(craneTopic, handleCraneMovement)
+  subscribe(conveyorTopic, handleConveyorStatus)
+})
+
+onBeforeUnmount(function () {
+  unsubscribe(craneTopic, handleCraneMovement)
+  unsubscribe(conveyorTopic, handleConveyorStatus)
+})
+
+// 4. 선택된 트레이 포지션 ID
 const selectedPosition = ref(null)
 
-// 3. 활성 오더 탭 상태
+// 5. 활성 오더 탭 상태
 const activeTab = ref('inbound')
 const isLoading = ref(false)
 
-// 4. 오더 테이블 컬럼 정의
+// 6. 오더 테이블 컬럼 정의
 const orderHeaders = [
   { title: '오더번호', key: 'orderNo', align: 'start' },
   { title: '트레이 ID', key: 'trayId', align: 'start' },
@@ -176,30 +223,30 @@ const inboundOrders = ref([
   {
     orderNo: 'ORD-IN-316-01',
     trayId: 'TRAY-31601',
-    matCode: 'CNMG 120408-HD',
+    matCode: 'CNMG 120408',
     status: '진행중',
-    timestamp: '2026-09-18 09:32:10',
+    timestamp: '2026-09-18 09:30:12',
   },
   {
     orderNo: 'ORD-IN-316-02',
     trayId: 'TRAY-31602',
-    matCode: 'WNMG 080408-HD',
+    matCode: 'WNMG 080408',
     status: '대기',
-    timestamp: '2026-09-18 09:38:00',
+    timestamp: '2026-09-18 09:35:40',
   },
   {
     orderNo: 'ORD-IN-316-03',
     trayId: 'TRAY-31603',
-    matCode: 'TNMG 160404-HD',
+    matCode: 'TNMG 160404',
     status: '대기',
-    timestamp: '2026-09-18 09:45:00',
+    timestamp: '2026-09-18 09:42:15',
   },
   {
     orderNo: 'ORD-IN-316-04',
     trayId: 'TRAY-31604',
-    matCode: 'SNMG 120412-HD',
+    matCode: 'SNMG 120412',
     status: '대기',
-    timestamp: '2026-09-18 09:52:30',
+    timestamp: '2026-09-18 09:50:00',
   },
 ])
 
@@ -208,30 +255,30 @@ const outboundOrders = ref([
   {
     orderNo: 'ORD-OUT-316-01',
     trayId: 'TRAY-31604',
-    matCode: 'DNMG 150608-HD',
+    matCode: 'DNMG 150608',
     status: '진행중',
-    timestamp: '2026-09-18 09:30:00',
+    timestamp: '2026-09-18 09:28:05',
   },
   {
     orderNo: 'ORD-OUT-316-02',
     trayId: 'TRAY-31605',
-    matCode: 'CCMT 09T304-HD',
+    matCode: 'CCMT 09T304',
     status: '대기',
-    timestamp: '2026-09-18 09:36:00',
+    timestamp: '2026-09-18 09:33:20',
   },
   {
     orderNo: 'ORD-OUT-316-03',
     trayId: 'TRAY-31606',
-    matCode: 'VBMT 160404-HD',
+    matCode: 'VBMT 160404',
     status: '대기',
-    timestamp: '2026-09-18 09:48:10',
+    timestamp: '2026-09-18 09:45:10',
   },
   {
     orderNo: 'ORD-OUT-316-04',
     trayId: 'TRAY-31607',
-    matCode: 'DCMT 11T308-HD',
+    matCode: 'DCMT 11T308',
     status: '대기',
-    timestamp: '2026-09-18 09:55:00',
+    timestamp: '2026-09-18 09:52:45',
   },
 ])
 

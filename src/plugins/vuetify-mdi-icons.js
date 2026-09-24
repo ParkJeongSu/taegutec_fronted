@@ -99,6 +99,8 @@ import {
   mdiContentSave,
   mdiAccountSearch,
   mdiMouse,
+  mdiTrayArrowDown,
+  mdiTrayArrowUp,
 } from '@mdi/js'
 
 // 아이콘 별칭(alias)을 만듭니다.
@@ -208,6 +210,8 @@ const aliases = {
   contentSave: mdiContentSave,
   accountSearch: mdiAccountSearch,
   mouse: mdiMouse,
+  trayArrowDown: mdiTrayArrowDown,
+  trayArrowUp: mdiTrayArrowUp,
 }
 
 // 설정들을 export 합니다.

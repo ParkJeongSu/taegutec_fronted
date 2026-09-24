@@ -87,6 +87,7 @@
               variant="text"
               size="small"
               icon="$refresh"
+              :loading="isLoading"
               v-on:click="handleRefreshOrders"
             ></v-btn>
           </div>
@@ -116,6 +117,12 @@
                   {{ item.status }}
                 </v-chip>
               </template>
+              <template #no-data>
+                <div class="text-center py-6 text-medium-emphasis">
+                  <v-icon icon="$table" size="32" color="disabled" class="mb-1" />
+                  <div>입고 오더 내역이 없습니다.</div>
+                </div>
+              </template>
             </BaseDataTable>
 
             <!-- 출고 오더 테이블 -->
@@ -139,6 +146,12 @@
                   {{ item.status }}
                 </v-chip>
               </template>
+              <template #no-data>
+                <div class="text-center py-6 text-medium-emphasis">
+                  <v-icon icon="$table" size="32" color="disabled" class="mb-1" />
+                  <div>출고 오더 내역이 없습니다.</div>
+                </div>
+              </template>
             </BaseDataTable>
           </div>
         </v-card>
@@ -152,6 +165,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import SvgDrawingViewer from '@/components/widgets/SvgDrawingViewer.vue'
 import { useStompSocket } from '@/composables/useStompSocket'
+import { fetchRecentTransportOrdersApi } from '@/api/transportOrder'
 
 // script setup 영역
 const baseUrl = import.meta.env.BASE_URL // '/wcs-web/' (로컬 개발 서버에선 '/')
@@ -165,12 +179,10 @@ const conveyorTopic = '/topic/warehouse/' + warehouseId + '/conveyor'
 // 1. 범용 STOMP WebSocket Composable 연결
 const { isConnected, connectionStatusText, subscribe, unsubscribe } = useStompSocket()
 
-// 2. 구독할 토픽 경로 정의 (상단 선언 참조)
-
-// 3. 크레인 실시간 위치 좌표 (반응형 상태)
+// 2. 크레인 실시간 위치 좌표 (반응형 상태)
 const cranePos = ref({ x: 200, y: 190 })
 
-// 4. 실시간 크레인 좌표 수신 핸들러
+// 3. 실시간 크레인 좌표 수신 핸들러
 function handleCraneMovement(payload) {
   if (!payload) {
     return
@@ -183,33 +195,22 @@ function handleCraneMovement(payload) {
   }
 }
 
-// 5. 실시간 컨베이어 상태 수신 핸들러 (확장용 뼈대)
+// 4. 실시간 컨베이어 상태 수신 핸들러 (확장용 뼈대)
 function handleConveyorStatus(payload) {
   if (!payload) {
     return
   }
-  console.log('[WorkStation323] 컨베이어 상태 수신:', payload)
+  console.log('[WorkStation' + wsNo + '] 컨베이어 상태 수신:', payload)
 }
 
-// 라이프사이클: 웹소켓 토픽 구독 및 해제
-onMounted(function () {
-  subscribe(craneTopic, handleCraneMovement)
-  subscribe(conveyorTopic, handleConveyorStatus)
-})
-
-onBeforeUnmount(function () {
-  unsubscribe(craneTopic, handleCraneMovement)
-  unsubscribe(conveyorTopic, handleConveyorStatus)
-})
-
-// 4. 선택된 트레이 포지션 ID
+// 5. 선택된 트레이 포지션 ID
 const selectedPosition = ref(null)
 
-// 5. 활성 오더 탭 상태
+// 6. 활성 오더 탭 상태 및 로딩 상태
 const activeTab = ref('inbound')
 const isLoading = ref(false)
 
-// 6. 오더 테이블 컬럼 정의
+// 7. 오더 테이블 컬럼 정의
 const orderHeaders = [
   { title: '오더번호', key: 'orderNo', align: 'start' },
   { title: '트레이 ID', key: 'trayId', align: 'start' },
@@ -218,97 +219,121 @@ const orderHeaders = [
   { title: '발생시간', key: 'timestamp', align: 'center' },
 ]
 
-// 5. 입고 오더 목데이터 (Inbound Mock Data)
-const inboundOrders = ref([
-  {
-    orderNo: 'ORD-IN-323-01',
-    trayId: 'TRAY-32301',
-    matCode: 'CNMG 120408',
-    status: '진행중',
-    timestamp: '2026-09-18 09:30:12',
-  },
-  {
-    orderNo: 'ORD-IN-323-02',
-    trayId: 'TRAY-32302',
-    matCode: 'WNMG 080408',
-    status: '대기',
-    timestamp: '2026-09-18 09:35:40',
-  },
-  {
-    orderNo: 'ORD-IN-323-03',
-    trayId: 'TRAY-32303',
-    matCode: 'TNMG 160404',
-    status: '대기',
-    timestamp: '2026-09-18 09:42:15',
-  },
-  {
-    orderNo: 'ORD-IN-323-04',
-    trayId: 'TRAY-32304',
-    matCode: 'SNMG 120412',
-    status: '대기',
-    timestamp: '2026-09-18 09:50:00',
-  },
-])
+// 8. 오더 목록 반응형 상태 (초기 빈 배열) 및 폴링 타이머
+const inboundOrders = ref([])
+const outboundOrders = ref([])
+let orderPollingTimer = null
 
-// 6. 출고 오더 목데이터 (Outbound Mock Data)
-const outboundOrders = ref([
-  {
-    orderNo: 'ORD-OUT-323-01',
-    trayId: 'TRAY-32304',
-    matCode: 'DNMG 150608',
-    status: '진행중',
-    timestamp: '2026-09-18 09:28:05',
-  },
-  {
-    orderNo: 'ORD-OUT-323-02',
-    trayId: 'TRAY-32305',
-    matCode: 'CCMT 09T304',
-    status: '대기',
-    timestamp: '2026-09-18 09:33:20',
-  },
-  {
-    orderNo: 'ORD-OUT-323-03',
-    trayId: 'TRAY-32306',
-    matCode: 'VBMT 160404',
-    status: '대기',
-    timestamp: '2026-09-18 09:45:10',
-  },
-  {
-    orderNo: 'ORD-OUT-323-04',
-    trayId: 'TRAY-32307',
-    matCode: 'DCMT 11T308',
-    status: '대기',
-    timestamp: '2026-09-18 09:52:45',
-  },
-])
+// 9. 백엔드 데이터 정규화 헬퍼 함수
+function mapTransportOrderItem(item) {
+  if (!item) {
+    return {}
+  }
+  return {
+    ...item,
+    orderNo: item.orderNo || item.transportOrderNo || item.transportOrderId || item.orderId || (item.id != null ? String(item.id) : ''),
+    trayId: item.trayId || item.carrierId || item.palletId || item.trayNo || '',
+    matCode: item.matCode || item.materialCode || item.itemCode || item.matId || '',
+    status: item.status || item.transportStatus || item.orderStatus || item.state || '',
+    timestamp: item.timestamp || item.createdTime || item.createdAt || item.createDt || item.orderTime || '',
+  }
+}
 
-// 7. 상태 칩 색상 변환 함수
+// 10. 입고 오더 조회 API 호출
+async function fetchInboundOrders() {
+  try {
+    const params = {
+      'work-station-id': wsNo,
+      'transport-type': 'I',
+      limit: 10,
+    }
+    const res = await fetchRecentTransportOrdersApi(params)
+    const rawList = (res && res.content) ? res.content : (res && res.data && res.data.content) ? res.data.content : (Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []))
+    const list = []
+    for (let i = 0; i < rawList.length; i++) {
+      list.push(mapTransportOrderItem(rawList[i]))
+    }
+    inboundOrders.value = list
+  } catch (error) {
+    console.error('[WorkStation' + wsNo + '] 입고 오더 조회 실패:', error)
+    inboundOrders.value = []
+  }
+}
+
+// 11. 출고 오더 조회 API 호출
+async function fetchOutboundOrders() {
+  try {
+    const params = {
+      'work-station-id': wsNo,
+      'transport-type': 'O',
+      limit: 10,
+    }
+    const res = await fetchRecentTransportOrdersApi(params)
+    const rawList = (res && res.content) ? res.content : (res && res.data && res.data.content) ? res.data.content : (Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []))
+    const list = []
+    for (let i = 0; i < rawList.length; i++) {
+      list.push(mapTransportOrderItem(rawList[i]))
+    }
+    outboundOrders.value = list
+  } catch (error) {
+    console.error('[WorkStation' + wsNo + '] 출고 오더 조회 실패:', error)
+    outboundOrders.value = []
+  }
+}
+
+// 12. 전체 오더 새로고침 핸들러
+async function handleRefreshOrders() {
+  isLoading.value = true
+  try {
+    await Promise.all([fetchInboundOrders(), fetchOutboundOrders()])
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// 13. 상태 칩 색상 변환 함수
 function getStatusColor(status) {
-  if (status === '진행중') {
+  if (status === '진행중' || status === 'PROCESSING' || status === 'RUNNING' || status === 'IN_PROGRESS') {
     return 'primary'
   }
-  if (status === '대기') {
+  if (status === '대기' || status === 'WAITING' || status === 'PENDING' || status === 'READY') {
     return 'warning'
   }
-  if (status === '완료') {
+  if (status === '완료' || status === 'COMPLETED' || status === 'DONE' || status === 'SUCCESS') {
     return 'success'
+  }
+  if (status === '에러' || status === 'ERROR' || status === 'FAILED' || status === 'ABORTED') {
+    return 'error'
   }
   return 'default'
 }
 
-// 8. 새로고침 핸들러
-function handleRefreshOrders() {
-  isLoading.value = true
-  setTimeout(function () {
-    isLoading.value = false
-  }, 400)
-}
-
-// 9. 트레이 포지션 클릭 핸들러 (이벤트 위임 수신)
+// 14. 트레이 포지션 클릭 핸들러 (이벤트 위임 수신)
 function handlePositionClick(posId) {
   selectedPosition.value = posId
-  console.log('[WorkStation323] 트레이 포지션 클릭:', posId)
+  console.log('[WorkStation' + wsNo + '] 트레이 포지션 클릭:', posId)
 }
+
+// 라이프사이클: 웹소켓 토픽 구독, 초기 오더 조회 및 30초 자동 폴링 타이머 설정
+onMounted(function () {
+  subscribe(craneTopic, handleCraneMovement)
+  subscribe(conveyorTopic, handleConveyorStatus)
+  handleRefreshOrders()
+
+  orderPollingTimer = setInterval(function () {
+    fetchInboundOrders()
+    fetchOutboundOrders()
+  }, 30000)
+})
+
+onBeforeUnmount(function () {
+  if (orderPollingTimer) {
+    clearInterval(orderPollingTimer)
+    orderPollingTimer = null
+  }
+  unsubscribe(craneTopic, handleCraneMovement)
+  unsubscribe(conveyorTopic, handleConveyorStatus)
+})
 </script>
 
 <style scoped>

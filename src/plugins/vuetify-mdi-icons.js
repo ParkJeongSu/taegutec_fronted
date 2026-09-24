@@ -107,6 +107,11 @@ import {
   mdiRadioboxBlank,
   mdiCircle,
   mdiCubeOutline,
+  mdiBattery,
+  mdiBatteryAlert,
+  mdiBatteryLow,
+  mdiBatteryMedium,
+  mdiBatteryHigh,
 } from '@mdi/js'
 
 // 아이콘 별칭(alias)을 만듭니다.
@@ -229,6 +234,11 @@ const aliases = {
   radioboxBlank: mdiRadioboxBlank,
   circle: mdiCircle,
   cubeOutline: mdiCubeOutline,
+  battery: mdiBattery,
+  batteryAlert: mdiBatteryAlert,
+  batteryLow: mdiBatteryLow,
+  batteryMedium: mdiBatteryMedium,
+  batteryHigh: mdiBatteryHigh,
 }
 
 // 설정들을 export 합니다.

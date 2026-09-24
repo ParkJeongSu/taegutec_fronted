@@ -35,9 +35,29 @@ export function useDataTable(fetchApi) {
 
       const response = await fetchApi(params)
 
-      // API 응답 구조에 맞게 데이터 매핑 (예: { data: [], total: 100 })
-      items.value = response.content || []
-      totalItems.value = Number(response.page.totalElements) || 0
+      // API 응답 구조에 맞게 데이터 매핑 (Spring Data Page, Spring HATEOAS, 커스텀 래퍼 등 안전 대응)
+      if (response && Array.isArray(response.content)) {
+        items.value = response.content
+        totalItems.value = Number(
+          (response.page && response.page.totalElements) != null
+            ? response.page.totalElements
+            : response.totalElements != null
+              ? response.totalElements
+              : response.content.length,
+        ) || 0
+      } else if (response && response.data && Array.isArray(response.data.content)) {
+        items.value = response.data.content
+        totalItems.value = Number(response.data.totalElements != null ? response.data.totalElements : response.data.content.length) || 0
+      } else if (response && response.data && Array.isArray(response.data)) {
+        items.value = response.data
+        totalItems.value = Number(response.total != null ? response.total : response.data.length) || 0
+      } else if (Array.isArray(response)) {
+        items.value = response
+        totalItems.value = Number(response.length) || 0
+      } else {
+        items.value = []
+        totalItems.value = 0
+      }
     } catch (error) {
       console.error('데이터 조회 중 오류 발생:', error)
       items.value = []

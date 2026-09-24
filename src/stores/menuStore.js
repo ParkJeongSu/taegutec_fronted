@@ -240,6 +240,12 @@ export const useMenuStore = defineStore('menu', function () {
               componentName: 'ZoneView',
               path: '/transfer/zone',
             },
+            {
+              id: 'SHELF',
+              title: '셸프',
+              componentName: 'ShelfView',
+              path: '/transfer/shelf',
+            },
           ],
         },
         {

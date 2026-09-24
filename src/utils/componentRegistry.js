@@ -107,6 +107,9 @@ export const componentMap = {
   ZoneView: defineAsyncComponent(function () {
     return import('@/views/Transfer/ZoneView.vue')
   }),
+  ShelfView: defineAsyncComponent(function () {
+    return import('@/views/Transfer/ShelfView.vue')
+  }),
   TransferHistoryView: defineAsyncComponent(function () {
     return import('@/views/Transfer/TransferHistoryView.vue')
   }),

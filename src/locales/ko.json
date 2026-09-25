@@ -73,6 +73,7 @@
     "ZONE": "존",
     "HISTORY": "반송 이력",
     "TRANSFER_HISTORY": "반송이력",
+    "TRANSFER_COMMAND_HISTORY": "반송 명령 이력",
     "ORDER": "오더",
     "SAP_IF": "인터페이스",
     "IDOC_HISTORY": "Idoc 이력",

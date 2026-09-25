@@ -1,6 +1,57 @@
 // src/composables/useDataTable.js
 import { ref, reactive } from 'vue'
 
+function parseTotalCount(value) {
+  if (value === null || value === undefined || value === '') {
+    return null
+  }
+  const parsed = Number(value)
+  return isNaN(parsed) ? null : parsed
+}
+
+function extractTotalElements(dataObj, fallbackLength, parentObj) {
+  if (dataObj) {
+    if (dataObj.page && dataObj.page.totalElements != null) {
+      const val = parseTotalCount(dataObj.page.totalElements)
+      if (val !== null) return val
+    }
+    if (dataObj.page && dataObj.page.total != null) {
+      const val = parseTotalCount(dataObj.page.total)
+      if (val !== null) return val
+    }
+    if (dataObj.totalElements != null) {
+      const val = parseTotalCount(dataObj.totalElements)
+      if (val !== null) return val
+    }
+    if (dataObj.total != null) {
+      const val = parseTotalCount(dataObj.total)
+      if (val !== null) return val
+    }
+  }
+
+  if (parentObj) {
+    if (parentObj.page && parentObj.page.totalElements != null) {
+      const val = parseTotalCount(parentObj.page.totalElements)
+      if (val !== null) return val
+    }
+    if (parentObj.page && parentObj.page.total != null) {
+      const val = parseTotalCount(parentObj.page.total)
+      if (val !== null) return val
+    }
+    if (parentObj.totalElements != null) {
+      const val = parseTotalCount(parentObj.totalElements)
+      if (val !== null) return val
+    }
+    if (parentObj.total != null) {
+      const val = parseTotalCount(parentObj.total)
+      if (val !== null) return val
+    }
+  }
+
+  const fallback = parseTotalCount(fallbackLength)
+  return fallback !== null ? fallback : 0
+}
+
 /**
  * @param {Function} fetchApi - 데이터를 가져올 API 함수
  */
@@ -38,19 +89,13 @@ export function useDataTable(fetchApi) {
       // API 응답 구조에 맞게 데이터 매핑 (Spring Data Page, Spring HATEOAS, 커스텀 래퍼 등 안전 대응)
       if (response && Array.isArray(response.content)) {
         items.value = response.content
-        totalItems.value = Number(
-          (response.page && response.page.totalElements) != null
-            ? response.page.totalElements
-            : response.totalElements != null
-              ? response.totalElements
-              : response.content.length,
-        ) || 0
+        totalItems.value = extractTotalElements(response, response.content.length)
       } else if (response && response.data && Array.isArray(response.data.content)) {
         items.value = response.data.content
-        totalItems.value = Number(response.data.totalElements != null ? response.data.totalElements : response.data.content.length) || 0
+        totalItems.value = extractTotalElements(response.data, response.data.content.length, response)
       } else if (response && response.data && Array.isArray(response.data)) {
         items.value = response.data
-        totalItems.value = Number(response.total != null ? response.total : response.data.length) || 0
+        totalItems.value = extractTotalElements(response, response.data.length, response.data)
       } else if (Array.isArray(response)) {
         items.value = response
         totalItems.value = Number(response.length) || 0

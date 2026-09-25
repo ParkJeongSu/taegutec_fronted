@@ -36,9 +36,9 @@
 
       <v-divider class="mb-4"></v-divider>
 
-      <!-- 검색 필터 폼 (v-row dense align-center) -->
+      <!-- 검색 필터 폼 (v-row density="compact" align-center) -->
       <div class="search-filter-bar pa-3 rounded bg-grey-lighten-4">
-        <v-row dense class="align-center">
+        <v-row density="compact" class="align-center">
           <!-- 1. 스토커 / 창고 선택 (cols 12 sm 4 md 3) -->
           <v-col cols="12" sm="4" md="3">
             <v-select

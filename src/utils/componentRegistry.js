@@ -110,8 +110,8 @@ export const componentMap = {
   ShelfView: defineAsyncComponent(function () {
     return import('@/views/Transfer/ShelfView.vue')
   }),
-  TransferHistoryView: defineAsyncComponent(function () {
-    return import('@/views/Transfer/TransferHistoryView.vue')
+  TransferCommandHistoryView: defineAsyncComponent(function () {
+    return import('@/views/Transfer/TransferCommandHistoryView.vue')
   }),
 
   // 3. ORDER (오더)

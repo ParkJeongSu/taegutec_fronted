@@ -73,6 +73,7 @@
     "ZONE": "Zone",
     "HISTORY": "Transfer History",
     "TRANSFER_HISTORY": "Transfer History",
+    "TRANSFER_COMMAND_HISTORY": "Transfer Command History",
     "ORDER": "Order",
     "SAP_IF": "Interface",
     "IDOC_HISTORY": "Idoc History",

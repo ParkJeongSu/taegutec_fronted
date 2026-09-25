@@ -255,7 +255,7 @@ export const useMenuStore = defineStore('menu', function () {
             {
               id: 'TRANSFER_HISTORY',
               title: '반송이력',
-              componentName: 'TransferHistoryView',
+              componentName: 'TransferCommandHistoryView',
               path: '/transfer/history',
             },
           ],

@@ -17,6 +17,7 @@
     v-on:update:options="onUpdateOptions"
     v-on:update:items-per-page="onUpdateItemsPerPage"
     v-on:click:row="onRowClick"
+    v-on:dblclick:row="onRowDblClick"
   >
     <!-- dynamic slot 전달 (부모에서 특정 컬럼 및 템플릿 커스텀 지원) -->
     <template v-for="slotName in Object.keys($slots)" :key="slotName" #[slotName]="slotProps">
@@ -93,7 +94,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['update:options', 'update:modelValue', 'update:itemsPerPage', 'click:row'])
+const emit = defineEmits(['update:options', 'update:modelValue', 'update:itemsPerPage', 'click:row', 'dblclick:row'])
 
 const internalItemsPerPage = ref(props.itemsPerPage)
 const selectedItems = ref(props.modelValue || [])
@@ -136,6 +137,10 @@ function onUpdateItemsPerPage(val) {
 
 function onRowClick(event, row) {
   emit('click:row', event, row)
+}
+
+function onRowDblClick(event, row) {
+  emit('dblclick:row', event, row)
 }
 </script>
 

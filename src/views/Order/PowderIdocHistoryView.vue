@@ -207,7 +207,7 @@
         item-value="compositeKey"
         density="compact"
         v-on:update:options="onUpdateOptions"
-        v-on:click:row="onRowClick"
+        v-on:dblclick:row="onRowDblClick"
       >
         <!-- 문서 번호 하이라이트 -->
         <template #[`item.docNum`]="{ item }">
@@ -482,7 +482,7 @@ function onUpdateOptions(newOptions) {
   updateOptions(newOptions, getSanitizedParams())
 }
 
-function onRowClick(event, row) {
+function onRowDblClick(event, row) {
   const itemData = (row && row.item) ? row.item : row
   if (itemData) {
     selectedItem.value = itemData

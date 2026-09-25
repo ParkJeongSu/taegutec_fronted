@@ -8,6 +8,7 @@
     </v-main>
 
     <TheDetailPanel />
+    <TheAlarmPanel />
   </v-app>
 </template>
 
@@ -15,6 +16,7 @@
 import TheHeader from './parts/TheHeader.vue'
 import TheSidebar from './parts/TheSidebar.vue'
 import TheDetailPanel from './parts/TheDetailPanel.vue'
+import TheAlarmPanel from './parts/TheAlarmPanel.vue'
 import TheMainContent from './parts/TheMainContent.vue'
 // Composition API를 통한 레이아웃 로직 관리
 </script>

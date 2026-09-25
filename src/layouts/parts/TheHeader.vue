@@ -29,8 +29,27 @@
           </v-tabs>
         </div>
 
-        <!-- 우측: 플랜트 칩 & 사용자 메뉴 드롭다운 -->
+        <!-- 우측: 알람 버튼 & 플랜트 칩 & 사용자 메뉴 드롭다운 -->
         <div class="nav-right d-flex align-center justify-end">
+          <!-- 실시간 알람 벨 아이콘 버튼 -->
+          <v-btn
+            icon
+            variant="text"
+            color="white"
+            class="mr-2 alarm-bell-btn"
+            title="실시간 알람"
+            v-on:click="alarmStore.togglePanel"
+          >
+            <v-badge
+              :content="alarmStore.unreadCount"
+              :model-value="alarmStore.unreadCount > 0"
+              color="error"
+              max="99"
+            >
+              <v-icon :icon="alarmStore.unreadCount > 0 ? '$bellRing' : '$bellOutline'" size="20" />
+            </v-badge>
+          </v-btn>
+
           <v-chip
             variant="tonal"
             color="white"
@@ -74,7 +93,7 @@
 
                 <v-divider class="my-1"></v-divider>
 
-                <!-- 언어(Locale) 변경 항목 (로그아웃 위) -->
+                <!-- 언어(Locale) 변경 항목 -->
                 <v-list-item prepend-icon="$translate" :title="$t('common.language')">
                   <template #append>
                     <v-btn-toggle
@@ -89,6 +108,34 @@
                       <v-btn value="ko" size="x-small" class="font-weight-bold">KO</v-btn>
                       <v-btn value="en" size="x-small" class="font-weight-bold">EN</v-btn>
                     </v-btn-toggle>
+                  </template>
+                </v-list-item>
+
+                <!-- 실시간 알람 항목 (언어 변경 아래, 로그아웃 위) -->
+                <v-list-item
+                  prepend-icon="$bellRing"
+                  title="실시간 알람"
+                  class="alarm-menu-item font-weight-medium"
+                  v-on:click="handleOpenAlarmPanel"
+                >
+                  <template #append>
+                    <v-chip
+                      v-if="alarmStore.unreadCount > 0"
+                      color="error"
+                      size="x-small"
+                      variant="flat"
+                      class="font-weight-bold"
+                    >
+                      {{ alarmStore.unreadCount }}건
+                    </v-chip>
+                    <v-chip
+                      v-else
+                      color="grey-lighten-1"
+                      size="x-small"
+                      variant="tonal"
+                    >
+                      {{ alarmStore.alarmList.length }}건
+                    </v-chip>
                   </template>
                 </v-list-item>
 
@@ -141,11 +188,13 @@ import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useMenuStore } from '@/stores/menuStore'
 import { useAuthStore } from '@/stores/auth'
+import { useAlarmStore } from '@/stores/alarmStore'
 import { APP_TITLE, PLANT_TYPE, isInsert, isPowder } from '@/constants/plant'
 
 const { locale, t, te } = useI18n()
 const menuStore = useMenuStore()
 const authStore = useAuthStore()
+const alarmStore = useAlarmStore()
 
 const currentLocale = ref(locale.value)
 
@@ -194,6 +243,10 @@ const plantDescription = computed(function () {
   }
   return plantCode + ' 공장'
 })
+
+function handleOpenAlarmPanel() {
+  alarmStore.openPanel()
+}
 
 function handleLogout() {
   authStore.logout()

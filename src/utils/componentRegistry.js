@@ -155,9 +155,6 @@ export const componentMap = {
   MenuAuthView: defineAsyncComponent(function () {
     return import('@/views/Settings/MenuAuthView.vue')
   }),
-  AdminAuthView: defineAsyncComponent(function () {
-    return import('@/views/Settings/AdminAuthView.vue')
-  }),
   PasswordPolicyView: defineAsyncComponent(function () {
     return import('@/views/Settings/PasswordPolicyView.vue')
   }),

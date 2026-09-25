@@ -372,12 +372,6 @@ export const useMenuStore = defineStore('menu', function () {
               componentName: 'MenuAuthView',
               path: '/settings/menu-auth',
             },
-            {
-              id: 'ADMIN_AUTH',
-              title: '관리자 권한',
-              componentName: 'AdminAuthView',
-              path: '/settings/admin-auth',
-            },
           ],
         },
         {

@@ -271,10 +271,16 @@ export const useMenuStore = defineStore('menu', function () {
           title: '인터페이스',
           children: [
             {
-              id: 'IDOC_HISTORY',
-              title: 'Idoc 이력',
-              componentName: 'IdocHistoryView',
-              path: '/order/idoc-history',
+              id: 'INSERT_IDOC_HISTORY',
+              title: 'INSERT Idoc 이력',
+              componentName: 'InsertIdocHistoryView',
+              path: '/order/insert-idoc-history',
+            },
+            {
+              id: 'POWDER_IDOC_HISTORY',
+              title: 'POWDER Idoc 이력',
+              componentName: 'PowderIdocHistoryView',
+              path: '/order/powder-idoc-history',
             },
           ],
         },

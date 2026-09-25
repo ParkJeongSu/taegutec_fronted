@@ -115,8 +115,11 @@ export const componentMap = {
   }),
 
   // 3. ORDER (오더)
-  IdocHistoryView: defineAsyncComponent(function () {
-    return import('@/views/Order/IdocHistoryView.vue')
+  InsertIdocHistoryView: defineAsyncComponent(function () {
+    return import('@/views/Order/InsertIdocHistoryView.vue')
+  }),
+  PowderIdocHistoryView: defineAsyncComponent(function () {
+    return import('@/views/Order/PowderIdocHistoryView.vue')
   }),
 
   // 4. MODELING (모델링)

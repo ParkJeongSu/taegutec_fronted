@@ -123,12 +123,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import { useMenuStore } from '@/stores/menuStore'
 import { loginApi } from '@/api/auth'
 import { useApi } from '@/composables/useApi'
 import { APP_TITLE, PLANT_TYPE, isInsert, isPowder } from '@/constants/plant'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const menuStore = useMenuStore()
 const formRef = ref(null)
 
 const employeeId = ref('')
@@ -222,9 +224,12 @@ async function handleLogin() {
       // 2. data 객체 추출
       const resData = res.data || {}
       const accessToken = resData.accessToken || ''
+      const targetUserId = resData.id || resData.userId || employeeId.value
 
       const userInfo = {
+        id: resData.id,
         userId: resData.userId || employeeId.value,
+        employeeId: resData.userId || employeeId.value,
         userName: resData.userName || employeeId.value,
         factoryName: resData.factoryName || plantCode,
         departmentName: resData.departmentName || '',
@@ -233,7 +238,14 @@ async function handleLogin() {
 
       authStore.setAuth(accessToken, userInfo)
 
-      // 3. 메인 업무 화면으로 이동
+      // 3. 사용자 권한에 따른 메뉴 트리 로드
+      try {
+        await menuStore.fetchUserMenuTree(targetUserId)
+      } catch (menuError) {
+        console.error('Failed to load menu tree after login:', menuError)
+      }
+
+      // 4. 메인 업무 화면으로 이동
       router.push('/')
     } else {
       errorMessage.value =

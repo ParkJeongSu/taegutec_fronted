@@ -1,19 +1,29 @@
 // src/api/menu.js
-import axios from 'axios'
+import axiosInstance from '@/api/index'
+
+/**
+ * 사용자 권한 메뉴 트리 조회
+ * @param {string|number} userId - 사용자 TSID 식별자 또는 사용자 ID
+ * @returns {Promise<Object>} API 응답 데이터
+ */
+export function fetchAuthorizedMenuTreeApi(userId) {
+  const targetId = typeof userId === 'object' && userId !== null ? (userId.id || userId.userId) : userId
+  const url = '/v1/mng/menu/authorized/' + encodeURIComponent(targetId)
+  return axiosInstance.get(url)
+}
 
 /**
  * 메뉴 목록 조회 (검색 및 페이징)
  * @param {Object} [params] - { page, size, factoryName, menuName, useState, ... }
  * @returns {Promise<Object>} API 응답 데이터
  */
-export async function fetchMenusApi(params) {
+export function fetchMenusApi(params) {
   const defaultParams = {
     page: 0,
     size: 200,
   }
   const mergedParams = Object.assign({}, defaultParams, params)
-  const response = await axios.get('/wcs-web/api/v1/mng/menu', { params: mergedParams })
-  return response.data
+  return axiosInstance.get('/v1/mng/menu', { params: mergedParams })
 }
 
 /**
@@ -21,9 +31,8 @@ export async function fetchMenusApi(params) {
  * @param {Object} [params] - { factoryName, useState, ... }
  * @returns {Promise<Object>} API 응답 데이터
  */
-export async function fetchMenuTreeApi(params) {
-  const response = await axios.get('/wcs-web/api/v1/mng/menu/tree', { params: params })
-  return response.data
+export function fetchMenuTreeApi(params) {
+  return axiosInstance.get('/v1/mng/menu/tree', { params: params })
 }
 
 /**
@@ -31,11 +40,10 @@ export async function fetchMenuTreeApi(params) {
  * @param {string|number} id - 메뉴 TSID 식별자
  * @returns {Promise<Object>} API 응답 데이터
  */
-export async function fetchMenuApi(id) {
+export function fetchMenuApi(id) {
   const targetId = typeof id === 'object' && id !== null ? id.id : id
-  const url = '/wcs-web/api/v1/mng/menu/' + encodeURIComponent(targetId)
-  const response = await axios.get(url)
-  return response.data
+  const url = '/v1/mng/menu/' + encodeURIComponent(targetId)
+  return axiosInstance.get(url)
 }
 
 /**
@@ -43,9 +51,8 @@ export async function fetchMenuApi(id) {
  * @param {Object} payload - 신규 메뉴 데이터
  * @returns {Promise<Object>} API 응답 데이터
  */
-export async function createMenuApi(payload) {
-  const response = await axios.post('/wcs-web/api/v1/mng/menu', payload)
-  return response.data
+export function createMenuApi(payload) {
+  return axiosInstance.post('/v1/mng/menu', payload)
 }
 
 /**
@@ -54,7 +61,7 @@ export async function createMenuApi(payload) {
  * @param {Object} [payload] - 수정할 메뉴 정보
  * @returns {Promise<Object>} API 응답 데이터
  */
-export async function updateMenuApi(id, payload) {
+export function updateMenuApi(id, payload) {
   let targetId = id
   let data = payload
 
@@ -63,9 +70,8 @@ export async function updateMenuApi(id, payload) {
     data = id
   }
 
-  const url = '/wcs-web/api/v1/mng/menu/' + encodeURIComponent(targetId)
-  const response = await axios.put(url, data)
-  return response.data
+  const url = '/v1/mng/menu/' + encodeURIComponent(targetId)
+  return axiosInstance.put(url, data)
 }
 
 /**
@@ -74,14 +80,14 @@ export async function updateMenuApi(id, payload) {
  * @param {Object} [params] - 추가 파라미터
  * @returns {Promise<Object>} API 응답 데이터
  */
-export async function deleteMenuApi(id, params) {
+export function deleteMenuApi(id, params) {
   const targetId = typeof id === 'object' && id !== null ? id.id : id
-  const url = '/wcs-web/api/v1/mng/menu/' + encodeURIComponent(targetId)
-  const response = await axios.delete(url, { params: params })
-  return response.data
+  const url = '/v1/mng/menu/' + encodeURIComponent(targetId)
+  return axiosInstance.delete(url, { params: params })
 }
 
 // 하위 호환성을 위한 별칭 export
+export const fetchAuthorizedMenuTree = fetchAuthorizedMenuTreeApi
 export const fetchMenus = fetchMenusApi
 export const fetchMenuTree = fetchMenuTreeApi
 export const fetchMenu = fetchMenuApi

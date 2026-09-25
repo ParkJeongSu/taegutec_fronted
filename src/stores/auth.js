@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import router from '@/router'
 import { useTabStore } from '@/stores/tabStore'
+import { useMenuStore } from '@/stores/menuStore'
 
 export const useAuthStore = defineStore('auth', function () {
   const token = ref(getStoredToken())
@@ -86,10 +87,14 @@ export const useAuthStore = defineStore('auth', function () {
     const tabStore = useTabStore()
     tabStore.clearTabs()
 
-    // 2. 인증 및 사용자 세션 정리
+    // 2. 메뉴 상태 초기화
+    const menuStore = useMenuStore()
+    menuStore.clearMenu()
+
+    // 3. 인증 및 사용자 세션 정리
     clearAuth()
 
-    // 3. 로그인 페이지로 리다이렉트
+    // 4. 로그인 페이지로 리다이렉트
     router.push('/login')
   }
 

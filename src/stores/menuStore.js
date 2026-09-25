@@ -1,402 +1,18 @@
+// src/stores/menuStore.js
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { fetchAuthorizedMenuTreeApi } from '@/api/menu'
 
 export const useMenuStore = defineStore('menu', function () {
-  // 신규 5대 대메뉴 체계 (DASHBOARD, TRANSFER, ORDER, MODELING, SETTINGS)
-  const menuTree = ref([
-    {
-      id: 'DASHBOARD',
-      title: '대시보드',
-      children: [
-        {
-          id: 'OPERATION',
-          title: '운영 모니터링',
-          children: [
-            {
-              id: 'WAREHOUSE_ROOT',
-              title: '창고',
-              componentName: 'WarehouseView',
-              path: '/dashboard/warehouse',
-            },
-            {
-              id: 'WAREHOUSE_1',
-              title: '창고1',
-              children: [
-                {
-                  id: 'WORK_STATION_311',
-                  title: 'workstation311',
-                  componentName: 'WorkStation311View',
-                  path: '/dashboard/warehouse1/ws311',
-                },
-                {
-                  id: 'WORK_STATION_312',
-                  title: 'workstation312',
-                  componentName: 'WorkStation312View',
-                  path: '/dashboard/warehouse1/ws312',
-                },
-                {
-                  id: 'WORK_STATION_313',
-                  title: 'workstation313',
-                  componentName: 'WorkStation313View',
-                  path: '/dashboard/warehouse1/ws313',
-                },
-                {
-                  id: 'WORK_STATION_314',
-                  title: 'workstation314',
-                  componentName: 'WorkStation314View',
-                  path: '/dashboard/warehouse1/ws314',
-                },
-                {
-                  id: 'WORK_STATION_315',
-                  title: 'workstation315',
-                  componentName: 'WorkStation315View',
-                  path: '/dashboard/warehouse1/ws315',
-                },
-                {
-                  id: 'WORK_STATION_316',
-                  title: 'workstation316',
-                  componentName: 'WorkStation316View',
-                  path: '/dashboard/warehouse1/ws316',
-                },
-              ],
-            },
-            {
-              id: 'WAREHOUSE_2',
-              title: '창고2',
-              children: [
-                {
-                  id: 'WORK_STATION_321',
-                  title: 'workstation321',
-                  componentName: 'WorkStation321View',
-                  path: '/dashboard/warehouse2/ws321',
-                },
-                {
-                  id: 'WORK_STATION_322',
-                  title: 'workstation322',
-                  componentName: 'WorkStation322View',
-                  path: '/dashboard/warehouse2/ws322',
-                },
-                {
-                  id: 'WORK_STATION_323',
-                  title: 'workstation323',
-                  componentName: 'WorkStation323View',
-                  path: '/dashboard/warehouse2/ws323',
-                },
-                {
-                  id: 'WORK_STATION_324',
-                  title: 'workstation324',
-                  componentName: 'WorkStation324View',
-                  path: '/dashboard/warehouse2/ws324',
-                },
-                {
-                  id: 'WORK_STATION_325',
-                  title: 'workstation325',
-                  componentName: 'WorkStation325View',
-                  path: '/dashboard/warehouse2/ws325',
-                },
-                {
-                  id: 'WORK_STATION_326',
-                  title: 'workstation326',
-                  componentName: 'WorkStation326View',
-                  path: '/dashboard/warehouse2/ws326',
-                },
-              ],
-            },
-            {
-              id: 'WAREHOUSE_3',
-              title: '창고3',
-              children: [
-                {
-                  id: 'WORK_STATION_331',
-                  title: 'workstation331',
-                  componentName: 'WorkStation331View',
-                  path: '/dashboard/warehouse3/ws331',
-                },
-              ],
-            },
-            {
-              id: 'WAREHOUSE_4',
-              title: '창고4',
-              children: [
-                {
-                  id: 'WORK_STATION_341',
-                  title: 'workstation341',
-                  componentName: 'WorkStation341View',
-                  path: '/dashboard/warehouse4/ws341',
-                },
-                {
-                  id: 'WORK_STATION_342',
-                  title: 'workstation342',
-                  componentName: 'WorkStation342View',
-                  path: '/dashboard/warehouse4/ws342',
-                },
-                {
-                  id: 'WORK_STATION_343',
-                  title: 'workstation343',
-                  componentName: 'WorkStation343View',
-                  path: '/dashboard/warehouse4/ws343',
-                },
-                {
-                  id: 'WORK_STATION_344',
-                  title: 'workstation344',
-                  componentName: 'WorkStation344View',
-                  path: '/dashboard/warehouse4/ws344',
-                },
-              ],
-            },
-            {
-              id: 'WAREHOUSE_5',
-              title: '창고5',
-              children: [
-                {
-                  id: 'WORK_STATION_351',
-                  title: 'workstation351',
-                  componentName: 'WorkStation351View',
-                  path: '/dashboard/warehouse5/ws351',
-                },
-                {
-                  id: 'WORK_STATION_352',
-                  title: 'workstation352',
-                  componentName: 'WorkStation352View',
-                  path: '/dashboard/warehouse5/ws352',
-                },
-              ],
-            },
-            {
-              id: 'WAREHOUSE_6',
-              title: '창고6',
-              children: [
-                {
-                  id: 'WORK_STATION_361',
-                  title: 'workstation361',
-                  componentName: 'WorkStation361View',
-                  path: '/dashboard/warehouse6/ws361',
-                },
-                {
-                  id: 'WORK_STATION_362',
-                  title: 'workstation362',
-                  componentName: 'WorkStation362View',
-                  path: '/dashboard/warehouse6/ws362',
-                },
-                {
-                  id: 'WORK_STATION_363',
-                  title: 'workstation363',
-                  componentName: 'WorkStation363View',
-                  path: '/dashboard/warehouse6/ws363',
-                },
-              ],
-            },
-            {
-              id: 'WAREHOUSE_7',
-              title: '창고7',
-              children: [
-                {
-                  id: 'WORK_STATION_371',
-                  title: 'workstation371',
-                  componentName: 'WorkStation371View',
-                  path: '/dashboard/warehouse7/ws371',
-                },
-                {
-                  id: 'WORK_STATION_372',
-                  title: 'workstation372',
-                  componentName: 'WorkStation372View',
-                  path: '/dashboard/warehouse7/ws372',
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'TRANSFER',
-      title: '반송',
-      children: [
-        {
-          id: 'EQUIPMENT',
-          title: '설비 제어',
-          children: [
-            {
-              id: 'STOCKER',
-              title: '스토커',
-              componentName: 'StockerView',
-              path: '/transfer/stocker',
-            },
-            {
-              id: 'CONVEYOR',
-              title: '컨베이어',
-              componentName: 'ConveyorView',
-              path: '/transfer/conveyor',
-            },
-            {
-              id: 'CARRIER',
-              title: '캐리어',
-              componentName: 'CarrierView',
-              path: '/transfer/carrier',
-            },
-            {
-              id: 'ZONE',
-              title: '존',
-              componentName: 'ZoneView',
-              path: '/transfer/zone',
-            },
-            {
-              id: 'SHELF',
-              title: '셸프',
-              componentName: 'ShelfView',
-              path: '/transfer/shelf',
-            },
-          ],
-        },
-        {
-          id: 'HISTORY',
-          title: '반송 이력',
-          children: [
-            {
-              id: 'TRANSFER_HISTORY',
-              title: '반송이력',
-              componentName: 'TransferCommandHistoryView',
-              path: '/transfer/history',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'ORDER',
-      title: '오더',
-      children: [
-        {
-          id: 'SAP_IF',
-          title: '인터페이스',
-          children: [
-            {
-              id: 'INSERT_IDOC_HISTORY',
-              title: 'INSERT Idoc 이력',
-              componentName: 'InsertIdocHistoryView',
-              path: '/order/insert-idoc-history',
-            },
-            {
-              id: 'POWDER_IDOC_HISTORY',
-              title: 'POWDER Idoc 이력',
-              componentName: 'PowderIdocHistoryView',
-              path: '/order/powder-idoc-history',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'MODELING',
-      title: '모델링',
-      children: [
-        {
-          id: 'ROUTE',
-          title: '경로 설정',
-          children: [
-            {
-              id: 'ROUTE_NODE',
-              title: '라우트 노드',
-              componentName: 'RouteNodeView',
-              path: '/modeling/route-node',
-            },
-            {
-              id: 'ROUTE_LINK',
-              title: '라우트 링크',
-              componentName: 'RouteLinkView',
-              path: '/modeling/route-link',
-            },
-            {
-              id: 'ALT_ZONE',
-              title: '대체존 설정',
-              componentName: 'AltZoneView',
-              path: '/modeling/alt-zone',
-            },
-          ],
-        },
-        {
-          id: 'RULE',
-          title: '제어 규칙',
-          children: [
-            {
-              id: 'ALARM_DEF',
-              title: '알람 정의',
-              componentName: 'AlarmDefView',
-              path: '/modeling/alarm-def',
-            },
-            {
-              id: 'SUB_TRANSFER_RULE',
-              title: 'Sub Transfer Rule',
-              componentName: 'SubTransferRuleView',
-              path: '/modeling/sub-transfer-rule',
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'SETTINGS',
-      title: '관리자 설정',
-      children: [
-        {
-          id: 'AUTH_USER',
-          title: '사용자 및 권한',
-          children: [
-            {
-              id: 'USER_MGMT',
-              title: '사용자',
-              componentName: 'UserMgmtView',
-              path: '/settings/user',
-            },
-            {
-              id: 'DEPT_MGMT',
-              title: '부서',
-              componentName: 'DeptMgmtView',
-              path: '/settings/dept',
-            },
-            {
-              id: 'USER_GROUP_MGMT',
-              title: '사용자 그룹',
-              componentName: 'UserGroupMgmtView',
-              path: '/settings/user-group',
-            },
-            {
-              id: 'MENU_MGMT',
-              title: '메뉴',
-              componentName: 'MenuMgmtView',
-              path: '/settings/menu',
-            },
-            {
-              id: 'MENU_AUTH',
-              title: '메뉴 권한',
-              componentName: 'MenuAuthView',
-              path: '/settings/menu-auth',
-            },
-          ],
-        },
-        {
-          id: 'POLICY',
-          title: '시스템 정책',
-          children: [
-            {
-              id: 'PASSWORD_POLICY',
-              title: '패스워드 정책',
-              componentName: 'PasswordPolicyView',
-              path: '/settings/password-policy',
-            },
-          ],
-        },
-      ],
-    },
-  ])
+  // 동적 메뉴 트리 상태 (초기값: 빈 배열)
+  const menuTree = ref([])
+  const isLoading = ref(false)
+  const isLoaded = ref(false)
+  const error = ref(null)
 
-  // 초기 상태: ID 기준 관리
-  const selectedL1Id = ref(menuTree.value.length > 0 ? menuTree.value[0].id : '')
-  const selectedL2Id = ref(
-    menuTree.value[0] && menuTree.value[0].children && menuTree.value[0].children.length > 0
-      ? menuTree.value[0].children[0].id
-      : '',
-  )
+  // 선택된 메뉴 ID 상태
+  const selectedL1Id = ref('')
+  const selectedL2Id = ref('')
   const isSidebarOpen = ref(true)
 
   // 대메뉴(L1) 객체 계산 (selectedL1Id 기반)
@@ -476,17 +92,252 @@ export const useMenuStore = defineStore('menu', function () {
     isSidebarOpen.value = !isSidebarOpen.value
   }
 
+  // 알려진 메뉴 ID 및 컴포넌트 매핑 테이블
+  function getKnownComponentMapping(menuId) {
+    if (!menuId) return ''
+    const upper = String(menuId).toUpperCase().trim()
+    const map = {
+      WAREHOUSE_ROOT: 'WarehouseView',
+      WAREHOUSE: 'WarehouseView',
+      WORK_STATION: 'WorkStationView',
+      STOCKER: 'StockerView',
+      CONVEYOR: 'ConveyorView',
+      CARRIER: 'CarrierView',
+      ZONE: 'ZoneView',
+      SHELF: 'ShelfView',
+      TRANSFER_COMMAND_HISTORY: 'TransferCommandHistoryView',
+      TRANSFER_HISTORY: 'TransferCommandHistoryView',
+      INSERT_IDOC_HISTORY: 'InsertIdocHistoryView',
+      POWDER_IDOC_HISTORY: 'PowderIdocHistoryView',
+      ROUTE_NODE: 'RouteNodeView',
+      ROUTE_LINK: 'RouteLinkView',
+      ALT_ZONE: 'AltZoneView',
+      ALARM_DEF: 'AlarmDefView',
+      SUB_TRANSFER_RULE: 'SubTransferRuleView',
+      USER_MGMT: 'UserMgmtView',
+      DEPT_MGMT: 'DeptMgmtView',
+      USER_GROUP_MGMT: 'UserGroupMgmtView',
+      MENU_MGMT: 'MenuMgmtView',
+      MENU_AUTH: 'MenuAuthView',
+      PASSWORD_POLICY: 'PasswordPolicyView',
+      PROCESS_STATUS: 'ProcessStatusView',
+      PROCESS_STATUS_VER2: 'ProcessStatusVer2View',
+      PURGE_CONFIG: 'PurgeConfigView',
+      PROCESS_INFO: 'ProcessInfoView',
+      PURGE_LOG: 'PurgeLogView',
+      PROCESS_STATUS_HISTORY: 'ProcessStatusHistoryView',
+    }
+
+    if (map[upper]) {
+      return map[upper]
+    }
+
+    // WORK_STATION_311 -> WorkStation311View 형식 처리
+    if (upper.indexOf('WORK_STATION_') === 0) {
+      const suffix = upper.replace('WORK_STATION_', '')
+      return 'WorkStation' + suffix + 'View'
+    }
+
+    // 스네이크 케이스 -> 파스칼 케이스 변환
+    const words = upper.split('_')
+    let pascal = ''
+    for (let i = 0; i < words.length; i++) {
+      const w = words[i]
+      if (w) {
+        pascal = pascal + w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()
+      }
+    }
+    if (pascal && pascal.indexOf('View') === -1) {
+      pascal = pascal + 'View'
+    }
+    return pascal
+  }
+
+  // 컴포넌트 명칭 추출 함수
+  function resolveComponentName(rawNode) {
+    if (!rawNode) return ''
+
+    // 1. DTO에 componentName이 직접 지정된 경우
+    if (rawNode.componentName) {
+      return rawNode.componentName
+    }
+
+    // 2. filePath 경로가 있는 경우 (예: "@/views/Transfer/StockerView.vue")
+    if (rawNode.filePath) {
+      const pathStr = String(rawNode.filePath).trim()
+      const parts = pathStr.split('/')
+      const fileName = parts[parts.length - 1]
+      const compName = fileName.replace(/\.vue$/i, '')
+      if (compName) {
+        return compName
+      }
+    }
+
+    // 3. menuId 기준 매핑 테이블 및 변환 규칙 적용
+    const menuId = rawNode.menuId || rawNode.id
+    if (menuId) {
+      const mapped = getKnownComponentMapping(menuId)
+      if (mapped) {
+        return mapped
+      }
+    }
+
+    return ''
+  }
+
+  // 백엔드 트리 노드 정규화
+  function normalizeMenuNode(rawNode) {
+    if (!rawNode) return null
+
+    const id = rawNode.menuId || (rawNode.id != null ? String(rawNode.id) : '')
+    const title = rawNode.menuName || rawNode.title || id
+    const path = rawNode.routerPath || rawNode.path || ''
+    const icon = rawNode.iconName || rawNode.icon || ''
+    const compName = resolveComponentName(rawNode)
+
+    const normalized = {
+      ...rawNode,
+      id: id,
+      dbId: rawNode.id,
+      menuId: rawNode.menuId || id,
+      title: title,
+      menuName: rawNode.menuName || title,
+      path: path,
+      routerPath: path,
+      icon: icon,
+      iconName: icon,
+      componentName: compName,
+      menuLevel: rawNode.menuLevel || 1,
+      children: [],
+    }
+
+    if (rawNode.children && Array.isArray(rawNode.children)) {
+      const childrenList = []
+      for (let i = 0; i < rawNode.children.length; i++) {
+        const child = normalizeMenuNode(rawNode.children[i])
+        if (child) {
+          childrenList.push(child)
+        }
+      }
+      normalized.children = childrenList
+    }
+
+    return normalized
+  }
+
+  // 초기 선택값 (selectedL1Id, selectedL2Id) 재동기화
+  function syncSelectedIds() {
+    if (!menuTree.value || menuTree.value.length === 0) {
+      selectedL1Id.value = ''
+      selectedL2Id.value = ''
+      return
+    }
+
+    let currentL1Exists = false
+    let matchedL1 = null
+    for (let i = 0; i < menuTree.value.length; i++) {
+      if (menuTree.value[i].id === selectedL1Id.value) {
+        currentL1Exists = true
+        matchedL1 = menuTree.value[i]
+        break
+      }
+    }
+
+    if (!currentL1Exists) {
+      matchedL1 = menuTree.value[0]
+      selectedL1Id.value = matchedL1.id
+    }
+
+    if (matchedL1 && matchedL1.children && matchedL1.children.length > 0) {
+      let currentL2Exists = false
+      for (let j = 0; j < matchedL1.children.length; j++) {
+        if (matchedL1.children[j].id === selectedL2Id.value) {
+          currentL2Exists = true
+          break
+        }
+      }
+      if (!currentL2Exists) {
+        selectedL2Id.value = matchedL1.children[0].id
+      }
+    } else {
+      selectedL2Id.value = ''
+    }
+  }
+
+  // 사용자 권한 메뉴 트리 조회 액션
+  async function fetchUserMenuTree(userId) {
+    if (!userId) {
+      console.warn('fetchUserMenuTree: userId가 유효하지 않습니다.')
+      return []
+    }
+
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const response = await fetchAuthorizedMenuTreeApi(userId)
+
+      let rawList = []
+      if (response) {
+        if (Array.isArray(response)) {
+          rawList = response
+        } else if (response.data && Array.isArray(response.data)) {
+          rawList = response.data
+        } else if (response.result === 'SUCCESS' && Array.isArray(response.data)) {
+          rawList = response.data
+        }
+      }
+
+      const normalizedTree = []
+      for (let i = 0; i < rawList.length; i++) {
+        const node = normalizeMenuNode(rawList[i])
+        if (node) {
+          normalizedTree.push(node)
+        }
+      }
+
+      menuTree.value = normalizedTree
+      isLoaded.value = true
+
+      // L1 / L2 선택값 동기화
+      syncSelectedIds()
+
+      return menuTree.value
+    } catch (err) {
+      console.error('Failed to fetch user menu tree:', err)
+      error.value = err
+      throw err
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // 메뉴 상태 초기화 (로그아웃 등)
+  function clearMenu() {
+    menuTree.value = []
+    selectedL1Id.value = ''
+    selectedL2Id.value = ''
+    isLoaded.value = false
+    error.value = null
+  }
+
   return {
-    menuTree,
-    selectedL1Id,
-    selectedL2Id,
-    selectedL1,
-    selectedL2,
-    currentL2List,
-    currentL3List,
-    isSidebarOpen,
-    selectL1,
-    selectL2,
-    toggleSidebar,
+    menuTree: menuTree,
+    selectedL1Id: selectedL1Id,
+    selectedL2Id: selectedL2Id,
+    selectedL1: selectedL1,
+    selectedL2: selectedL2,
+    currentL2List: currentL2List,
+    currentL3List: currentL3List,
+    isSidebarOpen: isSidebarOpen,
+    isLoading: isLoading,
+    isLoaded: isLoaded,
+    error: error,
+    selectL1: selectL1,
+    selectL2: selectL2,
+    toggleSidebar: toggleSidebar,
+    syncSelectedIds: syncSelectedIds,
+    fetchUserMenuTree: fetchUserMenuTree,
+    clearMenu: clearMenu,
   }
 })

@@ -39,7 +39,7 @@
         />
         <div v-else class="empty-state">
           <v-icon icon="$info" size="large" class="mb-2" />
-          <p>데이터 테이블에서 항목을 선택해주세요.</p>
+          <p>{{ $t('common.selectItemGuide') }}</p>
         </div>
       </v-card-text>
     </v-card>

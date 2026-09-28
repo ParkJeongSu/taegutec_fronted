@@ -11,31 +11,31 @@
           ></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.systemName" label="시스템명"></v-text-field>
+          <v-text-field v-model="formData.systemName" :label="$t('views.definition.processInfo.form.systemName')"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.processGroupName" label="프로세스 그룹명"></v-text-field>
+          <v-text-field v-model="formData.processGroupName" :label="$t('views.definition.processInfo.form.groupName')"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.processName" label="프로세스명"></v-text-field>
+          <v-text-field v-model="formData.processName" :label="$t('views.definition.processInfo.form.processName')"></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-text-field v-model="formData.fileName" label="실행 파일명 (jar 등)"></v-text-field>
+          <v-text-field v-model="formData.fileName" :label="$t('views.definition.processInfo.form.fileName')"></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-text-field v-model="formData.copyDir" label="복사 경로 (Source)"></v-text-field>
+          <v-text-field v-model="formData.copyDir" :label="$t('views.definition.processInfo.form.copyDir')"></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-text-field v-model="formData.workingDir" label="작업 경로 (Target)"></v-text-field>
+          <v-text-field v-model="formData.workingDir" :label="$t('views.definition.processInfo.form.workingDir')"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.batchDir" label="배치 파일 경로"></v-text-field>
+          <v-text-field v-model="formData.batchDir" :label="$t('views.definition.processInfo.form.batchDir')"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.batchName" label="배치 파일명"></v-text-field>
+          <v-text-field v-model="formData.batchName" :label="$t('views.definition.processInfo.form.batchName')"></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-textarea v-model="formData.description" label="프로세스 설명" rows="3"></v-textarea>
+          <v-textarea v-model="formData.description" :label="$t('views.definition.processInfo.form.description')" rows="3"></v-textarea>
         </v-col>
       </v-row>
     </v-form>
@@ -43,9 +43,9 @@
     <v-divider></v-divider>
     <v-card-actions class="pa-4">
       <v-spacer></v-spacer>
-      <v-btn variant="outlined" color="secondary" v-on:click="panelStore.closePanel">취소</v-btn>
+      <v-btn variant="outlined" color="secondary" v-on:click="panelStore.closePanel">{{ $t('common.cancel') }}</v-btn>
       <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave">
-        {{ panelStore.mode === 'add' ? '저장' : '수정' }}
+        {{ panelStore.mode === 'add' ? $t('common.save') : $t('common.edit') }}
       </v-btn>
     </v-card-actions>
   </div>
@@ -53,10 +53,12 @@
 
 <script setup>
 import { reactive, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { usePanelStore } from '@/stores/panelStore'
 import { useBaseForm } from '@/composables/useBaseForm'
 import { saveProcessInfoApi } from '@/api/processInfo'
 
+const { t } = useI18n()
 const panelStore = usePanelStore()
 const formData = reactive({
   port: null,
@@ -86,10 +88,18 @@ watch(
 )
 
 async function onHandleSave() {
-  const success = await submitForm(panelStore.mode, formData, function () {
-    alert('정상적으로 처리되었습니다.')
+  await submitForm(panelStore.mode, formData, function () {
+    alert(t('views.definition.processInfo.form.saved'))
+    if (typeof panelStore.onSuccess === 'function') {
+      panelStore.onSuccess()
+    }
     panelStore.closePanel()
-    // 여기에 부모 새로고침 이벤트를 추가할 수 있습니다.
   })
 }
 </script>
+
+<style scoped>
+.form-container {
+  height: 100%;
+}
+</style>

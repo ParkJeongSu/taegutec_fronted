@@ -5,9 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between">
         <div class="d-flex align-center">
           <v-icon icon="$accountKey" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">메뉴 권한 관리 (Menu Authority)</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.settings.menuAuth.title') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            설정 &gt; 사용자 및 권한 &gt; 메뉴 권한
+            {{ $t('views.settings.menuAuth.breadcrumb') }}
           </v-chip>
         </div>
 
@@ -20,9 +20,7 @@
             class="font-weight-medium"
             :loading="isGroupLoading || isMenuLoading"
             v-on:click="onRefreshAll"
-          >
-            전체 새로고침
-          </v-btn>
+          >{{ $t('common.refresh') }}</v-btn>
         </div>
       </div>
     </v-card>
@@ -46,7 +44,7 @@
             <v-select
               v-model="selectedFactory"
               :items="factoryList"
-              label="소속 공장 선택"
+              :label="$t('views.settings.menuAuth.selectFactory')"
               variant="outlined"
               density="compact"
               hide-details
@@ -64,7 +62,7 @@
 
             <div v-else-if="userGroupList.length === 0" class="empty-group-state text-center py-8 text-medium-emphasis">
               <v-icon icon="$accountGroup" size="36" color="disabled" class="mb-2" />
-              <div>등록된 사용자 그룹이 없습니다.</div>
+              <div>{{ $t('views.settings.menuAuth.noGroupData') }}</div>
             </div>
 
             <div v-else class="group-card-list">
@@ -93,7 +91,7 @@
                     variant="flat"
                     class="font-weight-medium status-badge"
                   >
-                    {{ group.useState === 'ACTIVE' || group.useState === 'USE' ? '사용' : '미사용' }}
+                    {{ group.useState === 'ACTIVE' || group.useState === 'USE' ? $t('common.use') : $t('common.unuse') }}
                   </v-chip>
                 </div>
 
@@ -131,35 +129,27 @@
                   size="x-small"
                   color="primary"
                   v-on:click="expandAllNodes"
-                >
-                  모두 펼치기
-                </v-btn>
+                >{{ $t('views.settings.menuAuth.expandAll') }}</v-btn>
                 <v-btn
                   variant="text"
                   size="x-small"
                   color="secondary"
                   v-on:click="collapseAllNodes"
-                >
-                  모두 접기
-                </v-btn>
+                >{{ $t('views.settings.menuAuth.collapseAll') }}</v-btn>
                 <v-btn
                   variant="tonal"
                   color="secondary"
                   size="small"
                   :disabled="!selectedGroup || menuTreeList.length === 0"
                   v-on:click="onSelectAll"
-                >
-                  전체 선택
-                </v-btn>
+                >{{ $t('views.settings.menuAuth.checkAll') }}</v-btn>
                 <v-btn
                   variant="outlined"
                   color="secondary"
                   size="small"
                   :disabled="!selectedGroup || menuTreeList.length === 0"
                   v-on:click="onDeselectAll"
-                >
-                  전체 해제
-                </v-btn>
+                >{{ $t('views.settings.menuAuth.uncheckAll') }}</v-btn>
                 <v-btn
                   color="primary"
                   variant="elevated"
@@ -169,9 +159,7 @@
                   :loading="isSaving"
                   :disabled="!selectedGroup"
                   v-on:click="handleSaveAuth"
-                >
-                  권한 저장
-                </v-btn>
+                >{{ $t('views.settings.menuAuth.saveAuth') }}</v-btn>
               </div>
             </div>
           </div>
@@ -195,7 +183,7 @@
             <!-- 메뉴 데이터 없음 -->
             <div v-else-if="menuTreeList.length === 0" class="empty-auth-state d-flex flex-column justify-center align-center py-12 text-medium-emphasis">
               <v-icon icon="$formatListBulleted" size="40" color="disabled" class="mb-2" />
-              <div>등록된 메뉴 데이터가 없습니다.</div>
+              <div>{{ $t('views.settings.menuAuth.noMenuData') }}</div>
             </div>
 
             <!-- 계층형 권한 트리 본문 -->
@@ -375,6 +363,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, reactive, onMounted } from 'vue'
 import { useApi } from '@/composables/useApi'
 import { fetchUserGroupsApi } from '@/api/userGroup'
@@ -383,6 +372,7 @@ import { fetchMenuAuthsByGroupApi, saveBatchMenuAuthApi } from '@/api/menuAuth'
 import { resolveMenuIcon } from '@/utils/menuIconUtils'
 
 const factoryList = ['INSERT', 'POWDER', 'COMMON']
+const { t } = useI18n()
 const selectedFactory = ref('INSERT')
 
 // 사용자 그룹 및 선택 상태
@@ -799,7 +789,7 @@ async function handleSaveAuth() {
     console.error('Save menu auth failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '메뉴 권한 저장 중 오류가 발생했습니다.'
+      t('views.settings.menuAuth.saveFail')
     alert(errorMsg)
   }
 }

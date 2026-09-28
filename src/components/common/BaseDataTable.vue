@@ -5,7 +5,7 @@
     v-model:items-per-page="internalItemsPerPage"
     :headers="headers"
     :items="items"
-    :items-length="totalItems"
+    :items-length="computedTotalItems"
     :loading="loading"
     :density="density"
     :hover="hover"
@@ -30,14 +30,14 @@
     <!-- 데이터가 없을 때 기본 표시 -->
     <template v-if="!$slots['no-data']" #no-data>
       <v-alert type="warning" variant="tonal" class="ma-4">
-        조회된 데이터가 없습니다.
+        {{ $t('common.noData') }}
       </v-alert>
     </template>
   </v-data-table-server>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 const props = defineProps({
   headers: {
@@ -51,7 +51,7 @@ const props = defineProps({
     },
   },
   totalItems: {
-    type: Number,
+    type: [Number, String],
     default: 0,
   },
   loading: {
@@ -95,6 +95,10 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:options', 'update:modelValue', 'update:itemsPerPage', 'click:row', 'dblclick:row'])
+
+const computedTotalItems = computed(function () {
+  return Number(props.totalItems || 0)
+})
 
 const internalItemsPerPage = ref(props.itemsPerPage)
 const selectedItems = ref(props.modelValue || [])

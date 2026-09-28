@@ -11,14 +11,14 @@
           <div>
             <div class="d-flex align-center">
               <span class="text-h6 font-weight-bold text-high-emphasis mr-3">
-                패스워드 정책 관리 (Password Policy)
+                {{ $t('views.settings.passwordPolicy.title') }}
               </span>
               <v-chip size="small" color="primary" variant="tonal" class="font-weight-medium">
-                설정 &gt; 보안 관리 &gt; 패스워드 정책
+                {{ $t('views.settings.passwordPolicy.breadcrumb') }}
               </v-chip>
             </div>
             <div class="text-caption text-medium-emphasis mt-1">
-              공장별 10대 패스워드 보안 정책을 설정하고 사용자 계정의 비밀번호 복잡도 및 수명주기를 관리합니다.
+              {{ $t('views.settings.passwordPolicy.subtitle') }}
             </div>
           </div>
         </div>
@@ -30,7 +30,7 @@
             <v-select
               v-model="selectedFactory"
               :items="factoryList"
-              label="대상 공장 (Factory)"
+              :label="$t('views.settings.passwordPolicy.targetFactory')"
               variant="outlined"
               density="compact"
               hide-details
@@ -48,9 +48,7 @@
               prepend-icon="$check"
               class="mr-2 font-weight-medium"
               v-on:click="toggleAllPolicies('Y')"
-            >
-              전체 활성화
-            </v-btn>
+            >{{ $t('views.settings.passwordPolicy.enableAll') }}</v-btn>
 
             <v-btn
               variant="outlined"
@@ -59,9 +57,7 @@
               prepend-icon="$close"
               class="mr-2 font-weight-medium"
               v-on:click="toggleAllPolicies('N')"
-            >
-              전체 비활성화
-            </v-btn>
+            >{{ $t('views.settings.passwordPolicy.disableAll') }}</v-btn>
 
             <v-btn
               variant="outlined"
@@ -71,9 +67,7 @@
               class="mr-2 font-weight-medium"
               :disabled="isPolicyLoading || isSaving"
               v-on:click="loadPolicies"
-            >
-              새로고침
-            </v-btn>
+            >{{ $t('common.refresh') }}</v-btn>
 
             <v-btn
               color="primary"
@@ -84,9 +78,7 @@
               :loading="isSaving"
               :disabled="isPolicyLoading"
               v-on:click="handleSave"
-            >
-              정책 저장
-            </v-btn>
+            >{{ $t('views.settings.passwordPolicy.savePolicies') }}</v-btn>
           </div>
         </div>
       </div>
@@ -285,6 +277,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useApi } from '@/composables/useApi'
 import {
   fetchPasswordPoliciesApi,
@@ -294,6 +287,7 @@ import {
 
 // 공장 목록 및 선택 상태
 const factoryList = ['INSERT', 'POWDER', 'COMMON']
+const { t } = useI18n()
 const selectedFactory = ref('INSERT')
 
 // 10대 정책 고정 메타데이터 정의

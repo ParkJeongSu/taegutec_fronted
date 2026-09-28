@@ -97,6 +97,18 @@ export function resolveMenuIcon(iconName, isFolder, isExpanded) {
     case 'mdi-package-variant':
     case 'packageVariant':
       return '$packageVariant'
+    case 'mdi-map-marker-radius':
+    case 'mapMarkerRadius':
+      return '$mapMarkerRadius'
+    case 'mdi-car-speed-limiter':
+    case 'carSpeedLimiter':
+      return '$carSpeedLimiter'
+    case 'mdi-transit-connection-variant':
+    case 'transitConnectionVariant':
+      return '$transitConnectionVariant'
+    case 'mdi-circle-small':
+    case 'circleSmall':
+      return '$circleSmall'
     default:
       // 매핑되지 않은 임의의 mdi 클래스는 SVG path 에러 방지를 위해 기본 아이콘으로 fallback
       if (isFolder) {

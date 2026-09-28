@@ -250,7 +250,7 @@
       <!-- 모달 하단 액션 버튼 -->
       <v-card-actions class="pa-3 justify-end">
         <v-btn variant="outlined" size="small" class="font-weight-medium" v-on:click="closeModal">
-          닫기
+          {{ $t('common.close') }}
         </v-btn>
       </v-card-actions>
     </v-card>

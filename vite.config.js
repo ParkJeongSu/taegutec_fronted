@@ -47,6 +47,12 @@ export default defineConfig(function (configEnv) {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
+    optimizeDeps: {
+      // [핵심] Vuetify를 Vite의 자동 번들 최적화 대상에서 완전히 제외합니다.
+      // 이렇게 하면 런타임에 504 (Outdated Optimize Dep)가 발생하지 않습니다.
+      exclude: ['vuetify'],
+      include: ['pinia', 'vue-i18n', 'vue-router', 'axios', 'sockjs-client', '@stomp/stompjs'],
+    },
     server: {
       proxy: {
         // REST API

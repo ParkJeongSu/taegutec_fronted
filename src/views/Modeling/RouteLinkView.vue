@@ -5,9 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$transitTransfer" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">라우트 링크(Link) 설정</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.modeling.routeLink.title') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            모델링 &gt; 경로 설정 &gt; 라우트 링크
+            {{ $t('views.modeling.routeLink.breadcrumb') }}
           </v-chip>
         </div>
 
@@ -20,7 +20,7 @@
             class="font-weight-bold mr-2"
             v-on:click="onAddLink"
           >
-            신규 등록
+            {{ $t('common.create') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -31,7 +31,7 @@
             :loading="loading"
             v-on:click="handleSearch"
           >
-            새로고침
+            {{ $t('common.refresh') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -41,7 +41,7 @@
             class="font-weight-medium"
             v-on:click="handleExport"
           >
-            엑셀 다운로드
+            {{ $t('common.export') }}
           </v-btn>
         </div>
       </div>
@@ -56,7 +56,7 @@
             <v-select
               v-model="searchParams.factoryName"
               :items="factoryFilterOptions"
-              label="소속 공장"
+              :label="$t('table.factoryName')"
               variant="outlined"
               density="compact"
               hide-details
@@ -122,7 +122,7 @@
             <v-select
               v-model="searchParams.useState"
               :items="useStateFilterOptions"
-              label="사용 여부"
+              :label="$t('table.useYn')"
               variant="outlined"
               density="compact"
               hide-details
@@ -138,7 +138,7 @@
               class="mr-2 font-weight-medium"
               v-on:click="handleSearch"
             >
-              검색
+              {{ $t('common.search') }}
             </v-btn>
             <v-btn
               variant="outlined"
@@ -146,7 +146,7 @@
               class="font-weight-medium"
               v-on:click="handleReset"
             >
-              초기화
+              {{ $t('common.reset') }}
             </v-btn>
           </v-col>
         </v-row>
@@ -243,6 +243,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import RouteLinkViewForm from './components/RouteLinkViewForm.vue'
@@ -254,6 +255,8 @@ import { formatDateTime } from '@/utils/dateUtils'
 const panelStore = usePanelStore()
 
 // 검색 파라미터 상태
+const { t } = useI18n()
+
 const searchParams = reactive({
   factoryName: '전체',
   routeLinkId: '',
@@ -269,19 +272,19 @@ const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
 
 // 테이블 컬럼 정의
 const headers = [
-  { title: '소속 공장', key: 'factoryName', align: 'center', width: '100px' },
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
   { title: '링크 ID', key: 'routeLinkId', align: 'center', width: '100px', sortable: true },
   { title: '링크 명칭', key: 'linkName', align: 'start', width: '150px' },
-  { title: '시작 노드', key: 'fromNode', align: 'start', width: '120px' },
-  { title: '도착 노드', key: 'toNode', align: 'start', width: '120px' },
+  { title: t('table.fromNode'), key: 'fromNode', align: 'start', width: '120px' },
+  { title: t('table.toNode'), key: 'toNode', align: 'start', width: '120px' },
   { title: '거리 (m)', key: 'distance', align: 'end', width: '110px' },
   { title: '제한 속도 (m/s)', key: 'speedLimit', align: 'end', width: '120px' },
   { title: '방향성', key: 'direction', align: 'center', width: '120px' },
   { title: '링크 타입', key: 'linkType', align: 'center', width: '110px' },
-  { title: '사용 여부', key: 'useState', align: 'center', width: '100px' },
-  { title: '수정자', key: 'eventUser', align: 'center', width: '100px' },
-  { title: '수정일시', key: 'eventTime', align: 'center', width: '160px' },
-  { title: '비고', key: 'eventComment', align: 'start', width: '150px' },
+  { title: t('table.useState'), key: 'useState', align: 'center', width: '100px' },
+  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '100px' },
+  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
+  { title: t('table.eventComment'), key: 'eventComment', align: 'start', width: '150px' },
 ]
 
 // 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
@@ -368,10 +371,10 @@ function getUseStateColor(state) {
 
 function getUseStateText(state) {
   if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return '사용'
+    return t('common.use')
   }
   if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return '미사용'
+    return t('common.unuse')
   }
   return state || '-'
 }
@@ -407,7 +410,7 @@ function onAddLink() {
   panelStore.openPanel(markRaw(RouteLinkViewForm), {
     mode: 'CREATE',
     data: null,
-    title: '신규 라우트 링크 등록',
+    title: t('views.modeling.routeLink.createTitle'),
     onSuccess: function () {
       loadData(getSanitizedParams())
     },
@@ -420,7 +423,7 @@ function onRowClick(event, row) {
   panelStore.openPanel(markRaw(RouteLinkViewForm), {
     mode: 'UPDATE',
     data: itemData,
-    title: '라우트 링크 정보 수정',
+    title: t('views.modeling.routeLink.editTitle'),
     onSuccess: function () {
       loadData(getSanitizedParams())
     },
@@ -430,7 +433,7 @@ function onRowClick(event, row) {
 function handleExport() {
   const list = displayItems.value
   if (!list || list.length === 0) {
-    alert('내보낼 라우트 링크 데이터가 없습니다.')
+    alert(t('views.modeling.routeLink.exportAlert'))
     return
   }
 

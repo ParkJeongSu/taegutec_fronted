@@ -6,10 +6,10 @@
         <div class="d-flex align-center">
           <v-icon icon="$robotIndustrial" size="24" color="primary" class="mr-2" />
           <span class="text-h6 font-weight-bold text-high-emphasis">
-            창고 7 &gt; WorkStation 371 모니터링
+            {{ $t('views.dashboard.workstationTitle', { wh: warehouseId, ws: wsNo }) }}
           </span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            대시보드 &gt; 운영 모니터링 &gt; 창고7 &gt; workstation371
+            {{ $t('views.dashboard.workstationBreadcrumb', { wh: warehouseId, ws: wsNo }) }}
           </v-chip>
           <v-chip
             v-if="selectedPosition"
@@ -18,7 +18,7 @@
             variant="flat"
             class="ml-2 font-weight-bold"
           >
-            선택 포지션: {{ selectedPosition }}
+            {{ $t('views.dashboard.selectedPosition', { pos: selectedPosition }) }}
           </v-chip>
         </div>
 
@@ -45,11 +45,11 @@
             <div class="d-flex align-center">
               <v-icon icon="$viewDashboard" size="20" color="primary" class="mr-2" />
               <span class="text-subtitle-1 font-weight-bold">
-                WorkStation 371 도면 및 크레인 위치
+                {{ $t('views.dashboard.drawingAndCrane', { ws: wsNo }) }}
               </span>
             </div>
             <div class="text-caption text-medium-emphasis">
-              크레인 좌표: (X: {{ cranePos.x }}, Y: {{ cranePos.y }})
+              {{ $t('views.dashboard.craneCoord', { x: cranePos.x, y: cranePos.y }) }}
             </div>
           </div>
 
@@ -74,11 +74,11 @@
             <v-tabs v-model="activeTab" color="primary" density="compact" class="order-tabs">
               <v-tab value="inbound" class="font-weight-bold">
                 <v-icon icon="$trayArrowDown" size="18" class="mr-1" />
-                입고 오더 목록 ({{ inboundOrders.length }})
+                {{ $t('views.dashboard.inboundOrderList', { count: inboundOrders.length }) }}
               </v-tab>
               <v-tab value="outbound" class="font-weight-bold">
                 <v-icon icon="$trayArrowUp" size="18" class="mr-1" />
-                출고 오더 목록 ({{ outboundOrders.length }})
+                {{ $t('views.dashboard.outboundOrderList', { count: outboundOrders.length }) }}
               </v-tab>
             </v-tabs>
 
@@ -120,7 +120,7 @@
               <template #no-data>
                 <div class="text-center py-6 text-medium-emphasis">
                   <v-icon icon="$table" size="32" color="disabled" class="mb-1" />
-                  <div>입고 오더 내역이 없습니다.</div>
+                  <div>{{ $t('views.dashboard.noInboundOrder') }}</div>
                 </div>
               </template>
             </BaseDataTable>
@@ -149,7 +149,7 @@
               <template #no-data>
                 <div class="text-center py-6 text-medium-emphasis">
                   <v-icon icon="$table" size="32" color="disabled" class="mb-1" />
-                  <div>출고 오더 내역이 없습니다.</div>
+                  <div>{{ $t('views.dashboard.noOutboundOrder') }}</div>
                 </div>
               </template>
             </BaseDataTable>
@@ -161,13 +161,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import SvgDrawingViewer from '@/components/widgets/SvgDrawingViewer.vue'
 import { useStompSocket } from '@/composables/useStompSocket'
 import { fetchRecentTransportOrdersApi } from '@/api/transportOrder'
 
 // script setup 영역
+const { t } = useI18n()
 const baseUrl = import.meta.env.BASE_URL // '/wcs-web/' (로컬 개발 서버에선 '/')
 const warehouseId = '7'
 const wsNo = '371'
@@ -200,7 +202,7 @@ function handleConveyorStatus(payload) {
   if (!payload) {
     return
   }
-  console.log('[WorkStation' + wsNo + '] 컨베이어 상태 수신:', payload)
+  console.log('[WorkStation' + wsNo + '] Conveyor status received:', payload)
 }
 
 // 5. 선택된 트레이 포지션 ID
@@ -211,13 +213,15 @@ const activeTab = ref('inbound')
 const isLoading = ref(false)
 
 // 7. 오더 테이블 컬럼 정의
-const orderHeaders = [
-  { title: '오더번호', key: 'orderNo', align: 'start' },
-  { title: '트레이 ID', key: 'trayId', align: 'start' },
-  { title: '자재코드', key: 'matCode', align: 'start' },
-  { title: '상태', key: 'status', align: 'center' },
-  { title: '발생시간', key: 'timestamp', align: 'center' },
-]
+const orderHeaders = computed(function () {
+  return [
+    { title: t('table.orderNo'), key: 'orderNo', align: 'start' },
+    { title: t('table.trayId'), key: 'trayId', align: 'start' },
+    { title: t('table.matCode'), key: 'matCode', align: 'start' },
+    { title: t('table.status'), key: 'status', align: 'center' },
+    { title: t('table.occurredTime'), key: 'timestamp', align: 'center' },
+  ]
+})
 
 // 8. 오더 목록 반응형 상태 (초기 빈 배열) 및 폴링 타이머
 const inboundOrders = ref([])
@@ -255,7 +259,7 @@ async function fetchInboundOrders() {
     }
     inboundOrders.value = list
   } catch (error) {
-    console.error('[WorkStation' + wsNo + '] 입고 오더 조회 실패:', error)
+    console.error('[WorkStation' + wsNo + '] Inbound order fetch error:', error)
     inboundOrders.value = []
   }
 }
@@ -276,7 +280,7 @@ async function fetchOutboundOrders() {
     }
     outboundOrders.value = list
   } catch (error) {
-    console.error('[WorkStation' + wsNo + '] 출고 오더 조회 실패:', error)
+    console.error('[WorkStation' + wsNo + '] Outbound order fetch error:', error)
     outboundOrders.value = []
   }
 }
@@ -311,7 +315,7 @@ function getStatusColor(status) {
 // 14. 트레이 포지션 클릭 핸들러 (이벤트 위임 수신)
 function handlePositionClick(posId) {
   selectedPosition.value = posId
-  console.log('[WorkStation' + wsNo + '] 트레이 포지션 클릭:', posId)
+  console.log('[WorkStation' + wsNo + '] Tray position clicked:', posId)
 }
 
 // 라이프사이클: 웹소켓 토픽 구독, 초기 오더 조회 및 30초 자동 폴링 타이머 설정

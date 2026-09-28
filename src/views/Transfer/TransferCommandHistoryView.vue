@@ -5,9 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$history" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">반송 명령 이력 조회</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.transfer.commandHistory.title') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            반송 &gt; 반송 이력 &gt; 반송 명령 이력
+            {{ $t('views.transfer.commandHistory.breadcrumb') }}
           </v-chip>
         </div>
 
@@ -21,7 +21,7 @@
             :loading="loading"
             v-on:click="handleSearch"
           >
-            새로고침
+            {{ $t('common.refresh') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -31,7 +31,7 @@
             class="font-weight-medium"
             v-on:click="handleExport"
           >
-            엑셀 다운로드
+            {{ $t('common.export') }}
           </v-btn>
         </div>
       </div>
@@ -45,7 +45,7 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.startDate"
-              label="조회 시작일"
+              :label="$t('common.startDate')"
               type="date"
               variant="outlined"
               density="compact"
@@ -57,7 +57,7 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.endDate"
-              label="조회 종료일"
+              :label="$t('common.endDate')"
               type="date"
               variant="outlined"
               density="compact"
@@ -69,8 +69,8 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.transferCommandName"
-              label="반송 명령 ID"
-              placeholder="예: CMD-001"
+              :label="$t('views.transfer.commandHistory.commandId')"
+              :placeholder="$t('views.transfer.commandHistory.placeholderCmdId')"
               variant="outlined"
               density="compact"
               hide-details
@@ -83,8 +83,8 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.carrierName"
-              label="캐리어 ID"
-              placeholder="예: RGV-01"
+              :label="$t('views.transfer.commandHistory.carrierId')"
+              :placeholder="$t('views.transfer.commandHistory.placeholderCarrierId')"
               variant="outlined"
               density="compact"
               hide-details
@@ -98,7 +98,7 @@
             <v-select
               v-model="searchParams.commandStatus"
               :items="commandStatusFilterOptions"
-              label="명령 상태"
+              :label="$t('views.transfer.commandHistory.commandStatus')"
               variant="outlined"
               density="compact"
               hide-details
@@ -110,7 +110,7 @@
             <v-select
               v-model="searchParams.orderType"
               :items="orderTypeFilterOptions"
-              label="오더 유형"
+              :label="$t('views.transfer.commandHistory.orderType')"
               variant="outlined"
               density="compact"
               hide-details
@@ -121,8 +121,8 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.currentEquipmentName"
-              label="현재 설비명"
-              placeholder="예: CV-01, STK-01"
+              :label="$t('views.transfer.commandHistory.currentEquipment')"
+              :placeholder="$t('views.transfer.commandHistory.placeholderEquipment')"
               variant="outlined"
               density="compact"
               hide-details
@@ -135,8 +135,8 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.eventUser"
-              label="처리자(User)"
-              placeholder="예: SYSTEM, ADMIN"
+              :label="$t('views.transfer.commandHistory.operator')"
+              :placeholder="$t('views.transfer.commandHistory.placeholderOperator')"
               variant="outlined"
               density="compact"
               hide-details
@@ -154,7 +154,7 @@
               class="mr-2 font-weight-medium"
               v-on:click="handleSearch"
             >
-              검색
+              {{ $t('common.search') }}
             </v-btn>
             <v-btn
               variant="outlined"
@@ -162,7 +162,7 @@
               class="font-weight-medium"
               v-on:click="handleReset"
             >
-              초기화
+              {{ $t('common.reset') }}
             </v-btn>
           </v-col>
         </v-row>
@@ -271,7 +271,7 @@
         <template #no-data>
           <div class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>조회된 반송 명령 이력 데이터가 없습니다.</div>
+            <div>{{ $t('views.transfer.commandHistory.noData') }}</div>
           </div>
         </template>
       </BaseDataTable>
@@ -284,7 +284,7 @@
           <div class="d-flex align-center justify-space-between">
             <div class="d-flex align-center">
               <v-icon icon="$history" size="20" color="primary" class="mr-2" />
-              <span class="text-subtitle-1 font-weight-bold text-high-emphasis">반송 명령 이력 상세</span>
+              <span class="text-subtitle-1 font-weight-bold text-high-emphasis">{{ $t('views.transfer.commandHistory.detailTitle') }}</span>
             </div>
             <v-btn
               icon="$close"
@@ -301,16 +301,16 @@
         <v-card-text class="pa-4">
           <v-row density="compact">
             <v-col cols="12" sm="6">
-              <div class="detail-label">이력 시간 Key</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.timeKey') }}</div>
               <div class="detail-value">{{ selectedDetailItem.eventTimeKey || '-' }}</div>
             </v-col>
             <v-col cols="12" sm="6">
-              <div class="detail-label">이벤트 일시</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.eventTime') }}</div>
               <div class="detail-value font-weight-medium">{{ formatDateTime(selectedDetailItem.eventTime) }}</div>
             </v-col>
 
             <v-col cols="12" sm="6">
-              <div class="detail-label">이벤트 명</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.eventName') }}</div>
               <div class="detail-value">
                 <v-chip size="x-small" variant="tonal" color="indigo" class="font-weight-bold">
                   {{ selectedDetailItem.eventName || '-' }}
@@ -318,21 +318,21 @@
               </div>
             </v-col>
             <v-col cols="12" sm="6">
-              <div class="detail-label">처리자 (User)</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.eventUser') }}</div>
               <div class="detail-value">{{ selectedDetailItem.eventUser || '-' }}</div>
             </v-col>
 
             <v-col cols="12" sm="6">
-              <div class="detail-label">반송 명령 ID</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.commandId') }}</div>
               <div class="detail-value font-weight-bold text-primary">{{ selectedDetailItem.transferCommandName }}</div>
             </v-col>
             <v-col cols="12" sm="6">
-              <div class="detail-label">캐리어 ID</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.carrierId') }}</div>
               <div class="detail-value font-weight-medium">{{ selectedDetailItem.carrierName || '-' }}</div>
             </v-col>
 
             <v-col cols="12" sm="6">
-              <div class="detail-label">명령 상태</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.commandStatus') }}</div>
               <div class="detail-value">
                 <v-chip
                   :color="getCommandStatusColor(selectedDetailItem.commandStatus)"
@@ -345,52 +345,52 @@
               </div>
             </v-col>
             <v-col cols="12" sm="6">
-              <div class="detail-label">오더 유형</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.orderType') }}</div>
               <div class="detail-value">{{ selectedDetailItem.orderType || '-' }}</div>
             </v-col>
 
             <v-col cols="12" sm="6">
-              <div class="detail-label">출발지 (Source)</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.source') }}</div>
               <div class="detail-value">{{ selectedDetailItem.source || '-' }}</div>
             </v-col>
             <v-col cols="12" sm="6">
-              <div class="detail-label">도착지 (Target)</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.target') }}</div>
               <div class="detail-value">{{ selectedDetailItem.target || '-' }}</div>
             </v-col>
 
             <v-col cols="12" sm="6">
-              <div class="detail-label">현재 설비</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.currentEq') }}</div>
               <div class="detail-value">{{ selectedDetailItem.currentEquipmentName || '-' }}</div>
             </v-col>
             <v-col cols="12" sm="6">
-              <div class="detail-label">도착 설비</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.targetEq') }}</div>
               <div class="detail-value">{{ selectedDetailItem.targetEquipmentName || '-' }}</div>
             </v-col>
 
             <v-col cols="12" sm="6">
-              <div class="detail-label">서브 명령 번호</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.subJobNo') }}</div>
               <div class="detail-value">{{ selectedDetailItem.subCommandJobNo != null ? selectedDetailItem.subCommandJobNo : '-' }}</div>
             </v-col>
             <v-col cols="12" sm="6">
-              <div class="detail-label">서브 명령 상태</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.subStatus') }}</div>
               <div class="detail-value">{{ selectedDetailItem.subCommandStatus || '-' }}</div>
             </v-col>
 
             <v-col cols="12" sm="6">
-              <div class="detail-label">작업 시작 일시</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.jobStart') }}</div>
               <div class="detail-value">{{ formatDateTime(selectedDetailItem.jobStartTime) }}</div>
             </v-col>
             <v-col cols="12" sm="6">
-              <div class="detail-label">작업 완료 일시</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.jobEnd') }}</div>
               <div class="detail-value">{{ formatDateTime(selectedDetailItem.jobCompletedTime) }}</div>
             </v-col>
 
             <v-col cols="12" sm="6">
-              <div class="detail-label">생성 일시</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.createTime') }}</div>
               <div class="detail-value">{{ formatDateTime(selectedDetailItem.createTime) }}</div>
             </v-col>
             <v-col cols="12" sm="6">
-              <div class="detail-label">이벤트 코멘트</div>
+              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.comment') }}</div>
               <div class="detail-value">{{ selectedDetailItem.eventComment || '-' }}</div>
             </v-col>
           </v-row>
@@ -399,7 +399,7 @@
         <v-divider></v-divider>
 
         <v-card-actions class="pa-3 justify-end">
-          <v-btn variant="outlined" size="small" v-on:click="isDetailDialogOpen = false">닫기</v-btn>
+          <v-btn variant="outlined" size="small" v-on:click="isDetailDialogOpen = false">{{ $t('common.close') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -407,6 +407,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import { useDataTable } from '@/composables/useDataTable'
@@ -414,6 +415,8 @@ import { fetchTransferCommandHistoriesApi } from '@/api/wcsTransferCommand'
 import { formatDateTime } from '@/utils/dateUtils'
 
 // 검색 파라미터 상태
+const { t } = useI18n()
+
 const searchParams = reactive({
   startDate: '',
   endDate: '',
@@ -448,24 +451,24 @@ const orderTypeFilterOptions = [
 
 // 테이블 컬럼 정의
 const headers = [
-  { title: '이력 Key', key: 'eventTimeKey', align: 'start', width: '160px', sortable: true },
-  { title: '이벤트 일시', key: 'eventTime', align: 'center', width: '160px', sortable: true },
-  { title: '이벤트', key: 'eventName', align: 'center', width: '130px' },
-  { title: '반송 명령 ID', key: 'transferCommandName', align: 'start', width: '150px' },
-  { title: '캐리어 ID', key: 'carrierName', align: 'start', width: '110px' },
-  { title: '명령 상태', key: 'commandStatus', align: 'center', width: '110px' },
-  { title: '오더 유형', key: 'orderType', align: 'center', width: '110px' },
-  { title: '현재 설비', key: 'currentEquipmentName', align: 'start', width: '110px' },
-  { title: '출발지', key: 'source', align: 'start', width: '100px' },
-  { title: '도착지', key: 'target', align: 'start', width: '100px' },
-  { title: '도착 설비', key: 'targetEquipmentName', align: 'start', width: '110px' },
-  { title: '서브 No', key: 'subCommandJobNo', align: 'center', width: '90px' },
-  { title: '서브 상태', key: 'subCommandStatus', align: 'center', width: '100px' },
-  { title: '작업 시작', key: 'jobStartTime', align: 'center', width: '160px' },
-  { title: '작업 완료', key: 'jobCompletedTime', align: 'center', width: '160px' },
-  { title: '생성 일시', key: 'createTime', align: 'center', width: '160px' },
-  { title: '처리자', key: 'eventUser', align: 'center', width: '90px' },
-  { title: '코멘트', key: 'eventComment', align: 'start', width: '150px' },
+  { title: t('table.eventTimeKey'), key: 'eventTimeKey', align: 'start', width: '160px', sortable: true },
+  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px', sortable: true },
+  { title: t('table.eventName'), key: 'eventName', align: 'center', width: '130px' },
+  { title: t('table.transferCommandName'), key: 'transferCommandName', align: 'start', width: '150px' },
+  { title: t('table.carrierName'), key: 'carrierName', align: 'start', width: '110px' },
+  { title: t('common.commandStatus'), key: 'commandStatus', align: 'center', width: '110px' },
+  { title: t('table.orderNo'), key: 'orderType', align: 'center', width: '110px' },
+  { title: t('table.currentEquipmentName'), key: 'currentEquipmentName', align: 'start', width: '110px' },
+  { title: t('table.source'), key: 'source', align: 'start', width: '100px' },
+  { title: t('table.target'), key: 'target', align: 'start', width: '100px' },
+  { title: t('table.targetEquipmentName'), key: 'targetEquipmentName', align: 'start', width: '110px' },
+  { title: t('table.subCommandJobNo'), key: 'subCommandJobNo', align: 'center', width: '90px' },
+  { title: t('table.subCommandStatus'), key: 'subCommandStatus', align: 'center', width: '100px' },
+  { title: t('table.jobStartTime'), key: 'jobStartTime', align: 'center', width: '160px' },
+  { title: t('table.jobCompletedTime'), key: 'jobCompletedTime', align: 'center', width: '160px' },
+  { title: t('table.createTime'), key: 'createTime', align: 'center', width: '160px' },
+  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '90px' },
+  { title: t('table.eventComment'), key: 'eventComment', align: 'start', width: '150px' },
 ]
 
 // 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
@@ -593,14 +596,14 @@ function onRowClick(event, row) {
 function handleExport() {
   const list = displayItems.value
   if (!list || list.length === 0) {
-    alert('내보낼 반송 명령 이력 데이터가 없습니다.')
+    alert(t('views.transfer.commandHistory.exportAlert'))
     return
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    '이력Key,이벤트일시,이벤트명,반송명령ID,캐리어ID,명령상태,오더유형,현재설비,출발지,도착지,도착설비,서브No,서브상태,작업시작,작업완료,생성일시,처리자,코멘트\n'
+    `${t('table.eventTimeKey')},${t('table.eventTime')},${t('table.eventName')},${t('table.transferCommandName')},${t('table.carrierId')},${t('common.commandStatus')},${t('table.orderNo')},${t('table.currentEquipmentName')},${t('table.source')},${t('table.target')},${t('table.targetEquipmentName')},${t('table.subCommandJobNo')},${t('table.subCommandStatus')},${t('table.jobStartTime')},${t('table.jobCompletedTime')},${t('table.createTime')},${t('table.eventUser')},${t('table.eventComment')}\n`
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]

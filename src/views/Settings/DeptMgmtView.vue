@@ -5,9 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$accountMultiple" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">부서 관리 (Department)</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.settings.deptMgmt.title') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            설정 &gt; 사용자 및 권한 &gt; 부서
+            {{ $t('views.settings.deptMgmt.breadcrumb') }}
           </v-chip>
         </div>
 
@@ -19,9 +19,7 @@
             prepend-icon="$plus"
             class="font-weight-bold mr-2"
             v-on:click="onAddDepartment"
-          >
-            신규 등록
-          </v-btn>
+          >{{ $t('common.create') }}</v-btn>
           <v-btn
             color="secondary"
             variant="tonal"
@@ -30,9 +28,7 @@
             class="font-weight-medium"
             :loading="isLoading"
             v-on:click="handleSearch"
-          >
-            새로고침
-          </v-btn>
+          >{{ $t('common.refresh') }}</v-btn>
         </div>
       </div>
 
@@ -46,7 +42,7 @@
             <v-select
               v-model="searchParams.factoryName"
               :items="factoryOptions"
-              label="소속 공장"
+              :label="$t('table.factoryName')"
               variant="outlined"
               density="compact"
               hide-details
@@ -57,8 +53,8 @@
           <v-col cols="12" sm="4" md="3">
             <v-text-field
               v-model="searchParams.departmentName"
-              label="부서명"
-              placeholder="부서명 입력"
+              :label="$t('views.settings.deptMgmt.deptName')"
+              :placeholder="$t('views.settings.deptMgmt.placeholderDept')"
               variant="outlined"
               density="compact"
               hide-details
@@ -72,7 +68,7 @@
             <v-select
               v-model="searchParams.useState"
               :items="stateFilterOptions"
-              label="상태"
+              :label="$t('common.status')"
               variant="outlined"
               density="compact"
               hide-details
@@ -87,17 +83,13 @@
               size="small"
               class="mr-2 font-weight-medium"
               v-on:click="handleSearch"
-            >
-              검색
-            </v-btn>
+            >{{ $t('common.search') }}</v-btn>
             <v-btn
               variant="outlined"
               size="small"
               class="font-weight-medium"
               v-on:click="handleReset"
-            >
-              초기화
-            </v-btn>
+            >{{ $t('common.reset') }}</v-btn>
           </v-col>
         </v-row>
       </div>
@@ -129,7 +121,7 @@
         <template #no-data>
           <div class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>등록된 부서 데이터가 없습니다.</div>
+            <div>{{ $t('views.settings.deptMgmt.noData') }}</div>
           </div>
         </template>
       </BaseDataTable>
@@ -138,13 +130,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, markRaw, onMounted } from 'vue'
+import { ref, reactive, computed, markRaw, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import DeptMgmtViewForm from './components/DeptMgmtViewForm.vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useApi } from '@/composables/useApi'
 import { fetchDepartmentsApi } from '@/api/department'
 
+const { t } = useI18n()
 const panelStore = usePanelStore()
 
 // 검색 파라미터 상태
@@ -168,13 +162,13 @@ const deptItems = ref([])
 const totalItems = ref(0)
 
 // 테이블 컬럼 정의 (id는 대리키이므로 그리드에는 미노출)
-const headers = [
-  { title: '소속 공장', key: 'factoryName', align: 'center', width: '120px' },
-  { title: '부서명', key: 'departmentName', align: 'start' },
-  { title: '사용 상태', key: 'useState', align: 'center', width: '120px' },
-  { title: '수정자', key: 'eventUser', align: 'center', width: '120px' },
-  { title: '수정일시', key: 'eventTime', align: 'center', width: '180px' },
-]
+const headers = computed(() => [
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '120px' },
+  { title: t('table.departmentName'), key: 'departmentName', align: 'start' },
+  { title: t('table.useState'), key: 'useState', align: 'center', width: '100px' },
+  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '120px' },
+  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '180px' },
+])
 
 // useApi 컴포저블을 활용한 목록 조회 바인딩
 const { loading: isLoading, execute: executeFetchDepartments } = useApi(fetchDepartmentsApi)
@@ -265,7 +259,7 @@ function onAddDepartment() {
   panelStore.openPanel(markRaw(DeptMgmtViewForm), {
     mode: 'CREATE',
     data: null,
-    title: '신규 부서 등록',
+    title: t('views.settings.deptMgmt.createTitle'),
     onSuccess: fetchDepartments,
   })
 }
@@ -276,7 +270,7 @@ function onRowClick(event, row) {
   panelStore.openPanel(markRaw(DeptMgmtViewForm), {
     mode: 'UPDATE',
     data: itemData,
-    title: '부서 정보 수정',
+    title: t('views.settings.deptMgmt.editTitle'),
     onSuccess: fetchDepartments,
   })
 }

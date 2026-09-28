@@ -5,13 +5,13 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$packageVariant" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">창고 모니터링</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.dashboard.warehouseTitle') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            대시보드 &gt; 운영 모니터링 &gt; 창고 모니터링
+            {{ $t('views.dashboard.warehouseBreadcrumb') }}
           </v-chip>
           <v-chip size="small" color="success" variant="flat" class="ml-2 font-weight-medium">
             <v-icon icon="$radioboxBlank" size="10" class="mr-1 pulse-dot" />
-            30초 자동 갱신 중
+            {{ $t('views.dashboard.autoRefresh30s') }}
           </v-chip>
         </div>
 
@@ -24,7 +24,7 @@
             :loading="loading"
             v-on:click="handleSearch"
           >
-            새로고침
+            {{ $t('common.refresh') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -33,7 +33,7 @@
             prepend-icon="$fileExport"
             v-on:click="handleExport"
           >
-            엑셀 다운로드
+            {{ $t('common.export') }}
           </v-btn>
         </div>
       </div>
@@ -46,8 +46,8 @@
           <v-col cols="12" sm="4" md="3">
             <v-text-field
               v-model="searchParams.stockerName"
-              label="스토커 명"
-              placeholder="스토커 코드 입력"
+              :label="$t('views.dashboard.stockerName')"
+              :placeholder="$t('views.dashboard.placeholderStockerCode')"
               variant="outlined"
               density="compact"
               hide-details
@@ -59,7 +59,7 @@
             <v-select
               v-model="searchParams.stockerStatus"
               :items="statusOptions"
-              label="스토커 상태"
+              :label="$t('views.dashboard.stockerStatus')"
               variant="outlined"
               density="compact"
               hide-details
@@ -73,9 +73,9 @@
               class="mr-2"
               v-on:click="handleSearch"
             >
-              검색
+              {{ $t('common.search') }}
             </v-btn>
-            <v-btn variant="outlined" size="small" v-on:click="handleReset"> 초기화 </v-btn>
+            <v-btn variant="outlined" size="small" v-on:click="handleReset"> {{ $t('common.reset') }} </v-btn>
           </v-col>
         </v-row>
       </div>
@@ -122,7 +122,7 @@
         <template #no-data>
           <div class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>조회된 스토커/창고 데이터가 없습니다.</div>
+            <div>{{ $t('views.dashboard.noStockerData') }}</div>
           </div>
         </template>
       </BaseDataTable>
@@ -132,9 +132,12 @@
 
 <script setup>
 import { reactive, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useI18n } from 'vue-i18n'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import { useDataTable } from '@/composables/useDataTable'
 import { fetchWcsStockersApi } from '@/api/wcsStocker'
+
+const { t } = useI18n()
 
 // 1. 검색 파라미터 상태
 const searchParams = reactive({
@@ -142,19 +145,29 @@ const searchParams = reactive({
   stockerStatus: '전체',
 })
 
-const statusOptions = ['전체', 'RUNNING', 'IDLE', 'ERROR', 'DOWN']
+const statusOptions = computed(function () {
+  return [
+    { title: t('common.all'), value: '전체' },
+    { title: 'RUNNING', value: 'RUNNING' },
+    { title: 'IDLE', value: 'IDLE' },
+    { title: 'ERROR', value: 'ERROR' },
+    { title: 'DOWN', value: 'DOWN' },
+  ]
+})
 
 // 2. 테이블 헤더 정의
-const headers = [
-  { title: '공장', key: 'factoryName', align: 'start', sortable: true },
-  { title: '스토커 코드', key: 'stockerName', align: 'start', sortable: true },
-  { title: '구역명', key: 'areaName', align: 'start', sortable: false },
-  { title: '총 셀 수', key: 'totalShelfCount', align: 'end', sortable: true },
-  { title: '적재 셀 수', key: 'useShelfCount', align: 'end', sortable: true },
-  { title: '빈 셀 수', key: 'emptyShelfCount', align: 'end', sortable: true },
-  { title: '적재율', key: 'occupancyRate', align: 'center', width: '160px', sortable: false },
-  { title: '설비 상태', key: 'stockerStatus', align: 'center', sortable: true },
-]
+const headers = computed(function () {
+  return [
+    { title: t('table.factoryName'), key: 'factoryName', align: 'start', sortable: true },
+    { title: t('table.stockerCode'), key: 'stockerName', align: 'start', sortable: true },
+    { title: t('table.areaName'), key: 'areaName', align: 'start', sortable: false },
+    { title: t('table.totalShelfCount'), key: 'totalShelfCount', align: 'end', sortable: true },
+    { title: t('table.useShelfCount'), key: 'useShelfCount', align: 'end', sortable: true },
+    { title: t('table.emptyShelfCount'), key: 'emptyShelfCount', align: 'end', sortable: true },
+    { title: t('table.occupancyRate'), key: 'occupancyRate', align: 'center', width: '160px', sortable: false },
+    { title: t('table.equipmentStatus'), key: 'stockerStatus', align: 'center', sortable: true },
+  ]
+})
 
 // 3. 페이징 전용 useDataTable 바인딩
 const { items, totalItems, loading, options, loadData, updateOptions } =
@@ -243,7 +256,7 @@ function handleReset() {
 }
 
 function handleExport() {
-  alert('스토커 모니터링 목록을 엑셀로 내보냅니다.')
+  alert(t('views.dashboard.exportStockerAlert'))
 }
 
 // 라이프사이클: 초기 로드 및 30초 폴링 타이머

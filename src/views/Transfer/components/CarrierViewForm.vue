@@ -8,7 +8,7 @@
           <v-select
             v-model="formData.factoryName"
             :items="factoryOptions"
-            label="소속 공장 (FACTORY_NAME)"
+            :label="$t('views.transfer.carrier.formFactory')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
@@ -21,11 +21,11 @@
         <v-col cols="12" sm="6">
           <v-text-field
             v-model="formData.carrierName"
-            label="캐리어 명 (CARRIER_NAME)"
+            :label="$t('views.transfer.carrier.formCarrierName')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            placeholder="예: RGV-01, OHT-01"
+            :placeholder="$t('views.transfer.carrier.placeholderCarrierCode')"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
@@ -36,7 +36,7 @@
           <v-select
             v-model="formData.carrierType"
             :items="carrierTypeOptions"
-            label="캐리어 타입 (CARRIER_TYPE)"
+            :label="$t('views.transfer.carrier.formCarrierType')"
             variant="outlined"
             density="compact"
           ></v-select>
@@ -47,7 +47,7 @@
           <v-select
             v-model="formData.carrierStatus"
             :items="carrierStatusOptions"
-            label="동작 상태 (CARRIER_STATUS)"
+            :label="$t('views.transfer.carrier.formCarrierStatus')"
             variant="outlined"
             density="compact"
           ></v-select>
@@ -57,10 +57,10 @@
         <v-col cols="12" sm="6">
           <v-text-field
             v-model="formData.currentNode"
-            label="현재 위치 노드 (CURRENT_NODE)"
+            :label="$t('table.currentNode')"
             variant="outlined"
             density="compact"
-            placeholder="예: NODE-04"
+            placeholder="NODE-04"
           ></v-text-field>
         </v-col>
 
@@ -68,10 +68,10 @@
         <v-col cols="12" sm="6">
           <v-text-field
             v-model="formData.destNode"
-            label="목적지 노드 (DEST_NODE)"
+            :label="$t('table.destNode')"
             variant="outlined"
             density="compact"
-            placeholder="예: NODE-10"
+            placeholder="NODE-10"
           ></v-text-field>
         </v-col>
 
@@ -80,10 +80,10 @@
           <v-text-field
             v-model.number="formData.battery"
             type="number"
-            label="배터리 잔량 % (BATTERY)"
+            :label="$t('table.battery')"
             variant="outlined"
             density="compact"
-            placeholder="예: 85"
+            placeholder="85"
           ></v-text-field>
         </v-col>
 
@@ -92,7 +92,7 @@
           <v-select
             v-model="formData.useState"
             :items="useStateOptions"
-            label="사용 여부 (USE_STATE)"
+            :label="$t('views.transfer.carrier.formUseState')"
             variant="outlined"
             density="compact"
           ></v-select>
@@ -102,10 +102,10 @@
         <v-col cols="12">
           <v-text-field
             v-model="formData.loadedTrayId"
-            label="적재 트레이 ID (LOADED_TRAY_ID)"
+            :label="$t('table.loadedTrayId')"
             variant="outlined"
             density="compact"
-            placeholder="예: TRAY-31101"
+            placeholder="TRAY-31101"
           ></v-text-field>
         </v-col>
 
@@ -113,11 +113,11 @@
         <v-col cols="12">
           <v-textarea
             v-model="formData.eventComment"
-            label="비고 / 설명 (EVENT_COMMENT)"
+            :label="$t('common.comment')"
             variant="outlined"
             density="compact"
             rows="3"
-            placeholder="비고 또는 특이사항 입력"
+            :placeholder="$t('common.comment')"
           ></v-textarea>
         </v-col>
       </v-row>
@@ -128,7 +128,7 @@
     <!-- 하단 액션 버튼 영역 -->
     <v-card-actions class="pa-4 action-buttons-container">
       <v-btn variant="outlined" color="secondary" v-on:click="onClose">
-        취소
+        {{ $t('common.cancel') }}
       </v-btn>
 
       <v-spacer></v-spacer>
@@ -142,7 +142,7 @@
         class="mr-2"
         v-on:click="onOpenDeleteDialog"
       >
-        삭제
+        {{ $t('common.delete') }}
       </v-btn>
 
       <!-- 저장 / 수정 실행 버튼 -->
@@ -152,20 +152,21 @@
         :loading="isSaving"
         v-on:click="onHandleSave"
       >
-        {{ isCreateMode ? '저장' : '수정' }}
+        {{ isCreateMode ? $t('common.save') : $t('common.edit') }}
       </v-btn>
     </v-card-actions>
 
     <!-- 삭제 확인 모달 -->
     <ConfirmDialog
       v-model="deleteConfirmDialog"
-      :message="'[' + (formData.factoryName + ' / ' + formData.carrierName) + '] 캐리어를 삭제하시겠습니까?'"
+      :message="$t('common.deleteConfirmMsg', { count: 1 })"
       v-on:confirm="onConfirmDelete"
     />
   </div>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useApi } from '@/composables/useApi'
@@ -176,6 +177,7 @@ import {
 } from '@/api/wcsCarrier'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
+const { t } = useI18n()
 const props = defineProps({
   data: {
     type: Object,
@@ -199,8 +201,8 @@ const carrierStatusOptions = [
   'DOWN',
 ]
 const useStateOptions = [
-  { title: '사용 (USE)', value: 'USE' },
-  { title: '미사용 (UNUSE)', value: 'UNUSE' },
+  { title: t('common.useStatusActive'), value: 'USE' },
+  { title: t('common.useStatusInactive'), value: 'UNUSE' },
 ]
 
 // useApi를 통한 API 바인딩
@@ -269,7 +271,7 @@ function validateRequired(value) {
   if (value !== null && value !== undefined && String(value).trim() !== '') {
     return true
   }
-  return '필수 입력 항목입니다.'
+  return t('validation.required')
 }
 
 function onClose() {
@@ -306,11 +308,11 @@ async function onHandleSave() {
 
     if (isCreateMode.value) {
       await executeCreate(payload)
-      alert('신규 캐리어가 등록되었습니다.')
+      alert(t('common.saveSuccess'))
     } else {
       // 복합키(factoryName + carrierName) 기준으로 수정 요청
       await executeUpdate(formData.factoryName, formData.carrierName, payload)
-      alert('캐리어 정보가 수정되었습니다.')
+      alert(t('common.saveSuccess'))
     }
 
     if (typeof panelStore.onSuccess === 'function') {
@@ -321,7 +323,7 @@ async function onHandleSave() {
     console.error('Save carrier failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '캐리어 정보 저장 중 오류가 발생했습니다.'
+      t('common.saveFail')
     alert(errorMsg)
   }
 }
@@ -330,7 +332,7 @@ async function onConfirmDelete() {
   try {
     // 복합키(factoryName + carrierName) 기준으로 삭제 요청
     await executeDelete(formData.factoryName, formData.carrierName)
-    alert('캐리어가 삭제되었습니다.')
+    alert(t('common.deleteSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {
       panelStore.onSuccess()
@@ -340,7 +342,7 @@ async function onConfirmDelete() {
     console.error('Delete carrier failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '캐리어 삭제 처리 중 오류가 발생했습니다.'
+      t('common.deleteFail')
     alert(errorMsg)
   }
 }

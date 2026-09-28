@@ -8,7 +8,7 @@
           <v-select
             v-model="formData.factoryName"
             :items="factoryOptions"
-            label="소속 공장 (FACTORY_NAME)"
+            :label="$t('views.transfer.conveyor.formFactory')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
@@ -21,11 +21,11 @@
         <v-col cols="12" sm="6">
           <v-text-field
             v-model="formData.conveyorGroup"
-            label="컨베이어 그룹 (CONVEYOR_GROUP)"
+            :label="$t('views.transfer.conveyor.formGroup')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            placeholder="예: CV_GRP_01"
+            :placeholder="$t('views.transfer.conveyor.placeholderGroupEx')"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
@@ -35,11 +35,11 @@
         <v-col cols="12">
           <v-text-field
             v-model="formData.conveyorName"
-            label="컨베이어 명 (CONVEYOR_NAME)"
+            :label="$t('views.transfer.conveyor.formName')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            placeholder="예: CV01, MAIN_LINE"
+            :placeholder="$t('views.transfer.conveyor.placeholderNameEx')"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
@@ -50,11 +50,11 @@
           <v-text-field
             v-model.number="formData.conveyorNumber"
             type="number"
-            label="컨베이어 번호 (CONVEYOR_NUMBER)"
+            :label="$t('table.conveyorNo')"
             variant="outlined"
             density="compact"
             :rules="[validateRequiredNumber]"
-            placeholder="예: 1"
+            placeholder="1"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
@@ -65,11 +65,11 @@
           <v-text-field
             v-model.number="formData.localNo"
             type="number"
-            label="로컬 번호 (LOCAL_NO)"
+            :label="$t('table.conveyorNo')"
             variant="outlined"
             density="compact"
             :rules="[validateRequiredNumber]"
-            placeholder="예: 1"
+            placeholder="1"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
@@ -79,10 +79,10 @@
         <v-col cols="12" sm="6">
           <v-text-field
             v-model="formData.fromNode"
-            label="시작 노드 (FROM_NODE)"
+            :label="$t('table.fromNode')"
             variant="outlined"
             density="compact"
-            placeholder="예: NODE-01"
+            placeholder="NODE-01"
           ></v-text-field>
         </v-col>
 
@@ -90,10 +90,10 @@
         <v-col cols="12" sm="6">
           <v-text-field
             v-model="formData.toNode"
-            label="도착 노드 (TO_NODE)"
+            :label="$t('table.toNode')"
             variant="outlined"
             density="compact"
-            placeholder="예: NODE-05"
+            placeholder="NODE-05"
           ></v-text-field>
         </v-col>
 
@@ -102,7 +102,7 @@
           <v-select
             v-model="formData.conveyorStatus"
             :items="conveyorStatusOptions"
-            label="운전 상태 (CONVEYOR_STATUS)"
+            :label="$t('table.status')"
             variant="outlined"
             density="compact"
           ></v-select>
@@ -113,7 +113,7 @@
           <v-select
             v-model="formData.useState"
             :items="useStateOptions"
-            label="사용 여부 (USE_STATE)"
+            :label="$t('views.transfer.conveyor.formUseState')"
             variant="outlined"
             density="compact"
           ></v-select>
@@ -123,10 +123,10 @@
         <v-col cols="12">
           <v-text-field
             v-model="formData.currentCarrier"
-            label="현재 캐리어 ID (CURRENT_CARRIER)"
+            :label="$t('table.carrierId')"
             variant="outlined"
             density="compact"
-            placeholder="예: CARRIER-012"
+            placeholder="CARRIER-012"
           ></v-text-field>
         </v-col>
 
@@ -134,11 +134,11 @@
         <v-col cols="12">
           <v-textarea
             v-model="formData.eventComment"
-            label="비고 / 설명 (EVENT_COMMENT)"
+            :label="$t('common.comment')"
             variant="outlined"
             density="compact"
             rows="3"
-            placeholder="비고 또는 특이사항 입력"
+            :placeholder="$t('common.comment')"
           ></v-textarea>
         </v-col>
       </v-row>
@@ -149,7 +149,7 @@
     <!-- 하단 액션 버튼 영역 -->
     <v-card-actions class="pa-4 action-buttons-container">
       <v-btn variant="outlined" color="secondary" v-on:click="onClose">
-        취소
+        {{ $t('common.cancel') }}
       </v-btn>
 
       <v-spacer></v-spacer>
@@ -163,7 +163,7 @@
         class="mr-2"
         v-on:click="onOpenDeleteDialog"
       >
-        삭제
+        {{ $t('common.delete') }}
       </v-btn>
 
       <!-- 저장 / 수정 실행 버튼 -->
@@ -173,20 +173,21 @@
         :loading="isSaving"
         v-on:click="onHandleSave"
       >
-        {{ isCreateMode ? '저장' : '수정' }}
+        {{ isCreateMode ? $t('common.save') : $t('common.edit') }}
       </v-btn>
     </v-card-actions>
 
     <!-- 삭제 확인 모달 -->
     <ConfirmDialog
       v-model="deleteConfirmDialog"
-      :message="'[' + getConveyorDisplayTitle() + '] 컨베이어를 삭제하시겠습니까?'"
+      :message="$t('common.deleteConfirmMsg', { count: 1 })"
       v-on:confirm="onConfirmDelete"
     />
   </div>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useApi } from '@/composables/useApi'
@@ -197,6 +198,7 @@ import {
 } from '@/api/wcsConveyor'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
+const { t } = useI18n()
 const props = defineProps({
   data: {
     type: Object,
@@ -211,8 +213,8 @@ const deleteConfirmDialog = ref(false)
 const factoryOptions = ['INSERT', 'POWDER', 'COMMON']
 const conveyorStatusOptions = ['RUN', 'STOP', 'ALARM', 'IDLE', 'ERROR']
 const useStateOptions = [
-  { title: '사용 (USE)', value: 'USE' },
-  { title: '미사용 (UNUSE)', value: 'UNUSE' },
+  { title: t('common.useStatusActive'), value: 'USE' },
+  { title: t('common.useStatusInactive'), value: 'UNUSE' },
 ]
 
 // useApi를 통한 API 바인딩
@@ -284,14 +286,14 @@ function validateRequired(value) {
   if (value !== null && value !== undefined && String(value).trim() !== '') {
     return true
   }
-  return '필수 입력 항목입니다.'
+  return t('validation.required')
 }
 
 function validateRequiredNumber(value) {
   if (value !== null && value !== undefined && value !== '' && !isNaN(Number(value))) {
     return true
   }
-  return '올바른 숫자를 입력하세요.'
+  return t('validation.numberOnly')
 }
 
 function getConveyorDisplayTitle() {
@@ -344,7 +346,7 @@ async function onHandleSave() {
 
     if (isCreateMode.value) {
       await executeCreate(payload)
-      alert('신규 컨베이어가 등록되었습니다.')
+      alert(t('common.saveSuccess'))
     } else {
       // 5개 복합키 기준으로 수정 요청
       await executeUpdate(
@@ -355,7 +357,7 @@ async function onHandleSave() {
         formData.localNo,
         payload,
       )
-      alert('컨베이어 정보가 수정되었습니다.')
+      alert(t('common.saveSuccess'))
     }
 
     if (typeof panelStore.onSuccess === 'function') {
@@ -366,7 +368,7 @@ async function onHandleSave() {
     console.error('Save conveyor failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '컨베이어 정보 저장 중 오류가 발생했습니다.'
+      t('common.saveFail')
     alert(errorMsg)
   }
 }
@@ -381,7 +383,7 @@ async function onConfirmDelete() {
       formData.conveyorNumber,
       formData.localNo,
     )
-    alert('컨베이어가 삭제되었습니다.')
+    alert(t('common.deleteSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {
       panelStore.onSuccess()
@@ -391,7 +393,7 @@ async function onConfirmDelete() {
     console.error('Delete conveyor failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '컨베이어 삭제 처리 중 오류가 발생했습니다.'
+      t('common.deleteFail')
     alert(errorMsg)
   }
 }

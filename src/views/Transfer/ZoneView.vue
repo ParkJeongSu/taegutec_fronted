@@ -99,14 +99,14 @@
       <v-col cols="6" sm="3">
         <v-card class="elevation-1 pa-3 stat-card">
           <div class="text-caption text-medium-emphasis">{{ $t('zone.totalCells') }}</div>
-          <div class="text-h6 font-weight-bold text-primary">{{ totalCellCount.toLocaleString() }} 셀</div>
+          <div class="text-h6 font-weight-bold text-primary">{{ totalCellCount.toLocaleString() }} {{ $t('views.transfer.zone.cellUnit') }}</div>
         </v-card>
       </v-col>
       <v-col cols="6" sm="3">
         <v-card class="elevation-1 pa-3 stat-card">
           <div class="text-caption text-medium-emphasis">{{ $t('zone.occupiedCells') }}</div>
           <div class="text-h6 font-weight-bold text-success">
-            {{ occupiedCellCount.toLocaleString() }} 셀
+            {{ occupiedCellCount.toLocaleString() }} {{ $t('views.transfer.zone.cellUnit') }}
             <span class="text-caption font-weight-regular text-medium-emphasis">
               ({{ occupancyRate }}%)
             </span>
@@ -117,7 +117,7 @@
         <v-card class="elevation-1 pa-3 stat-card">
           <div class="text-caption text-medium-emphasis">{{ $t('zone.emptyCells') }}</div>
           <div class="text-h6 font-weight-bold text-grey-darken-1">
-            {{ (totalCellCount - occupiedCellCount).toLocaleString() }} 셀
+            {{ (totalCellCount - occupiedCellCount).toLocaleString() }} {{ $t('views.transfer.zone.cellUnit') }}
           </div>
         </v-card>
       </v-col>
@@ -125,7 +125,7 @@
         <v-card class="elevation-1 pa-3 stat-card">
           <div class="text-caption text-medium-emphasis">{{ $t('zone.modifiedCells') }}</div>
           <div class="text-h6 font-weight-bold" :class="modifiedCount > 0 ? 'text-warning' : 'text-grey'">
-            {{ modifiedCount }} 셀 변경됨
+            {{ $t('views.transfer.zone.modifiedCellsUnit', { count: modifiedCount }) }}
           </div>
         </v-card>
       </v-col>
@@ -302,23 +302,23 @@
             Shelf: {{ hoveredShelf.shelfCode }}
           </div>
           <div class="tooltip-row">
-            <span class="tooltip-label">위치:</span>
-            <span class="tooltip-val font-weight-bold">Row {{ hoveredShelf.row }}열 / Stage {{ hoveredShelf.stage }}단</span>
+            <span class="tooltip-label">{{ $t('views.transfer.zone.posTooltip') }}</span>
+            <span class="tooltip-val font-weight-bold">{{ $t('views.transfer.zone.rowStageTooltip', { row: hoveredShelf.row, stage: hoveredShelf.stage }) }}</span>
           </div>
           <div class="tooltip-row">
-            <span class="tooltip-label">존 (Zone):</span>
+            <span class="tooltip-label">{{ $t('views.transfer.zone.zoneTooltip') }}</span>
             <span class="tooltip-val font-weight-bold" :class="'zone-text-' + (hoveredShelf.zoneName || 'empty').toLowerCase()">
               {{ hoveredShelf.zoneName || 'EMPTY' }}
             </span>
           </div>
           <div class="tooltip-row">
-            <span class="tooltip-label">캐리어 (Tray):</span>
+            <span class="tooltip-label">{{ $t('views.transfer.zone.carrierTooltip') }}</span>
             <span class="tooltip-val font-weight-bold text-info">
-              {{ hoveredShelf.carrierId || '(없음)' }}
+              {{ hoveredShelf.carrierId || $t('views.transfer.zone.none') }}
             </span>
           </div>
           <div v-if="hoveredShelf.isModified" class="tooltip-row mt-1 text-warning font-weight-bold">
-            * 변경 대기 상태
+            {{ $t('views.transfer.zone.pendingMod') }}
           </div>
         </div>
       </div>
@@ -333,9 +333,7 @@
     >
       {{ snackbar.message }}
       <template #actions>
-        <v-btn variant="text" size="small" v-on:click="snackbar.show = false">
-          닫기
-        </v-btn>
+        <v-btn variant="text" size="small" v-on:click="snackbar.show = false">{{ $t('common.close') }}</v-btn>
       </template>
     </v-snackbar>
   </v-container>
@@ -651,11 +649,11 @@ async function handleSearch() {
       showMessage(t('zone.cellsLoaded', { count: resData.length }))
     } else {
       generateRealisticMockData()
-      showMessage('서버 응답 데이터가 없어 2,300개 랙 표준 데이터를 로드했습니다.', 'info')
+      showMessage(t('views.transfer.zone.fallbackLoadedInfo'), 'info')
     }
   } catch {
     generateRealisticMockData()
-    showMessage('API 서버 미응답으로 인해 2,300개 테스트 랙 데이터를 로드했습니다.', 'warning')
+    showMessage(t('views.transfer.zone.fallbackLoadedWarn'), 'warning')
   } finally {
     nextTick(function () {
       calculateCanvasLayout()
@@ -761,7 +759,7 @@ function drawCanvas() {
       ctx.font = '10px sans-serif'
     }
 
-    ctx.fillText(String(s) + '단', headerL / 2, centerY)
+    ctx.fillText(String(s) + 'F', headerL / 2, centerY)
   }
 
   // 4. Row 헤더 텍스트 렌더링 (X축: 1 ~ 92)
@@ -1033,7 +1031,7 @@ function selectAllCells() {
     list[i].isSelected = true
   }
   drawCanvas()
-  showMessage('전체 ' + len + '개 셀이 선택되었습니다.')
+  showMessage(t('views.transfer.zone.selectedAllMsg', { count: len }))
 }
 
 // 편의 조작 기능: 선택 해제
@@ -1070,14 +1068,14 @@ function selectByZone(zoneKey) {
     }
   }
   drawCanvas()
-  showMessage("Zone '" + zoneKey + "'에 속한 " + count + '개 셀이 선택되었습니다.')
+  showMessage(t('views.transfer.zone.selectedZoneMsg', { zone: zoneKey, count }))
 }
 
 // Zone 일괄 적용
 function applyZoneBatch() {
   const selectedZone = targetZone.value
   if (!selectedZone) {
-    showMessage('적용할 대상 Zone을 선택해주세요.', 'warning')
+    showMessage(t('views.transfer.zone.selectTargetZoneAlert'), 'warning')
     return
   }
 
@@ -1155,7 +1153,7 @@ function saveChanges() {
         }
       }
       drawCanvas()
-      showMessage(modifiedList.length + '개 셀의 Zone 변경 내역이 로컬에 저장되었습니다 (Mock).', 'success')
+      showMessage(t('views.transfer.zone.mockSaveSuccess', { count: modifiedList.length }), 'success')
     })
     .finally(function () {
       isSaving.value = false
@@ -1164,7 +1162,7 @@ function saveChanges() {
 
 // 엑셀/데이터 내보내기
 function handleExport() {
-  alert('현재 ' + currentSearchInfo.value.stocker + ' ' + currentSearchInfo.value.bankLabel + ' 랙 현황(2,300셀)을 엑셀로 내보냅니다.')
+  alert(t('views.transfer.zone.exportZoneAlert', { stocker: currentSearchInfo.value.stocker, bank: currentSearchInfo.value.bankLabel }))
 }
 
 // 창 크기 조절 시 리사이즈 감지

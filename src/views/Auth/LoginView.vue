@@ -48,13 +48,13 @@
         <!-- 사번 입력 필드 -->
         <div class="mb-4">
           <label class="form-label text-caption font-weight-bold text-medium-emphasis mb-1 d-block">
-            사번 (Employee ID)
+            {{ $t('views.auth.employeeIdLabel') }}
           </label>
           <v-text-field
             v-model="employeeId"
             variant="outlined"
             density="comfortable"
-            placeholder="사번을 입력해주세요"
+            :placeholder="$t('views.auth.placeholderEmployeeId')"
             prepend-inner-icon="$account"
             :rules="[validateRequired, validateEmployeeId]"
             autocomplete="username"
@@ -66,14 +66,14 @@
         <!-- 비밀번호 입력 필드 -->
         <div class="mb-4">
           <label class="form-label text-caption font-weight-bold text-medium-emphasis mb-1 d-block">
-            비밀번호 (Password)
+            {{ $t('views.auth.passwordLabel') }}
           </label>
           <v-text-field
             v-model="password"
             :type="showPassword ? 'text' : 'password'"
             variant="outlined"
             density="comfortable"
-            placeholder="비밀번호를 입력해주세요"
+            :placeholder="$t('views.auth.placeholderPassword')"
             prepend-inner-icon="$lock"
             :append-inner-icon="showPassword ? '$eyeOff' : '$eye'"
             :rules="[validateRequired, validatePassword]"
@@ -88,7 +88,7 @@
         <div class="d-flex justify-space-between align-center mb-6">
           <v-checkbox
             v-model="rememberMe"
-            label="사번 저장"
+            :label="$t('views.auth.rememberMe')"
             density="compact"
             color="primary"
             hide-details
@@ -107,7 +107,7 @@
           :loading="isLoading"
           class="login-btn font-weight-bold text-body-1"
         >
-          로그인
+          {{ $t('common.login') }}
         </v-btn>
       </v-form>
 
@@ -122,12 +122,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import { useMenuStore } from '@/stores/menuStore'
 import { loginApi } from '@/api/auth'
 import { useApi } from '@/composables/useApi'
 import { APP_TITLE, PLANT_TYPE, isInsert, isPowder } from '@/constants/plant'
 
+const { t } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 const menuStore = useMenuStore()
@@ -160,7 +162,7 @@ function validateRequired(value) {
   if (value !== null && value !== undefined && String(value).trim() !== '') {
     return true
   }
-  return '필수 입력 항목입니다.'
+  return t('validation.required')
 }
 
 function validateEmployeeId(value) {
@@ -170,7 +172,7 @@ function validateEmployeeId(value) {
   if (String(value).trim().length >= 2) {
     return true
   }
-  return '사번은 2자리 이상 입력해주세요.'
+  return t('validation.employeeIdLength')
 }
 
 function validatePassword(value) {
@@ -180,7 +182,7 @@ function validatePassword(value) {
   if (String(value).length >= 4) {
     return true
   }
-  return '비밀번호는 4자리 이상 입력해주세요.'
+  return t('validation.passwordLength')
 }
 
 function togglePasswordVisibility() {
@@ -249,16 +251,16 @@ async function handleLogin() {
       router.push('/')
     } else {
       errorMessage.value =
-        (res && res.message) || '로그인에 실패했습니다. 사번과 비밀번호를 확인해주세요.'
+        (res && res.message) || t('views.auth.loginFailedCheck')
     }
   } catch (error) {
     console.error('Login error:', error)
     if (error && error.response && error.response.data && error.response.data.message) {
       errorMessage.value = error.response.data.message
     } else if (error && error.response && error.response.status === 401) {
-      errorMessage.value = '사번 또는 비밀번호가 올바르지 않습니다.'
+      errorMessage.value = t('views.auth.invalidCredentials')
     } else {
-      errorMessage.value = '로그인 서버와 통신 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+      errorMessage.value = t('views.auth.serverError')
     }
   }
 }

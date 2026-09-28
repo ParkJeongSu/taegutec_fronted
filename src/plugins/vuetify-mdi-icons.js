@@ -114,6 +114,19 @@ import {
   mdiBatteryLow,
   mdiBatteryMedium,
   mdiBatteryHigh,
+  mdiMapMarkerRadius,
+  mdiCarSpeedLimiter,
+  mdiTransitConnectionVariant,
+  mdiCircleSmall,
+  mdiShieldKeyOutline,
+  mdiDomain,
+  mdiShieldAccount,
+  mdiDesktopTower,
+  mdiCogOutline,
+  mdiSwapHorizontal,
+  mdiVectorLine,
+  mdiAlertCircleOutline,
+  mdiLockCheckOutline,
 } from '@mdi/js'
 
 // 아이콘 별칭(alias)을 만듭니다.
@@ -243,6 +256,19 @@ const aliases = {
   batteryLow: mdiBatteryLow,
   batteryMedium: mdiBatteryMedium,
   batteryHigh: mdiBatteryHigh,
+  mapMarkerRadius: mdiMapMarkerRadius,
+  carSpeedLimiter: mdiCarSpeedLimiter,
+  transitConnectionVariant: mdiTransitConnectionVariant,
+  circleSmall: mdiCircleSmall,
+  shieldKeyOutline: mdiShieldKeyOutline,
+  domain: mdiDomain,
+  shieldAccount: mdiShieldAccount,
+  desktopTower: mdiDesktopTower,
+  cogOutline: mdiCogOutline,
+  swapHorizontal: mdiSwapHorizontal,
+  vectorLine: mdiVectorLine,
+  alertCircleOutline: mdiAlertCircleOutline,
+  lockCheckOutline: mdiLockCheckOutline,
 }
 
 // 설정들을 export 합니다.

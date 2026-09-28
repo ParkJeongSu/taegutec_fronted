@@ -8,7 +8,7 @@
       <v-col cols="auto" class="ml-auto">
         <div class="d-flex ga-2">
           <v-btn color="primary" prepend-icon="$magnify" variant="elevated" v-on:click="onSearch">
-            조회
+            {{ $t('common.search') }}
           </v-btn>
           <!-- 필요 시 초기화 버튼 등을 슬롯으로 추가 가능 -->
           <slot name="extra-actions"></slot>

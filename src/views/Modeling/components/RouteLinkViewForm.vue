@@ -8,7 +8,7 @@
           <v-select
             v-model="formData.factoryName"
             :items="factoryOptions"
-            label="소속 공장 (FACTORY_NAME)"
+            :label="$t('views.modeling.routeLink.formFactory')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
@@ -58,7 +58,7 @@
         <v-col cols="12" sm="6">
           <v-text-field
             v-model="formData.fromNode"
-            label="시작 노드 (FROM_NODE)"
+            :label="$t('table.fromNode')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
@@ -71,7 +71,7 @@
         <v-col cols="12" sm="6">
           <v-text-field
             v-model="formData.toNode"
-            label="도착 노드 (TO_NODE)"
+            :label="$t('table.toNode')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
@@ -133,7 +133,7 @@
           <v-select
             v-model="formData.useState"
             :items="useStateOptions"
-            label="사용 여부 (USE_STATE)"
+            :label="$t('views.modeling.routeLink.formUseState')"
             variant="outlined"
             density="compact"
           ></v-select>
@@ -143,7 +143,7 @@
         <v-col cols="12">
           <v-textarea
             v-model="formData.eventComment"
-            label="비고 / 설명 (EVENT_COMMENT)"
+            :label="$t('common.comment')"
             variant="outlined"
             density="compact"
             rows="3"
@@ -158,7 +158,7 @@
     <!-- 하단 액션 버튼 영역 -->
     <v-card-actions class="pa-4 action-buttons-container">
       <v-btn variant="outlined" color="secondary" v-on:click="onClose">
-        취소
+        {{ $t('common.cancel') }}
       </v-btn>
 
       <v-spacer></v-spacer>
@@ -172,7 +172,7 @@
         class="mr-2 font-weight-medium"
         v-on:click="onOpenDeleteDialog"
       >
-        삭제
+        {{ $t('common.delete') }}
       </v-btn>
 
       <!-- 저장 / 수정 실행 버튼 -->
@@ -183,7 +183,7 @@
         class="font-weight-medium"
         v-on:click="onHandleSave"
       >
-        {{ isCreateMode ? '저장' : '수정' }}
+        {{ isCreateMode ? $t('common.save') : $t('common.edit') }}
       </v-btn>
     </v-card-actions>
 
@@ -197,6 +197,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useApi } from '@/composables/useApi'
@@ -207,6 +208,7 @@ import {
 } from '@/api/wcsRouteLink'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
+const { t } = useI18n()
 const props = defineProps({
   data: {
     type: Object,
@@ -237,8 +239,8 @@ const linkStatusOptions = [
   'MAINTENANCE',
 ]
 const useStateOptions = [
-  { title: '사용 (USE)', value: 'USE' },
-  { title: '미사용 (UNUSE)', value: 'UNUSE' },
+  { title: t('common.useStatusActive'), value: 'USE' },
+  { title: t('common.useStatusInactive'), value: 'UNUSE' },
 ]
 
 // useApi를 통한 CUD API 바인딩
@@ -319,7 +321,7 @@ function validateRequired(value) {
   if (value !== null && value !== undefined && String(value).trim() !== '') {
     return true
   }
-  return '필수 입력 항목입니다.'
+  return t('validation.required')
 }
 
 function validateRequiredNumber(value) {
@@ -367,7 +369,7 @@ async function onHandleSave() {
 
     if (isCreateMode.value) {
       await executeCreate(payload)
-      alert('신규 라우트 링크가 등록되었습니다.')
+      alert(t('common.saveSuccess'))
     } else {
       // 복합키(factoryName + routeLinkId) 기준 수정 요청
       await executeUpdate({
@@ -375,7 +377,7 @@ async function onHandleSave() {
         routeLinkId: formData.routeLinkId,
         payload: payload,
       })
-      alert('라우트 링크 정보가 수정되었습니다.')
+      alert(t('common.saveSuccess'))
     }
 
     if (typeof panelStore.onSuccess === 'function') {
@@ -398,7 +400,7 @@ async function onConfirmDelete() {
       factoryName: formData.factoryName,
       routeLinkId: formData.routeLinkId,
     })
-    alert('라우트 링크가 삭제되었습니다.')
+    alert(t('common.deleteSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {
       panelStore.onSuccess()
@@ -408,7 +410,7 @@ async function onConfirmDelete() {
     console.error('Delete route link failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '라우트 링크 삭제 처리 중 오류가 발생했습니다.'
+      t('common.deleteFail')
     alert(errorMsg)
   }
 }

@@ -5,9 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$accountGroup" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">사용자 관리 (User Management)</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.settings.userMgmt.title') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            설정 &gt; 사용자 및 권한 &gt; 사용자 관리
+            {{ $t('views.settings.userMgmt.breadcrumb') }}
           </v-chip>
         </div>
 
@@ -19,9 +19,7 @@
             prepend-icon="$plus"
             class="font-weight-bold mr-2"
             v-on:click="onAddUser"
-          >
-            신규 등록
-          </v-btn>
+          >{{ $t('common.create') }}</v-btn>
           <v-btn
             color="secondary"
             variant="tonal"
@@ -30,9 +28,7 @@
             class="font-weight-medium"
             :loading="isLoading"
             v-on:click="handleSearch"
-          >
-            새로고침
-          </v-btn>
+          >{{ $t('common.refresh') }}</v-btn>
         </div>
       </div>
 
@@ -45,8 +41,8 @@
           <v-col cols="12" sm="4" md="3">
             <v-text-field
               v-model="searchParams.keyword"
-              label="사번 / 성명"
-              placeholder="사번 또는 이름 입력"
+              :label="$t('views.settings.userMgmt.searchUser')"
+              :placeholder="$t('views.settings.userMgmt.placeholderUser')"
               variant="outlined"
               density="compact"
               hide-details
@@ -60,7 +56,7 @@
             <v-select
               v-model="searchParams.factoryName"
               :items="factoryOptions"
-              label="소속 공장"
+              :label="$t('table.factoryName')"
               variant="outlined"
               density="compact"
               hide-details
@@ -87,17 +83,13 @@
               size="small"
               class="mr-2 font-weight-medium"
               v-on:click="handleSearch"
-            >
-              검색
-            </v-btn>
+            >{{ $t('common.search') }}</v-btn>
             <v-btn
               variant="outlined"
               size="small"
               class="font-weight-medium"
               v-on:click="handleReset"
-            >
-              초기화
-            </v-btn>
+            >{{ $t('common.reset') }}</v-btn>
           </v-col>
         </v-row>
       </div>
@@ -128,7 +120,7 @@
         <template #no-data>
           <div class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>등록된 사용자 데이터가 없습니다.</div>
+            <div>{{ $t('views.settings.userMgmt.noData') }}</div>
           </div>
         </template>
       </BaseDataTable>
@@ -137,13 +129,15 @@
 </template>
 
 <script setup>
-import { ref, reactive, markRaw, onMounted } from 'vue'
+import { ref, reactive, computed, markRaw, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import UserMgmtViewForm from './components/UserMgmtViewForm.vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useApi } from '@/composables/useApi'
 import { fetchUsersApi } from '@/api/user'
 
+const { t } = useI18n()
 const panelStore = usePanelStore()
 
 // 검색 파라미터 상태
@@ -161,16 +155,17 @@ const userItems = ref([])
 const totalItems = ref(0)
 
 // 테이블 컬럼 정의 (id는 헤더에 미노출, departmentName 추가)
-const headers = [
-  { title: '사번 (USER_ID)', key: 'userId', align: 'start' },
-  { title: '성명 (USER_NAME)', key: 'userName', align: 'start' },
-  { title: '부서명', key: 'departmentName', align: 'start' },
-  { title: '소속 공장', key: 'factoryName', align: 'center' },
-  { title: '상태', key: 'userState', align: 'center' },
-  { title: '이메일', key: 'email', align: 'start' },
-  { title: '전화번호', key: 'phone', align: 'center' },
-  { title: '최종 로그인', key: 'lastLoginAt', align: 'center' },
-]
+const headers = computed(() => [
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
+  { title: t('table.employeeId'), key: 'userId', align: 'center', width: '110px' },
+  { title: t('table.userName'), key: 'userName', align: 'start', width: '120px' },
+  { title: t('table.departmentName'), key: 'departmentName', align: 'start', width: '140px' },
+  { title: t('table.email'), key: 'email', align: 'start' },
+  { title: t('table.phone'), key: 'phone', align: 'center', width: '130px' },
+  { title: t('table.useState'), key: 'userState', align: 'center', width: '100px' },
+  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '110px' },
+  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
+])
 
 // useApi 컴포저블을 활용한 목록 조회 바인딩
 const { loading: isLoading, execute: executeFetchUsers } = useApi(fetchUsersApi)
@@ -250,7 +245,7 @@ function onAddUser() {
   panelStore.openPanel(markRaw(UserMgmtViewForm), {
     mode: 'CREATE',
     data: null,
-    title: '신규 사용자 등록',
+    title: t('views.settings.userMgmt.createTitle'),
     onSuccess: fetchUsers,
   })
 }
@@ -261,7 +256,7 @@ function onRowClick(event, row) {
   panelStore.openPanel(markRaw(UserMgmtViewForm), {
     mode: 'UPDATE',
     data: itemData,
-    title: '사용자 정보 수정',
+    title: t('views.settings.userMgmt.editTitle'),
     onSuccess: fetchUsers,
   })
 }

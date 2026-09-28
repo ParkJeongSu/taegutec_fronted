@@ -5,9 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$robotIndustrial" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">컨베이어 설비 관리 (Conveyor)</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.transfer.conveyor.title') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            반송 &gt; 설비 관리 &gt; 컨베이어
+            {{ $t('views.transfer.conveyor.breadcrumb') }}
           </v-chip>
         </div>
 
@@ -20,7 +20,7 @@
             class="font-weight-bold mr-2"
             v-on:click="onAddConveyor"
           >
-            신규 등록
+            {{ $t('common.create') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -31,7 +31,7 @@
             :loading="isLoading"
             v-on:click="handleSearch"
           >
-            새로고침
+            {{ $t('common.refresh') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -41,7 +41,7 @@
             class="font-weight-medium"
             v-on:click="handleExport"
           >
-            엑셀 다운로드
+            {{ $t('common.export') }}
           </v-btn>
         </div>
       </div>
@@ -56,7 +56,7 @@
             <v-select
               v-model="searchParams.factoryName"
               :items="factoryFilterOptions"
-              label="소속 공장"
+              :label="$t('table.factoryName')"
               variant="outlined"
               density="compact"
               hide-details
@@ -67,8 +67,8 @@
           <v-col cols="12" sm="6" md="2">
             <v-text-field
               v-model="searchParams.conveyorGroup"
-              label="컨베이어 그룹"
-              placeholder="예: CV_GRP_01"
+              :label="$t('views.transfer.conveyor.conveyorGroup')"
+              :placeholder="$t('views.transfer.conveyor.placeholderGroupEx')"
               variant="outlined"
               density="compact"
               hide-details
@@ -81,8 +81,8 @@
           <v-col cols="12" sm="6" md="2">
             <v-text-field
               v-model="searchParams.conveyorName"
-              label="컨베이어 명 / 코드"
-              placeholder="예: CV01"
+              :label="$t('table.conveyorName')"
+              :placeholder="$t('views.transfer.conveyor.placeholderNameEx')"
               variant="outlined"
               density="compact"
               hide-details
@@ -96,7 +96,7 @@
             <v-select
               v-model="searchParams.conveyorStatus"
               :items="statusFilterOptions"
-              label="운전 상태"
+              :label="$t('table.status')"
               variant="outlined"
               density="compact"
               hide-details
@@ -108,7 +108,7 @@
             <v-select
               v-model="searchParams.useState"
               :items="useStateFilterOptions"
-              label="사용 여부"
+              :label="$t('table.useYn')"
               variant="outlined"
               density="compact"
               hide-details
@@ -124,7 +124,7 @@
               class="mr-2 font-weight-medium"
               v-on:click="handleSearch"
             >
-              검색
+              {{ $t('common.search') }}
             </v-btn>
             <v-btn
               variant="outlined"
@@ -132,7 +132,7 @@
               class="font-weight-medium"
               v-on:click="handleReset"
             >
-              초기화
+              {{ $t('common.reset') }}
             </v-btn>
           </v-col>
         </v-row>
@@ -142,7 +142,7 @@
       <BaseDataTable
         :headers="headers"
         :items="displayItems"
-        :total-items="totalItems"
+        :total-items="Number(totalItems)"
         :loading="isLoading"
         item-value="compositeKey"
         density="compact"
@@ -185,7 +185,7 @@
         <template #no-data>
           <div class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>등록된 컨베이어 설비 데이터가 없습니다.</div>
+            <div>{{ $t('views.transfer.conveyor.noData') }}</div>
           </div>
         </template>
       </BaseDataTable>
@@ -194,6 +194,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import ConveyorViewForm from './components/ConveyorViewForm.vue'
@@ -204,6 +205,8 @@ import { fetchWcsConveyorsApi } from '@/api/wcsConveyor'
 const panelStore = usePanelStore()
 
 // 검색 파라미터 상태
+const { t } = useI18n()
+
 const searchParams = reactive({
   factoryName: '전체',
   conveyorGroup: '',
@@ -228,18 +231,18 @@ const totalItems = ref(0)
 
 // 테이블 컬럼 정의
 const headers = [
-  { title: '소속 공장', key: 'factoryName', align: 'center', width: '100px' },
-  { title: '그룹', key: 'conveyorGroup', align: 'start', width: '120px' },
-  { title: '컨베이어 명', key: 'conveyorName', align: 'start', width: '130px' },
-  { title: '번호', key: 'conveyorNumber', align: 'center', width: '80px' },
-  { title: '로컬 번호', key: 'localNo', align: 'center', width: '90px' },
-  { title: '시작 노드', key: 'fromNode', align: 'start', width: '120px' },
-  { title: '도착 노드', key: 'toNode', align: 'start', width: '120px' },
-  { title: '운전 상태', key: 'conveyorStatus', align: 'center', width: '100px' },
-  { title: '현재 캐리어', key: 'currentCarrier', align: 'center', width: '130px' },
-  { title: '사용 여부', key: 'useState', align: 'center', width: '90px' },
-  { title: '수정자', key: 'eventUser', align: 'center', width: '100px' },
-  { title: '수정일시', key: 'eventTime', align: 'center', width: '160px' },
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
+  { title: t('table.group'), key: 'conveyorGroup', align: 'start', width: '120px' },
+  { title: t('table.conveyorName'), key: 'conveyorName', align: 'start', width: '130px' },
+  { title: t('table.conveyorNo'), key: 'conveyorNumber', align: 'center', width: '80px' },
+  { title: t('table.conveyorNo'), key: 'localNo', align: 'center', width: '90px' },
+  { title: t('table.fromNode'), key: 'fromNode', align: 'start', width: '120px' },
+  { title: t('table.toNode'), key: 'toNode', align: 'start', width: '120px' },
+  { title: t('table.status'), key: 'conveyorStatus', align: 'center', width: '100px' },
+  { title: t('table.carrierId'), key: 'currentCarrier', align: 'center', width: '130px' },
+  { title: t('table.useState'), key: 'useState', align: 'center', width: '90px' },
+  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '100px' },
+  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
 ]
 
 // useApi를 통한 목록 조회 API 바인딩
@@ -309,10 +312,10 @@ function getUseStateColor(state) {
 
 function getUseStateText(state) {
   if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return '사용'
+    return t('common.use')
   }
   if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return '미사용'
+    return t('common.unuse')
   }
   return state || '-'
 }
@@ -385,7 +388,7 @@ function onAddConveyor() {
   panelStore.openPanel(markRaw(ConveyorViewForm), {
     mode: 'CREATE',
     data: null,
-    title: '신규 컨베이어 등록',
+    title: t('views.transfer.conveyor.createTitle'),
     onSuccess: fetchConveyors,
   })
 }
@@ -396,7 +399,7 @@ function onRowClick(event, row) {
   panelStore.openPanel(markRaw(ConveyorViewForm), {
     mode: 'UPDATE',
     data: itemData,
-    title: '컨베이어 정보 수정',
+    title: t('views.transfer.conveyor.editTitle'),
     onSuccess: fetchConveyors,
   })
 }
@@ -404,14 +407,14 @@ function onRowClick(event, row) {
 function handleExport() {
   const list = displayItems.value
   if (!list || list.length === 0) {
-    alert('내보낼 컨베이어 데이터가 없습니다.')
+    alert(t('views.transfer.conveyor.exportAlert'))
     return
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    '소속 공장,컨베이어 그룹,컨베이어 명,번호,로컬 번호,시작 노드,도착 노드,운전 상태,현재 캐리어,사용 여부,수정자,수정일시\n'
+    `${t('table.factoryName')},${t('table.conveyorGroup')},${t('table.conveyorName')},${t('table.conveyorNo')},LocalNo,${t('table.fromNode')},${t('table.toNode')},${t('table.status')},${t('table.carrierId')},${t('table.useState')},${t('table.eventUser')},${t('table.eventTime')}\n`
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]

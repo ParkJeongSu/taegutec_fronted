@@ -10,7 +10,7 @@
     <v-toolbar density="comfortable" class="mb-2">
       <v-toolbar-title class="text-h6 font-weight-bold">
         <v-icon icon="$table" class="mr-2" color="primary"></v-icon>
-        {{ title }}
+        {{ title || $t('common.result') }}
       </v-toolbar-title>
 
       <v-spacer></v-spacer>
@@ -32,7 +32,7 @@
 const props = defineProps({
   title: {
     type: String,
-    default: '조회 리스트',
+    default: '',
   },
 })
 </script>

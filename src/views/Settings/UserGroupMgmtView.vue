@@ -5,9 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$accountGroup" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">사용자 그룹 관리 (User Group)</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.settings.userGroup.title') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            설정 &gt; 사용자 및 권한 &gt; 사용자 그룹
+            {{ $t('views.settings.userGroup.breadcrumb') }}
           </v-chip>
         </div>
 
@@ -19,9 +19,7 @@
             prepend-icon="$plus"
             class="font-weight-bold mr-2"
             v-on:click="onAddUserGroup"
-          >
-            신규 등록
-          </v-btn>
+          >{{ $t('common.create') }}</v-btn>
           <v-btn
             color="secondary"
             variant="tonal"
@@ -30,9 +28,7 @@
             class="font-weight-medium"
             :loading="loading"
             v-on:click="onSearch"
-          >
-            새로고침
-          </v-btn>
+          >{{ $t('common.refresh') }}</v-btn>
         </div>
       </div>
 
@@ -46,7 +42,7 @@
             <v-select
               v-model="searchParams.factoryName"
               :items="factoryFilterOptions"
-              label="소속 공장"
+              :label="$t('table.factoryName')"
               variant="outlined"
               density="compact"
               hide-details
@@ -57,7 +53,7 @@
           <v-col cols="12" sm="4" md="3">
             <v-text-field
               v-model="searchParams.userGroupName"
-              label="사용자 그룹명"
+              :label="$t('views.settings.userGroup.groupName')"
               placeholder="그룹명 입력"
               variant="outlined"
               density="compact"
@@ -72,7 +68,7 @@
             <v-select
               v-model="searchParams.useState"
               :items="stateFilterOptions"
-              label="상태"
+              :label="$t('common.status')"
               variant="outlined"
               density="compact"
               hide-details
@@ -87,17 +83,13 @@
               size="small"
               class="mr-2 font-weight-medium"
               v-on:click="onSearch"
-            >
-              검색
-            </v-btn>
+            >{{ $t('common.search') }}</v-btn>
             <v-btn
               variant="outlined"
               size="small"
               class="font-weight-medium"
               v-on:click="onReset"
-            >
-              초기화
-            </v-btn>
+            >{{ $t('common.reset') }}</v-btn>
           </v-col>
         </v-row>
       </div>
@@ -106,7 +98,7 @@
       <BaseDataTable
         :headers="headers"
         :items="items"
-        :total-items="totalItems"
+        :total-items="Number(totalItems)"
         :loading="loading"
         item-value="id"
         density="compact"
@@ -129,7 +121,7 @@
         <template #no-data>
           <div class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>등록된 사용자 그룹 데이터가 없습니다.</div>
+            <div>{{ $t('views.settings.userGroup.noData') }}</div>
           </div>
         </template>
       </BaseDataTable>
@@ -138,13 +130,15 @@
 </template>
 
 <script setup>
-import { reactive, markRaw, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import UserGroupMgmtViewForm from './components/UserGroupMgmtViewForm.vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useDataTable } from '@/composables/useDataTable'
 import { fetchUserGroupsApi } from '@/api/userGroup'
 
+const { t } = useI18n()
 const panelStore = usePanelStore()
 
 // 검색 파라미터 상태
@@ -158,14 +152,16 @@ const factoryFilterOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
 const stateFilterOptions = ['전체', 'ACTIVE', 'INACTIVE']
 
 // 테이블 컬럼 정의 (id는 대리키이므로 그리드에는 미노출)
-const headers = [
-  { title: '소속 공장', key: 'factoryName', align: 'center', width: '120px' },
-  { title: '사용자 그룹명', key: 'userGroupName', align: 'start' },
-  { title: '그룹 설명', key: 'description', align: 'start' },
-  { title: '계정 상태', key: 'useState', align: 'center', width: '120px' },
-  { title: '수정자', key: 'eventUser', align: 'center', width: '120px' },
-  { title: '수정일시', key: 'eventTime', align: 'center', width: '180px' },
-]
+const headers = computed(function () {
+  return [
+    { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '120px' },
+    { title: t('table.userGroupName'), key: 'userGroupName', align: 'start' },
+    { title: t('table.description'), key: 'description', align: 'start' },
+    { title: t('table.useState'), key: 'useState', align: 'center', width: '100px' },
+    { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '120px' },
+    { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '180px' },
+  ]
+})
 
 // useDataTable 컴포저블을 활용한 서버사이드 페이징 및 정렬 바인딩
 const { items, totalItems, loading, loadData, updateOptions } = useDataTable(fetchUserGroupsApi)
@@ -223,7 +219,7 @@ function onAddUserGroup() {
   panelStore.openPanel(markRaw(UserGroupMgmtViewForm), {
     mode: 'CREATE',
     data: null,
-    title: '신규 사용자 그룹 등록',
+    title: t('views.settings.userGroup.createTitle'),
     onSuccess: onSearch,
   })
 }
@@ -234,7 +230,7 @@ function onRowClick(event, row) {
   panelStore.openPanel(markRaw(UserGroupMgmtViewForm), {
     mode: 'UPDATE',
     data: itemData,
-    title: '사용자 그룹 정보 수정',
+    title: t('views.settings.userGroup.editTitle'),
     onSuccess: onSearch,
   })
 }

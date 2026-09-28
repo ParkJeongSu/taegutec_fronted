@@ -8,7 +8,7 @@
           <v-select
             v-model="formData.factoryName"
             :items="factoryOptions"
-            label="소속 공장 (FACTORY_NAME)"
+            :label="$t('views.transfer.stocker.formFactory')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
@@ -21,11 +21,11 @@
         <v-col cols="12">
           <v-text-field
             v-model="formData.stockerName"
-            label="스토커 코드 / 명 (STOCKER_NAME)"
+            :label="$t('views.transfer.stocker.formName')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            placeholder="예: WH1, STK-01"
+            :placeholder="$t('views.transfer.stocker.placeholderStockerEx')"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
@@ -35,10 +35,10 @@
         <v-col cols="12">
           <v-text-field
             v-model="formData.areaName"
-            label="구역명 (AREA_NAME)"
+            :label="$t('views.transfer.stocker.formArea')"
             variant="outlined"
             density="compact"
-            placeholder="구역명 입력"
+            :placeholder="$t('views.transfer.stocker.placeholderArea')"
           ></v-text-field>
         </v-col>
 
@@ -47,7 +47,7 @@
           <v-select
             v-model="formData.stockerStatus"
             :items="stockerStatusOptions"
-            label="설비 상태 (STOCKER_STATUS)"
+            :label="$t('views.transfer.stocker.formStatus')"
             variant="outlined"
             density="compact"
           ></v-select>
@@ -58,7 +58,7 @@
           <v-select
             v-model="formData.useState"
             :items="useStateOptions"
-            label="사용 여부 (USE_STATE)"
+            :label="$t('views.transfer.stocker.formUseState')"
             variant="outlined"
             density="compact"
           ></v-select>
@@ -69,7 +69,7 @@
           <v-text-field
             v-model.number="formData.totalShelfCount"
             type="number"
-            label="총 셀 수 (TOTAL_SHELF_COUNT)"
+            :label="$t('table.totalShelfCount')"
             variant="outlined"
             density="compact"
             placeholder="0"
@@ -81,7 +81,7 @@
           <v-text-field
             v-model.number="formData.useShelfCount"
             type="number"
-            label="적재 셀 수 (USE_SHELF_COUNT)"
+            :label="$t('table.useShelfCount')"
             variant="outlined"
             density="compact"
             placeholder="0"
@@ -92,11 +92,11 @@
         <v-col cols="12">
           <v-textarea
             v-model="formData.eventComment"
-            label="비고 / 설명 (EVENT_COMMENT)"
+            :label="$t('common.comment')"
             variant="outlined"
             density="compact"
             rows="3"
-            placeholder="비고 또는 설비 설명 입력"
+            :placeholder="$t('common.comment')"
           ></v-textarea>
         </v-col>
       </v-row>
@@ -107,7 +107,7 @@
     <!-- 하단 액션 버튼 영역 -->
     <v-card-actions class="pa-4 action-buttons-container">
       <v-btn variant="outlined" color="secondary" v-on:click="onClose">
-        취소
+        {{ $t('common.cancel') }}
       </v-btn>
 
       <v-spacer></v-spacer>
@@ -121,7 +121,7 @@
         class="mr-2"
         v-on:click="onOpenDeleteDialog"
       >
-        삭제
+        {{ $t('common.delete') }}
       </v-btn>
 
       <!-- 저장 / 수정 실행 버튼 -->
@@ -131,26 +131,28 @@
         :loading="isSaving"
         v-on:click="onHandleSave"
       >
-        {{ isCreateMode ? '저장' : '수정' }}
+        {{ isCreateMode ? $t('common.save') : $t('common.edit') }}
       </v-btn>
     </v-card-actions>
 
     <!-- 삭제 확인 모달 -->
     <ConfirmDialog
       v-model="deleteConfirmDialog"
-      :message="'[' + (formData.factoryName + ' / ' + formData.stockerName) + '] 스토커를 삭제하시겠습니까?'"
+      :message="$t('common.deleteConfirmMsg', { count: 1 })"
       v-on:confirm="onConfirmDelete"
     />
   </div>
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useApi } from '@/composables/useApi'
 import { createWcsStockerApi, updateWcsStockerApi, deleteWcsStockerApi } from '@/api/wcsStocker'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
+const { t } = useI18n()
 const props = defineProps({
   data: {
     type: Object,
@@ -165,8 +167,8 @@ const deleteConfirmDialog = ref(false)
 const factoryOptions = ['INSERT', 'POWDER', 'COMMON']
 const stockerStatusOptions = ['IDLE', 'RUNNING', 'ERROR', 'DOWN', 'OFFLINE']
 const useStateOptions = [
-  { title: '사용 (USE)', value: 'USE' },
-  { title: '미사용 (UNUSE)', value: 'UNUSE' },
+  { title: t('common.useStatusActive'), value: 'USE' },
+  { title: t('common.useStatusInactive'), value: 'UNUSE' },
 ]
 
 // useApi를 통한 API 바인딩
@@ -229,7 +231,7 @@ function validateRequired(value) {
   if (value !== null && value !== undefined && String(value).trim() !== '') {
     return true
   }
-  return '필수 입력 항목입니다.'
+  return t('validation.required')
 }
 
 function onClose() {
@@ -264,11 +266,11 @@ async function onHandleSave() {
 
     if (isCreateMode.value) {
       await executeCreate(payload)
-      alert('신규 스토커가 등록되었습니다.')
+      alert(t('common.saveSuccess'))
     } else {
       // 복합키(factoryName + stockerName) 기준으로 수정 요청
       await executeUpdate(formData.factoryName, formData.stockerName, payload)
-      alert('스토커 정보가 수정되었습니다.')
+      alert(t('common.saveSuccess'))
     }
 
     if (typeof panelStore.onSuccess === 'function') {
@@ -279,7 +281,7 @@ async function onHandleSave() {
     console.error('Save stocker failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '스토커 정보 저장 중 오류가 발생했습니다.'
+      t('common.saveFail')
     alert(errorMsg)
   }
 }
@@ -288,7 +290,7 @@ async function onConfirmDelete() {
   try {
     // 복합키(factoryName + stockerName) 기준으로 삭제 요청
     await executeDelete(formData.factoryName, formData.stockerName)
-    alert('스토커가 삭제되었습니다.')
+    alert(t('common.deleteSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {
       panelStore.onSuccess()
@@ -298,7 +300,7 @@ async function onConfirmDelete() {
     console.error('Delete stocker failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '스토커 삭제 처리 중 오류가 발생했습니다.'
+      t('common.deleteFail')
     alert(errorMsg)
   }
 }

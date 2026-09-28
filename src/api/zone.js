@@ -12,7 +12,7 @@ import api from './index'
  */
 export function fetchBankShelvesApi(params) {
   return api
-    .get('/wcs-web/api/v1/wcs/zones/bankShelves', { params: params })
+    .get('/v1/wcs/zones/bankShelves', { params: params })
     .then(function (response) {
       if (response && response.data) {
         return response.data
@@ -40,7 +40,7 @@ export const fetchBankShelves = fetchBankShelvesApi
  */
 export function saveBankShelvesZoneApi(payload) {
   return api
-    .post('/wcs-web/api/v1/wcs/zones/bankShelves/batch-update', payload)
+    .post('/v1/wcs/zones/bankShelves/batch-update', payload)
     .then(function (response) {
       if (response && response.data) {
         return response.data

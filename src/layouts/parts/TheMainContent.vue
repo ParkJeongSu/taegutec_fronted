@@ -21,7 +21,7 @@
           variant="text"
           size="x-small"
           class="ml-2 close-tab-btn"
-          v-on:click.stop="tabStore.closeTab(tab.id)"
+          v-on:click.stop="handleCloseTab(tab.id)"
         ></v-btn>
       </v-tab>
     </v-tabs>
@@ -50,11 +50,22 @@
     </v-menu>
 
     <!-- 탭 내용 영역 -->
-    <v-window v-if="tabStore.openTabs.length > 0" v-model="tabStore.activeTabId" class="pa-4">
+    <v-window
+      v-if="tabStore.openTabs.length > 0"
+      v-model="tabStore.activeTabId"
+      :transition="false"
+      :touch="false"
+      class="fill-height pa-4"
+    >
       <v-window-item v-for="tab in tabStore.openTabs" :key="tab.id" :value="tab.id">
-        <keep-alive>
-          <component :is="getComponent(tab.componentName)" />
-        </keep-alive>
+        <template v-if="tab && tab.componentName && resolveComponent(tab.componentName)">
+          <keep-alive>
+            <component :is="resolveComponent(tab.componentName)" />
+          </keep-alive>
+        </template>
+        <div v-else class="pa-8 text-center text-medium-emphasis">
+          화면을 로드할 수 없습니다: {{ tab ? tab.componentName : '' }}
+        </div>
       </v-window-item>
     </v-window>
 
@@ -88,6 +99,9 @@ const contextMenuTarget = ref([0, 0])
 const selectedContextTab = ref(null)
 
 function getTabTitle(tab) {
+  if (!tab) {
+    return ''
+  }
   if (tab.titleKey && te(tab.titleKey)) {
     return t(tab.titleKey)
   }
@@ -104,6 +118,12 @@ function openContextMenu(event, tab) {
   isContextMenuOpen.value = true
 }
 
+function handleCloseTab(tabId) {
+  if (tabId) {
+    tabStore.closeTab(tabId)
+  }
+}
+
 function handleCloseOtherTabs() {
   if (selectedContextTab.value) {
     tabStore.closeOtherTabs(selectedContextTab.value.id)
@@ -114,8 +134,16 @@ function handleCloseAllTabs() {
   tabStore.closeAllTabs()
 }
 
-function getComponent(name) {
-  return componentMap[name] || null
+function resolveComponent(name) {
+  if (!name || typeof name !== 'string') {
+    return null
+  }
+  const comp = componentMap[name]
+  if (comp) {
+    return comp
+  }
+  console.warn('[TheMainContent] 매핑되지 않은 컴포넌트입니다: ' + name)
+  return null
 }
 </script>
 

@@ -11,50 +11,50 @@
           ></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.systemName" label="시스템명"></v-text-field>
+          <v-text-field v-model="formData.systemName" :label="$t('table.systemName')"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.processGroupName" label="프로세스 그룹명"></v-text-field>
+          <v-text-field v-model="formData.processGroupName" :label="$t('table.processGroupName')"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.processName" label="프로세스명"></v-text-field>
+          <v-text-field v-model="formData.processName" :label="$t('table.processName')"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.status" label="상태"></v-text-field>
+          <v-text-field v-model="formData.status" :label="$t('common.status')"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.pid" label="PID" type="number"></v-text-field>
+          <v-text-field v-model="formData.pid" :label="$t('table.pid')" type="number"></v-text-field>
         </v-col>
         <v-col cols="6">
           <v-text-field
             v-model="formData.startRequestTime"
-            label="시작 요청 시간"
+            :label="$t('table.startRequestTime')"
             placeholder="YYYY-MM-DDTHH:mm:ss"
           ></v-text-field>
         </v-col>
         <v-col cols="6">
           <v-text-field
             v-model="formData.startTime"
-            label="시작 시간"
+            :label="$t('table.startTime')"
             placeholder="YYYY-MM-DDTHH:mm:ss"
           ></v-text-field>
         </v-col>
         <v-col cols="6">
           <v-text-field
             v-model="formData.endRequestTime"
-            label="종료 요청 시간"
+            :label="$t('table.endRequestTime')"
             placeholder="YYYY-MM-DDTHH:mm:ss"
           ></v-text-field>
         </v-col>
         <v-col cols="6">
           <v-text-field
             v-model="formData.endTime"
-            label="종료 시간"
+            :label="$t('table.endTime')"
             placeholder="YYYY-MM-DDTHH:mm:ss"
           ></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-textarea v-model="formData.description" label="프로세스 설명" rows="3"></v-textarea>
+          <v-textarea v-model="formData.description" :label="$t('table.description')" rows="3"></v-textarea>
         </v-col>
       </v-row>
     </v-form>
@@ -62,9 +62,9 @@
     <v-divider></v-divider>
     <v-card-actions class="pa-4">
       <v-spacer></v-spacer>
-      <v-btn variant="outlined" color="secondary" v-on:click="panelStore.closePanel">취소</v-btn>
+      <v-btn variant="outlined" color="secondary" v-on:click="panelStore.closePanel">{{ $t('common.cancel') }}</v-btn>
       <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave">
-        {{ panelStore.mode === 'add' ? '저장' : '수정' }}
+        {{ panelStore.mode === 'add' ? $t('common.save') : $t('common.edit') }}
       </v-btn>
     </v-card-actions>
   </div>
@@ -72,10 +72,12 @@
 
 <script setup>
 import { reactive, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { usePanelStore } from '@/stores/panelStore'
 import { useBaseForm } from '@/composables/useBaseForm'
 import { saveProcessInfoApi } from '@/api/processInfo'
 
+const { t } = useI18n()
 const panelStore = usePanelStore()
 const formData = reactive({
   port: null,
@@ -107,8 +109,14 @@ watch(
 
 async function onHandleSave() {
   const success = await submitForm(panelStore.mode, formData, function () {
-    alert('정상적으로 처리되었습니다.')
+    alert(t('common.saveSuccess'))
     panelStore.closePanel()
   })
 }
 </script>
+
+<style scoped>
+.form-container {
+  height: 100%;
+}
+</style>

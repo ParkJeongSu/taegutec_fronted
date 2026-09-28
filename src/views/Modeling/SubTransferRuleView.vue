@@ -7,7 +7,7 @@
           <v-icon icon="$cogSyncOutline" size="24" color="primary" class="mr-2" />
           <span class="text-h6 font-weight-bold text-high-emphasis">Sub Transfer Rule (하위 반송 규칙)</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            모델링 &gt; 제어 규칙 &gt; Sub Transfer Rule
+            {{ $t('views.modeling.subTransferRule.breadcrumb') }}
           </v-chip>
         </div>
 
@@ -20,7 +20,7 @@
             class="font-weight-bold mr-2"
             v-on:click="onAddRule"
           >
-            신규 등록
+            {{ $t('common.create') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -31,7 +31,7 @@
             :loading="loading"
             v-on:click="handleSearch"
           >
-            새로고침
+            {{ $t('common.refresh') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -41,7 +41,7 @@
             class="font-weight-medium"
             v-on:click="handleExport"
           >
-            엑셀 다운로드
+            {{ $t('common.export') }}
           </v-btn>
         </div>
       </div>
@@ -56,7 +56,7 @@
             <v-select
               v-model="searchParams.factoryName"
               :items="factoryFilterOptions"
-              label="소속 공장"
+              :label="$t('table.factoryName')"
               variant="outlined"
               density="compact"
               hide-details
@@ -122,7 +122,7 @@
             <v-select
               v-model="searchParams.useState"
               :items="useStateFilterOptions"
-              label="사용 여부"
+              :label="$t('table.useYn')"
               variant="outlined"
               density="compact"
               hide-details
@@ -138,7 +138,7 @@
               class="mr-2 font-weight-medium"
               v-on:click="handleSearch"
             >
-              검색
+              {{ $t('common.search') }}
             </v-btn>
             <v-btn
               variant="outlined"
@@ -146,7 +146,7 @@
               class="font-weight-medium"
               v-on:click="handleReset"
             >
-              초기화
+              {{ $t('common.reset') }}
             </v-btn>
           </v-col>
         </v-row>
@@ -239,7 +239,7 @@
         <template #no-data>
           <div class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>등록된 Sub Transfer Rule 데이터가 없습니다.</div>
+            <div>{{ $t('views.modeling.subTransferRule.noData') }}</div>
           </div>
         </template>
       </BaseDataTable>
@@ -248,6 +248,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import SubTransferRuleViewForm from './components/SubTransferRuleViewForm.vue'
@@ -259,6 +260,8 @@ import { formatDateTime } from '@/utils/dateUtils'
 const panelStore = usePanelStore()
 
 // 검색 파라미터 상태
+const { t } = useI18n()
+
 const searchParams = reactive({
   factoryName: '전체',
   equipmentName: '',
@@ -282,18 +285,18 @@ const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
 
 // 테이블 컬럼 정의
 const headers = [
-  { title: '소속 공장', key: 'factoryName', align: 'center', width: '100px' },
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
   { title: '설비 명칭', key: 'equipmentName', align: 'start', width: '130px', sortable: true },
   { title: '모듈 명칭', key: 'moduleName', align: 'start', width: '130px', sortable: true },
   { title: '링크 ID', key: 'routeLinkId', align: 'center', width: '110px', sortable: true },
-  { title: '우선순위', key: 'priority', align: 'center', width: '90px' },
+  { title: t('table.priority'), key: 'priority', align: 'center', width: '90px' },
   { title: '규칙 명칭', key: 'ruleName', align: 'start', width: '180px' },
   { title: '규칙 유형', key: 'ruleType', align: 'center', width: '140px' },
   { title: '동작 유형', key: 'actionType', align: 'center', width: '110px' },
-  { title: '사용 여부', key: 'useState', align: 'center', width: '100px' },
-  { title: '수정자', key: 'eventUser', align: 'center', width: '100px' },
-  { title: '수정일시', key: 'eventTime', align: 'center', width: '160px' },
-  { title: '비고', key: 'eventComment', align: 'start', width: '150px' },
+  { title: t('table.useState'), key: 'useState', align: 'center', width: '100px' },
+  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '100px' },
+  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
+  { title: t('table.eventComment'), key: 'eventComment', align: 'start', width: '150px' },
 ]
 
 // 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
@@ -396,10 +399,10 @@ function getUseStateColor(state) {
 
 function getUseStateText(state) {
   if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return '사용'
+    return t('common.use')
   }
   if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return '미사용'
+    return t('common.unuse')
   }
   return state || '-'
 }

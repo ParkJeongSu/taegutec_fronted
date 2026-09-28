@@ -5,51 +5,51 @@
         <v-col cols="6">
           <v-text-field
             v-model="formData.id"
-            label="정책 ID"
+            :label="$t('views.definition.purgeConfig.form.policyId')"
             type="number"
             :readonly="panelStore.mode === 'edit'"
           ></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-select v-model="formData.isActive" :items="['Y', 'N']" label="활성 여부"></v-select>
+          <v-select v-model="formData.isActive" :items="['Y', 'N']" :label="$t('views.definition.purgeConfig.form.isActive')"></v-select>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.dbName" label="데이터베이스명"></v-text-field>
+          <v-text-field v-model="formData.dbName" :label="$t('views.definition.purgeConfig.form.dbName')"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.schemaName" label="스키마명"></v-text-field>
+          <v-text-field v-model="formData.schemaName" :label="$t('views.definition.purgeConfig.form.schemaName')"></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-text-field v-model="formData.tableName" label="대상 테이블명"></v-text-field>
+          <v-text-field v-model="formData.tableName" :label="$t('views.definition.purgeConfig.form.tableName')"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.targetColumnName" label="기준 컬럼명"></v-text-field>
+          <v-text-field v-model="formData.targetColumnName" :label="$t('views.definition.purgeConfig.form.targetColumn')"></v-text-field>
         </v-col>
         <v-col cols="6">
           <v-select
             v-model="formData.dataType"
             :items="['DATE', 'NUMBER', 'STRING']"
-            label="데이터 타입"
+            :label="$t('views.definition.purgeConfig.form.dataType')"
           ></v-select>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.operator" label="연산자 (예: <, >=)"></v-text-field>
+          <v-text-field v-model="formData.operator" :label="$t('views.definition.purgeConfig.form.operator')"></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.compValue" label="비교 값 (Days 등)"></v-text-field>
+          <v-text-field v-model="formData.compValue" :label="$t('views.definition.purgeConfig.form.compValue')"></v-text-field>
         </v-col>
         <v-col cols="4">
-          <v-text-field v-model="formData.batchSize" label="배치 크기" type="number"></v-text-field>
+          <v-text-field v-model="formData.batchSize" :label="$t('views.definition.purgeConfig.form.batchSize')" type="number"></v-text-field>
         </v-col>
         <v-col cols="4">
           <v-text-field
             v-model="formData.maxLoopCount"
-            label="최대 루프"
+            :label="$t('views.definition.purgeConfig.form.maxLoop')"
             type="number"
           ></v-text-field>
         </v-col>
         <v-col cols="4">
-          <v-text-field v-model="formData.delayMs" label="지연(ms)" type="number"></v-text-field>
+          <v-text-field v-model="formData.delayMs" :label="$t('views.definition.purgeConfig.form.delayMs')" type="number"></v-text-field>
         </v-col>
       </v-row>
     </v-form>
@@ -57,20 +57,22 @@
     <v-divider></v-divider>
     <v-card-actions class="pa-4">
       <v-spacer></v-spacer>
-      <v-btn variant="outlined" color="secondary" v-on:click="panelStore.closePanel">닫기</v-btn>
-      <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave"
-        >저장</v-btn
-      >
+      <v-btn variant="outlined" color="secondary" v-on:click="panelStore.closePanel">{{ $t('common.close') }}</v-btn>
+      <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave">
+        {{ $t('common.save') }}
+      </v-btn>
     </v-card-actions>
   </div>
 </template>
 
 <script setup>
 import { reactive, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { usePanelStore } from '@/stores/panelStore'
 import { useBaseForm } from '@/composables/useBaseForm'
 import { savePurgeConfigApi } from '@/api/purgeConfig'
 
+const { t } = useI18n()
 const panelStore = usePanelStore()
 const formData = reactive({
   id: null,
@@ -101,8 +103,17 @@ watch(
 
 async function onHandleSave() {
   await submitForm(panelStore.mode, formData, function () {
-    alert('반영 완료')
+    alert(t('views.definition.purgeConfig.form.saved'))
+    if (typeof panelStore.onSuccess === 'function') {
+      panelStore.onSuccess()
+    }
     panelStore.closePanel()
   })
 }
 </script>
+
+<style scoped>
+.form-container {
+  height: 100%;
+}
+</style>

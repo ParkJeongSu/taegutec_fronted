@@ -5,9 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$mapMarkerPath" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">라우트 노드(Node) 설정</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.modeling.routeNode.title') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            모델링 &gt; 경로 설정 &gt; 라우트 노드
+            {{ $t('views.modeling.routeNode.breadcrumb') }}
           </v-chip>
         </div>
 
@@ -20,7 +20,7 @@
             class="font-weight-bold mr-2"
             v-on:click="onAddNode"
           >
-            신규 등록
+            {{ $t('common.create') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -31,7 +31,7 @@
             :loading="loading"
             v-on:click="handleSearch"
           >
-            새로고침
+            {{ $t('common.refresh') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -41,7 +41,7 @@
             class="font-weight-medium"
             v-on:click="handleExport"
           >
-            엑셀 다운로드
+            {{ $t('common.export') }}
           </v-btn>
         </div>
       </div>
@@ -56,7 +56,7 @@
             <v-select
               v-model="searchParams.factoryName"
               :items="factoryFilterOptions"
-              label="소속 공장"
+              :label="$t('table.factoryName')"
               variant="outlined"
               density="compact"
               hide-details
@@ -67,8 +67,8 @@
           <v-col cols="12" sm="6" md="2">
             <v-text-field
               v-model="searchParams.routeNodeId"
-              label="노드 ID"
-              placeholder="예: 101"
+              :label="$t('table.nodeId')"
+              placeholder="101"
               variant="outlined"
               density="compact"
               hide-details
@@ -81,8 +81,8 @@
           <v-col cols="12" sm="6" md="3">
             <v-text-field
               v-model="searchParams.nodeName"
-              label="노드 명칭"
-              placeholder="예: NODE-01, 입고 투입 노드"
+              :label="$t('table.nodeName')"
+              placeholder="NODE-01"
               variant="outlined"
               density="compact"
               hide-details
@@ -96,7 +96,7 @@
             <v-select
               v-model="searchParams.nodeType"
               :items="nodeTypeFilterOptions"
-              label="노드 유형"
+              :label="$t('table.nodeType')"
               variant="outlined"
               density="compact"
               hide-details
@@ -108,7 +108,7 @@
             <v-select
               v-model="searchParams.useState"
               :items="useStateFilterOptions"
-              label="사용 여부"
+              :label="$t('table.useYn')"
               variant="outlined"
               density="compact"
               hide-details
@@ -124,7 +124,7 @@
               class="mr-2 font-weight-medium"
               v-on:click="handleSearch"
             >
-              검색
+              {{ $t('common.search') }}
             </v-btn>
             <v-btn
               variant="outlined"
@@ -132,7 +132,7 @@
               class="font-weight-medium"
               v-on:click="handleReset"
             >
-              초기화
+              {{ $t('common.reset') }}
             </v-btn>
           </v-col>
         </v-row>
@@ -204,7 +204,7 @@
         <template #no-data>
           <div class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>등록된 라우트 노드 설정 데이터가 없습니다.</div>
+            <div>{{ $t('views.modeling.routeNode.noData') }}</div>
           </div>
         </template>
       </BaseDataTable>
@@ -213,6 +213,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import RouteNodeViewForm from './components/RouteNodeViewForm.vue'
@@ -224,6 +225,8 @@ import { formatDateTime } from '@/utils/dateUtils'
 const panelStore = usePanelStore()
 
 // 검색 파라미터 상태
+const { t } = useI18n()
+
 const searchParams = reactive({
   factoryName: '전체',
   routeNodeId: '',
@@ -247,19 +250,19 @@ const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
 
 // 테이블 컬럼 정의
 const headers = [
-  { title: '소속 공장', key: 'factoryName', align: 'center', width: '100px' },
-  { title: '노드 ID', key: 'routeNodeId', align: 'center', width: '100px', sortable: true },
-  { title: '노드 명칭', key: 'nodeName', align: 'start', width: '160px' },
-  { title: '노드 유형', key: 'nodeType', align: 'center', width: '120px' },
-  { title: '좌표 (X, Y, Z)', key: 'coord', align: 'center', width: '160px' },
-  { title: '최대 대기 수', key: 'maxWait', align: 'end', width: '110px' },
-  { title: '연결 링크 수', key: 'linkCount', align: 'end', width: '110px' },
-  { title: '존(Zone)', key: 'zoneName', align: 'center', width: '110px' },
-  { title: '스토커', key: 'stockerName', align: 'center', width: '100px' },
-  { title: '사용 여부', key: 'useState', align: 'center', width: '100px' },
-  { title: '수정자', key: 'eventUser', align: 'center', width: '100px' },
-  { title: '수정일시', key: 'eventTime', align: 'center', width: '160px' },
-  { title: '비고', key: 'eventComment', align: 'start', width: '150px' },
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
+  { title: t('table.nodeId'), key: 'routeNodeId', align: 'center', width: '100px', sortable: true },
+  { title: t('table.nodeName'), key: 'nodeName', align: 'start', width: '160px' },
+  { title: t('table.nodeType'), key: 'nodeType', align: 'center', width: '120px' },
+  { title: 'Coord (X,Y,Z)', key: 'coord', align: 'center', width: '160px' },
+  { title: 'Max Wait', key: 'maxWait', align: 'end', width: '110px' },
+  { title: 'Links', key: 'linkCount', align: 'end', width: '110px' },
+  { title: t('table.zone'), key: 'zoneName', align: 'center', width: '110px' },
+  { title: t('table.stockerName'), key: 'stockerName', align: 'center', width: '100px' },
+  { title: t('table.useState'), key: 'useState', align: 'center', width: '100px' },
+  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '100px' },
+  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
+  { title: t('table.eventComment'), key: 'eventComment', align: 'start', width: '150px' },
 ]
 
 // 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
@@ -349,10 +352,10 @@ function getUseStateColor(state) {
 
 function getUseStateText(state) {
   if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return '사용'
+    return t('common.use')
   }
   if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return '미사용'
+    return t('common.unuse')
   }
   return state || '-'
 }
@@ -381,7 +384,7 @@ function onAddNode() {
   panelStore.openPanel(markRaw(RouteNodeViewForm), {
     mode: 'CREATE',
     data: null,
-    title: '신규 라우트 노드 등록',
+    title: t('views.modeling.routeNode.createTitle'),
     onSuccess: function () {
       loadData(getSanitizedParams())
     },
@@ -394,7 +397,7 @@ function onRowClick(event, row) {
   panelStore.openPanel(markRaw(RouteNodeViewForm), {
     mode: 'UPDATE',
     data: itemData,
-    title: '라우트 노드 정보 수정',
+    title: t('views.modeling.routeNode.editTitle'),
     onSuccess: function () {
       loadData(getSanitizedParams())
     },
@@ -404,14 +407,14 @@ function onRowClick(event, row) {
 function handleExport() {
   const list = displayItems.value
   if (!list || list.length === 0) {
-    alert('내보낼 라우트 노드 데이터가 없습니다.')
+    alert(t('views.modeling.routeNode.exportAlert'))
     return
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    '소속공장,노드ID,노드명칭,노드유형,X좌표,Y좌표,Z좌표,최대대기수,연결링크수,존,스토커,사용여부,수정자,수정일시,비고\n'
+    `${t('table.factoryName')},${t('table.nodeId')},${t('table.nodeName')},${t('table.nodeType')},X,Y,Z,MaxWait,Links,${t('table.zone')},${t('table.stockerName')},${t('table.useState')},${t('table.eventUser')},${t('table.eventTime')},${t('table.eventComment')}\n`
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]

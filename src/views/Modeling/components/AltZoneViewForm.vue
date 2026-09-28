@@ -8,7 +8,7 @@
           <v-select
             v-model="formData.factoryName"
             :items="factoryOptions"
-            label="소속 공장 (FACTORY_NAME)"
+            :label="$t('views.modeling.altZone.formFactory')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
@@ -22,7 +22,7 @@
           <v-text-field
             v-model.number="formData.priority"
             type="number"
-            label="우선순위 (PRIORITY)"
+            :label="$t('views.modeling.altZone.formPriority')"
             variant="outlined"
             density="compact"
             :rules="[validateRequiredNumber]"
@@ -89,7 +89,7 @@
           <v-select
             v-model="formData.useState"
             :items="useStateOptions"
-            label="사용 여부 (USE_STATE)"
+            :label="$t('views.modeling.altZone.formUseState')"
             variant="outlined"
             density="compact"
           ></v-select>
@@ -114,7 +114,7 @@
     <!-- 하단 액션 버튼 영역 -->
     <v-card-actions class="pa-4 action-buttons-container">
       <v-btn variant="outlined" color="secondary" v-on:click="onClose">
-        취소
+        {{ $t('common.cancel') }}
       </v-btn>
 
       <v-spacer></v-spacer>
@@ -128,7 +128,7 @@
         class="mr-2 font-weight-medium"
         v-on:click="onOpenDeleteDialog"
       >
-        삭제
+        {{ $t('common.delete') }}
       </v-btn>
 
       <!-- 저장 / 수정 실행 버튼 -->
@@ -139,7 +139,7 @@
         class="font-weight-medium"
         v-on:click="onHandleSave"
       >
-        {{ isCreateMode ? '저장' : '수정' }}
+        {{ isCreateMode ? $t('common.save') : $t('common.edit') }}
       </v-btn>
     </v-card-actions>
 
@@ -153,6 +153,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useApi } from '@/composables/useApi'
@@ -163,6 +164,7 @@ import {
 } from '@/api/wcsAlternativeStorageZone'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
+const { t } = useI18n()
 const props = defineProps({
   data: {
     type: Object,
@@ -176,8 +178,8 @@ const deleteConfirmDialog = ref(false)
 
 const factoryOptions = ['INSERT', 'POWDER', 'COMMON']
 const useStateOptions = [
-  { title: '사용 (USE)', value: 'USE' },
-  { title: '미사용 (UNUSE)', value: 'UNUSE' },
+  { title: t('common.useStatusActive'), value: 'USE' },
+  { title: t('common.useStatusInactive'), value: 'UNUSE' },
 ]
 
 // useApi를 통한 CUD API 바인딩
@@ -257,7 +259,7 @@ function validateRequired(value) {
   if (value !== null && value !== undefined && String(value).trim() !== '') {
     return true
   }
-  return '필수 입력 항목입니다.'
+  return t('validation.required')
 }
 
 function validateRequiredNumber(value) {

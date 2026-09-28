@@ -1,67 +1,63 @@
 <template>
   <v-navigation-drawer
     v-model="menuStore.isSidebarOpen"
+    location="left"
     :width="260"
-    class="sidebar-drawer"
-    elevation="1"
+    class="sidebar-drawer elevation-1"
   >
-    <v-list-item class="bg-light-green-lighten-5 py-3">
-      <v-list-item-title class="font-weight-bold text-subtitle-1">
-        {{
-          menuStore.selectedL2 ? getMenuTitle(menuStore.selectedL2) : $t('common.selectMenuGuide')
-        }}
-      </v-list-item-title>
-    </v-list-item>
+    <!-- 사이드바 상단 중메뉴 타이틀 -->
+    <div class="sidebar-header px-4 py-3 bg-grey-lighten-4 border-b">
+      <div class="text-subtitle-2 font-weight-bold text-high-emphasis">
+        {{ currentL2Title }}
+      </div>
+    </div>
 
-    <v-divider></v-divider>
-
-    <v-list density="compact" nav class="py-2">
+    <!-- 소메뉴(L3/L4) 리스트 -->
+    <v-list density="compact" nav class="pa-2">
       <template v-for="l3 in menuStore.currentL3List" :key="l3.id">
-        <!-- 조건 A (자식이 있는 그룹 메뉴) -->
+        <!-- 1. 하위 자식이 있는 그룹 메뉴 (L4 존재 시) -->
         <v-list-group v-if="l3.children && l3.children.length > 0" :value="l3.id">
-          <template #activator="{ props }">
-            <v-list-item v-bind="props" color="primary" class="mb-1 rounded">
-              <!-- <template #prepend>
-                <v-icon icon="$chevronRight" size="16" color="medium-emphasis" />
-              </template> -->
-              <v-list-item-title class="font-weight-medium">
-                {{ getMenuTitle(l3) }}
-              </v-list-item-title>
-            </v-list-item>
+          <template #activator="{ props: activatorProps }">
+            <v-list-item
+              v-bind="activatorProps"
+              :prepend-icon="resolveMenuIcon(l3.icon)"
+              :title="getMenuTitle(l3)"
+              color="primary"
+              rounded="lg"
+              class="mb-1 font-weight-medium"
+            />
           </template>
+
           <!-- L4 자식 항목들 -->
           <v-list-item
             v-for="l4 in l3.children"
             :key="l4.id"
+            :title="getMenuTitle(l4)"
             color="primary"
-            class="mb-1 rounded pl-6"
+            rounded="lg"
+            class="mb-1 pl-6 text-body-2"
             v-on:click="onMenuClick(l4)"
-          >
-            <v-list-item-title class="font-weight-regular text-body-2">
-              {{ getMenuTitle(l4) }}
-            </v-list-item-title>
-          </v-list-item>
+          />
         </v-list-group>
 
-        <!-- 조건 B (하위 자식이 없는 일반 메뉴) -->
+        <!-- 2. 단일 메뉴 항목 (L4 없는 일반 메뉴) -->
         <v-list-item
           v-else
-          :key="l3.id"
+          :key="'single-' + l3.id"
+          :prepend-icon="resolveMenuIcon(l3.icon)"
+          :title="getMenuTitle(l3)"
           color="primary"
-          class="mb-1 rounded"
+          rounded="lg"
+          class="mb-1 font-weight-medium"
           v-on:click="onMenuClick(l3)"
-        >
-          <!-- 자식이 없으므로 $chevronRight 아이콘을 표시하지 않음 -->
-          <v-list-item-title class="font-weight-medium">
-            {{ getMenuTitle(l3) }}
-          </v-list-item-title>
-        </v-list-item>
+        />
       </template>
     </v-list>
   </v-navigation-drawer>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useMenuStore } from '@/stores/menuStore'
 import { useTabStore } from '@/stores/tabStore'
@@ -69,6 +65,23 @@ import { useTabStore } from '@/stores/tabStore'
 const { t, te } = useI18n()
 const menuStore = useMenuStore()
 const tabStore = useTabStore()
+
+function resolveMenuIcon(iconName) {
+  if (!iconName) {
+    return '$circleSmall'
+  }
+  if (iconName.indexOf('$') === 0) {
+    return iconName
+  }
+  return '$' + iconName
+}
+
+const currentL2Title = computed(function () {
+  if (!menuStore.selectedL2) {
+    return t('common.selectMenuGuide')
+  }
+  return getMenuTitle(menuStore.selectedL2)
+})
 
 function getMenuTitle(item) {
   if (!item) {
@@ -90,8 +103,14 @@ function onMenuClick(menuItem) {
 
 <style scoped>
 .sidebar-drawer {
-  /* L1(48px) + L2(48px) = 96px 만큼 위에서 떨어져야 함 */
   top: 96px !important;
   height: calc(100% - 96px) !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.sidebar-header {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
 }
 </style>

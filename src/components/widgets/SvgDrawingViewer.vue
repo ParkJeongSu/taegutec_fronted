@@ -3,13 +3,13 @@
     <!-- 로딩 인디케이터 -->
     <div v-if="isLoading" class="svg-loading-overlay d-flex flex-column align-center justify-center">
       <v-progress-circular indeterminate color="primary" size="40" class="mb-2"></v-progress-circular>
-      <span class="text-caption text-medium-emphasis">도면 로딩 중...</span>
+      <span class="text-caption text-medium-emphasis">{{ $t('common.loadingDrawing') }}</span>
     </div>
 
     <!-- 에러 표시 영역 -->
     <div v-if="hasError" class="svg-error-overlay pa-4 d-flex flex-column align-center justify-center">
       <v-icon icon="$alertCircle" size="36" color="error" class="mb-2" />
-      <span class="text-body-2 text-error font-weight-medium">도면을 불러오지 못했습니다.</span>
+      <span class="text-body-2 text-error font-weight-medium">{{ $t('common.loadDrawingFailed') }}</span>
       <span class="text-caption text-medium-emphasis mt-1">{{ errorMessage }}</span>
     </div>
 
@@ -81,7 +81,7 @@ async function loadSvg(url) {
   try {
     const response = await fetch(url)
     if (!response.ok) {
-      throw new Error('도면 파일을 불러올 수 없습니다 (상태코드: ' + response.status + ')')
+      throw new Error('Failed to load drawing file (status: ' + response.status + ')')
     }
     const svgText = await response.text()
     if (containerRef.value) {
@@ -91,7 +91,7 @@ async function loadSvg(url) {
     emit('loaded')
   } catch (err) {
     hasError.value = true
-    errorMessage.value = err && err.message ? err.message : 'SVG 로드 실패'
+    errorMessage.value = err && err.message ? err.message : 'Failed to load SVG'
     emit('error', err)
   } finally {
     isLoading.value = false

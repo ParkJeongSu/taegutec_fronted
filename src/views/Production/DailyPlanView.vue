@@ -2,26 +2,26 @@
   <v-card flat class="content-card">
     <v-card-title class="text-h5 font-weight-bold">
       <v-icon icon="$calendarCheck" class="mr-2" color="primary" />
-      일일 생산계획 수립
+      {{ $t('views.production.dailyPlan.title') }}
     </v-card-title>
     <v-divider></v-divider>
     <v-card-text>
       <v-alert type="success" variant="tonal" border="start">
-        생산 라인별 일일 계획을 설정하는 화면입니다. (Test Page 01)
+        {{ $t('views.production.dailyPlan.subtitle') }}
       </v-alert>
       <v-table class="mt-4">
         <thead>
           <tr>
-            <th>라인명</th>
-            <th>목표량</th>
-            <th>상태</th>
+            <th>{{ $t('table.lineName') }}</th>
+            <th>{{ $t('table.targetQty') }}</th>
+            <th>{{ $t('common.status') }}</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td>Line-A</td>
             <td>1,200</td>
-            <td><v-chip size="small" color="success">정상</v-chip></td>
+            <td><v-chip size="small" color="success">{{ $t('common.normal') }}</v-chip></td>
           </tr>
         </tbody>
       </v-table>
@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-// 특별한 로직 없이 화면 확인용으로 구성
+// Daily production plan view
 </script>
 
 <style scoped>

@@ -5,12 +5,12 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$fileImport" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">INSERT SAP Idoc 인터페이스 이력</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.order.insertIdoc.title') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            오더 &gt; 인터페이스 &gt; INSERT Idoc 이력
+            {{ $t('views.order.insertIdoc.breadcrumb') }}
           </v-chip>
           <v-chip size="small" color="primary" variant="flat" class="ml-2 font-weight-bold">
-            INSERT 공장
+            {{ $t('common.insertPlantAffiliation') }}
           </v-chip>
         </div>
 
@@ -24,7 +24,7 @@
             :loading="loading"
             v-on:click="handleSearch"
           >
-            새로고침
+            {{ $t('common.refresh') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -34,7 +34,7 @@
             class="font-weight-medium"
             v-on:click="handleExport"
           >
-            엑셀 다운로드
+            {{ $t('common.export') }}
           </v-btn>
         </div>
       </div>
@@ -48,7 +48,7 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.startDate"
-              label="조회 시작일"
+              :label="$t('common.startDate')"
               type="date"
               variant="outlined"
               density="compact"
@@ -60,7 +60,7 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.endDate"
-              label="조회 종료일"
+              :label="$t('common.endDate')"
               type="date"
               variant="outlined"
               density="compact"
@@ -72,8 +72,8 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.docNum"
-              label="문서 번호(Doc Num)"
-              placeholder="DOC-001 등"
+              :label="$t('table.docNum')"
+              :placeholder="$t('views.order.insertIdoc.placeholderDocNum')"
               variant="outlined"
               density="compact"
               hide-details
@@ -100,8 +100,8 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.idocTypId"
-              label="IDOC 타입 ID"
-              placeholder="예: 01, ORDERS05"
+              :label="$t('table.idocType')"
+              placeholder="ORDERS05"
               variant="outlined"
               density="compact"
               hide-details
@@ -115,7 +115,7 @@
             <v-select
               v-model="searchParams.transTy"
               :items="['전체', 'INBOUND', 'OUTBOUND']"
-              label="구분"
+              :label="$t('table.orderNo')"
               variant="outlined"
               density="compact"
               hide-details
@@ -127,7 +127,7 @@
             <v-select
               v-model="searchParams.status"
               :items="statusFilterOptions"
-              label="처리 상태"
+              :label="$t('table.status')"
               variant="outlined"
               density="compact"
               hide-details
@@ -138,8 +138,8 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.source"
-              label="송신처 (Source)"
-              placeholder="SAP 등"
+              :label="$t('table.source')"
+              placeholder="SAP"
               variant="outlined"
               density="compact"
               hide-details
@@ -152,8 +152,8 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.destination"
-              label="수신처 (Dest)"
-              placeholder="WCS 등"
+              :label="$t('table.target')"
+              placeholder="WCS"
               variant="outlined"
               density="compact"
               hide-details
@@ -166,8 +166,8 @@
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.errorCode"
-              label="에러 코드"
-              placeholder="0, 99 등"
+              :label="$t('views.order.idocModal.labels.errorCode')"
+              placeholder="0"
               variant="outlined"
               density="compact"
               hide-details
@@ -184,7 +184,7 @@
               class="mr-2 font-weight-medium"
               v-on:click="handleSearch"
             >
-              검색
+              {{ $t('common.search') }}
             </v-btn>
             <v-btn
               variant="outlined"
@@ -192,7 +192,7 @@
               class="font-weight-medium"
               v-on:click="handleReset"
             >
-              초기화
+              {{ $t('common.reset') }}
             </v-btn>
           </v-col>
         </v-row>
@@ -280,7 +280,7 @@
         <template #no-data>
           <div class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>조회된 INSERT Idoc 인터페이스 데이터가 없습니다.</div>
+            <div>{{ $t('views.order.insertIdoc.noData') }}</div>
           </div>
         </template>
       </BaseDataTable>
@@ -296,12 +296,15 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import IdocDetailModal from './components/IdocDetailModal.vue'
 import { useDataTable } from '@/composables/useDataTable'
 import { fetchGalInterfacesApi } from '@/api/galInterface'
 import { formatDateTime } from '@/utils/dateUtils'
+
+const { t } = useI18n()
 
 const searchParams = reactive({
   startDate: '',
@@ -319,21 +322,21 @@ const searchParams = reactive({
 const statusFilterOptions = ['전체', '0', '1', '2', 'SUCCESS', 'PENDING', 'ERROR']
 
 const headers = [
-  { title: '문서 번호', key: 'docNum', align: 'start', width: '160px', sortable: true },
+  { title: t('table.docNum'), key: 'docNum', align: 'start', width: '160px', sortable: true },
   { title: 'Line ID', key: 'lineId', align: 'center', width: '90px' },
-  { title: 'IDOC 타입', key: 'idocTypId', align: 'center', width: '120px' },
-  { title: '구분', key: 'transTy', align: 'center', width: '110px' },
-  { title: '송신처', key: 'source', align: 'center', width: '100px' },
-  { title: '수신처', key: 'destination', align: 'center', width: '100px' },
-  { title: '상태', key: 'status', align: 'center', width: '110px' },
-  { title: '에러 코드', key: 'errorCode', align: 'center', width: '100px' },
-  { title: '에러 내용', key: 'errorDescription', align: 'start', width: '180px' },
-  { title: '요청 존', key: 'reqZone', align: 'center', width: '100px' },
+  { title: t('table.idocType'), key: 'idocTypId', align: 'center', width: '120px' },
+  { title: t('table.orderNo'), key: 'transTy', align: 'center', width: '110px' },
+  { title: t('table.source'), key: 'source', align: 'center', width: '100px' },
+  { title: t('table.target'), key: 'destination', align: 'center', width: '100px' },
+  { title: t('table.status'), key: 'status', align: 'center', width: '110px' },
+  { title: t('views.order.idocModal.labels.errorCode'), key: 'errorCode', align: 'center', width: '100px' },
+  { title: t('views.order.idocModal.labels.errorText'), key: 'errorDescription', align: 'start', width: '180px' },
+  { title: t('table.zone'), key: 'reqZone', align: 'center', width: '100px' },
   { title: 'T-Code', key: 'tCode', align: 'center', width: '100px' },
   { title: 'Arc Key', key: 'arcKey', align: 'center', width: '100px' },
-  { title: '생성 일시', key: 'createTime', align: 'center', width: '160px' },
-  { title: '수정 일시', key: 'modTime', align: 'center', width: '160px' },
-  { title: '수정자', key: 'usrMod', align: 'center', width: '100px' },
+  { title: t('table.createTime'), key: 'createTime', align: 'center', width: '160px' },
+  { title: t('table.eventTime'), key: 'modTime', align: 'center', width: '160px' },
+  { title: t('table.eventUser'), key: 'usrMod', align: 'center', width: '100px' },
 ]
 
 // 1. 역할 분리 아키텍처: useDataTable 컴포저블 전담 연동
@@ -482,14 +485,14 @@ function onRowDblClick(event, row) {
 function handleExport() {
   const list = displayItems.value
   if (!list || list.length === 0) {
-    alert('내보낼 Idoc 인터페이스 데이터가 없습니다.')
+    alert(t('common.noDataToExport'))
     return
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    '문서번호,LineID,IDOC타입,구분,송신처,수신처,상태,에러코드,에러내용,요청존,T-Code,ArcKey,생성일시,수정일시,수정자\n'
+    `${t('table.docNum')},LineID,${t('table.idocType')},${t('table.orderNo')},${t('table.source')},${t('table.target')},${t('table.status')},${t('views.order.idocModal.labels.errorCode')},${t('views.order.idocModal.labels.errorText')},${t('table.zone')},T-Code,ArcKey,${t('table.createTime')},${t('table.eventTime')},${t('table.eventUser')}\n`
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]

@@ -37,7 +37,7 @@
             variant="text"
             color="white"
             class="mr-2 alarm-bell-btn"
-            title="실시간 알람"
+            :title="$t('common.realtimeAlarm')"
             v-on:click="alarmStore.togglePanel"
           >
             <v-badge
@@ -114,7 +114,7 @@
                 <!-- 실시간 알람 항목 (언어 변경 아래, 로그아웃 위) -->
                 <v-list-item
                   prepend-icon="$bellRing"
-                  title="실시간 알람"
+                  :title="$t('common.realtimeAlarm')"
                   class="alarm-menu-item font-weight-medium"
                   v-on:click="handleOpenAlarmPanel"
                 >
@@ -126,7 +126,7 @@
                       variant="flat"
                       class="font-weight-bold"
                     >
-                      {{ alarmStore.unreadCount }}건
+                      {{ alarmStore.unreadCount }}{{ $t('common.countUnit') }}
                     </v-chip>
                     <v-chip
                       v-else
@@ -134,7 +134,7 @@
                       size="x-small"
                       variant="tonal"
                     >
-                      {{ alarmStore.alarmList.length }}건
+                      {{ alarmStore.alarmList.length }}{{ $t('common.countUnit') }}
                     </v-chip>
                   </template>
                 </v-list-item>
@@ -224,24 +224,25 @@ const displayEmployeeId = computed(function () {
   if (authStore.currentUser && authStore.currentUser.employeeId) {
     return authStore.currentUser.employeeId
   }
-  return '사원'
+  return t('common.employee')
 })
 
 const displayUserLabel = computed(function () {
   if (authStore.currentUser && authStore.currentUser.employeeId) {
-    return authStore.currentUser.employeeId + ' 님'
+    const suffix = t('common.userSuffix')
+    return suffix ? `${authStore.currentUser.employeeId} ${suffix}` : authStore.currentUser.employeeId
   }
-  return '사용자'
+  return t('common.user')
 })
 
 const plantDescription = computed(function () {
   if (isInsert()) {
-    return 'INSERT 공장 소속'
+    return t('common.insertPlantAffiliation')
   }
   if (isPowder()) {
-    return 'POWDER 공장 소속'
+    return t('common.powderPlantAffiliation')
   }
-  return plantCode + ' 공장'
+  return t('common.plantAffiliation', { plant: plantCode })
 })
 
 function handleOpenAlarmPanel() {

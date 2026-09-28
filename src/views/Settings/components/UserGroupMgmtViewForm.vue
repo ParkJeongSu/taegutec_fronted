@@ -8,7 +8,7 @@
           <v-select
             v-model="formData.factoryName"
             :items="factoryOptions"
-            label="소속 공장 (FACTORY_NAME)"
+            :label="$t('views.settings.userGroup.form.factory')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
@@ -20,11 +20,11 @@
         <v-col cols="12">
           <v-text-field
             v-model="formData.userGroupName"
-            label="사용자 그룹명 (USER_GROUP_NAME)"
+            :label="$t('views.settings.userGroup.form.groupName')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            placeholder="사용자 그룹명을 입력하세요"
+            :placeholder="$t('views.settings.userGroup.form.placeholderGroupName')"
             required
           ></v-text-field>
         </v-col>
@@ -34,7 +34,7 @@
           <v-select
             v-model="formData.useState"
             :items="statusOptions"
-            label="계정 상태 (USE_STATE)"
+            :label="$t('views.settings.userGroup.form.useYn')"
             variant="outlined"
             density="compact"
           ></v-select>
@@ -44,11 +44,11 @@
         <v-col cols="12">
           <v-textarea
             v-model="formData.description"
-            label="그룹 설명 (DESCRIPTION)"
+            :label="$t('views.settings.userGroup.form.groupDesc')"
             variant="outlined"
             density="compact"
             rows="3"
-            placeholder="사용자 그룹에 대한 설명을 입력하세요"
+            :placeholder="$t('views.settings.userGroup.form.placeholderDesc')"
             auto-grow
           ></v-textarea>
         </v-col>
@@ -57,10 +57,10 @@
         <v-col cols="12">
           <v-text-field
             v-model="formData.eventComment"
-            label="비고 / 코멘트"
+            :label="$t('common.comment')"
             variant="outlined"
             density="compact"
-            placeholder="비고사항 입력"
+            :placeholder="$t('common.comment')"
           ></v-text-field>
         </v-col>
       </v-row>
@@ -70,7 +70,7 @@
 
     <!-- 하단 액션 버튼 영역 -->
     <v-card-actions class="pa-4 action-buttons-container">
-      <v-btn variant="outlined" color="secondary" v-on:click="onClose"> 취소 </v-btn>
+      <v-btn variant="outlined" color="secondary" v-on:click="onClose"> {{ $t('common.cancel') }} </v-btn>
 
       <v-spacer></v-spacer>
 
@@ -82,20 +82,18 @@
         :loading="isDeleting"
         class="mr-2"
         v-on:click="onOpenDeleteDialog"
-      >
-        삭제
-      </v-btn>
+      >{{ $t('common.delete') }}</v-btn>
 
       <!-- 저장 / 수정 실행 버튼 -->
       <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave">
-        {{ isCreateMode ? '저장' : '수정' }}
+        {{ isCreateMode ? $t('common.save') : $t('common.edit') }}
       </v-btn>
     </v-card-actions>
 
     <!-- 삭제 확인 모달 -->
     <ConfirmDialog
       v-model="deleteConfirmDialog"
-      :message="'[' + (formData.userGroupName || '선택한') + '] 사용자 그룹을 삭제하시겠습니까?'"
+      :message="$t('common.deleteConfirmMsg', { count: 1 })"
       v-on:confirm="onConfirmDelete"
     />
   </div>
@@ -103,6 +101,7 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { usePanelStore } from '@/stores/panelStore'
 import { useApi } from '@/composables/useApi'
 import { createUserGroupApi, updateUserGroupApi, deleteUserGroupApi } from '@/api/userGroup'
@@ -115,6 +114,7 @@ const props = defineProps({
   },
 })
 
+const { t } = useI18n()
 const panelStore = usePanelStore()
 const formRef = ref(null)
 const deleteConfirmDialog = ref(false)
@@ -123,10 +123,10 @@ const deleteConfirmDialog = ref(false)
 const currentId = ref(null)
 
 const factoryOptions = ['INSERT', 'POWDER', 'COMMON']
-const statusOptions = [
-  { title: '사용 (ACTIVE)', value: 'ACTIVE' },
-  { title: '미사용 (INACTIVE)', value: 'INACTIVE' },
-]
+const statusOptions = computed(() => [
+  { title: t('common.userStatusActive'), value: 'ACTIVE' },
+  { title: t('common.userStatusInactive'), value: 'INACTIVE' },
+])
 
 // useApi를 통한 API 바인딩
 const { loading: isCreating, execute: executeCreate } = useApi(createUserGroupApi)
@@ -181,7 +181,7 @@ function validateRequired(value) {
   if (value !== null && value !== undefined && String(value).trim() !== '') {
     return true
   }
-  return '필수 입력 항목입니다.'
+  return t('validation.required')
 }
 
 function onClose() {
@@ -213,12 +213,12 @@ async function onHandleSave() {
 
     if (isCreateMode.value) {
       await executeCreate(payload)
-      alert('신규 사용자 그룹이 등록되었습니다.')
+      alert(t('common.saveSuccess'))
     } else {
       // 대리키 TSID id 기준으로 수정 요청 수행
       const targetId = currentId.value
       await executeUpdate(targetId, payload)
-      alert('사용자 그룹 정보가 수정되었습니다.')
+      alert(t('common.saveSuccess'))
     }
 
     if (typeof panelStore.onSuccess === 'function') {
@@ -229,7 +229,7 @@ async function onHandleSave() {
     console.error('Save user group failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '사용자 그룹 정보 저장 중 오류가 발생했습니다.'
+      t('common.saveFail')
     alert(errorMsg)
   }
 }
@@ -239,7 +239,7 @@ async function onConfirmDelete() {
     // 대리키 TSID id 기준으로 삭제 요청 수행
     const targetId = currentId.value
     await executeDelete(targetId)
-    alert('사용자 그룹이 삭제되었습니다.')
+    alert(t('common.deleteSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {
       panelStore.onSuccess()
@@ -249,7 +249,7 @@ async function onConfirmDelete() {
     console.error('Delete user group failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '사용자 그룹 삭제 처리 중 오류가 발생했습니다.'
+      t('common.deleteFail')
     alert(errorMsg)
   }
 }

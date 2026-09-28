@@ -14,10 +14,10 @@
         </v-avatar>
         <div>
           <div class="text-subtitle-1 font-weight-bold alarm-title-text">
-            실시간 알람 큐
+            {{ $t('views.alarm.realtimeQueue') }}
           </div>
           <div class="text-caption text-medium-emphasis">
-            최근 {{ alarmStore.alarmList.length }} / 20건 관리 (FIFO)
+            {{ $t('views.alarm.fifoNotice', { count: alarmStore.alarmList.length }) }}
           </div>
         </div>
       </div>
@@ -29,7 +29,7 @@
           variant="text"
           size="small"
           color="grey-lighten-1"
-          title="알람 목록 비우기"
+          :title="$t('views.alarm.clearAlarms')"
           v-on:click="alarmStore.clearAlarms"
         >
           <v-icon icon="$delete" size="18" />
@@ -39,7 +39,7 @@
           variant="text"
           size="small"
           color="white"
-          title="닫기"
+          :title="$t('common.close')"
           v-on:click="alarmStore.closePanel"
         >
           <v-icon icon="$close" size="20" />
@@ -98,7 +98,7 @@
 
           <!-- 알람 메시지 본문 -->
           <div class="alarm-text text-body-2 font-weight-bold mb-2">
-            {{ alarm.alarmText || '알람이 발생했습니다.' }}
+            {{ alarm.alarmText || $t('views.alarm.alarmOccurred') }}
           </div>
 
           <!-- 카드 하단: 발생 일시 -->
@@ -123,10 +123,10 @@
           <v-icon icon="$checkCircle" size="32" color="success" />
         </v-avatar>
         <div class="text-subtitle-1 font-weight-bold text-white mb-1">
-          현재 발생한 알람이 없습니다.
+          {{ $t('views.alarm.noAlarm') }}
         </div>
         <div class="text-caption text-medium-emphasis">
-          설비 및 시스템이 정상 가동 중입니다.
+          {{ $t('views.alarm.systemNormal') }}
         </div>
       </div>
     </div>

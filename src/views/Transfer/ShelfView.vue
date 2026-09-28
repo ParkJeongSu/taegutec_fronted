@@ -5,9 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$warehouse" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">셸프 설비 관리 (Shelf)</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.transfer.shelf.title') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            반송 &gt; 설비 제어 &gt; 셸프
+            {{ $t('views.transfer.shelf.breadcrumb') }}
           </v-chip>
         </div>
 
@@ -20,7 +20,7 @@
             class="font-weight-bold mr-2"
             v-on:click="onAddShelf"
           >
-            신규 등록
+            {{ $t('common.create') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -31,7 +31,7 @@
             :loading="loading"
             v-on:click="handleSearch"
           >
-            새로고침
+            {{ $t('common.refresh') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -41,7 +41,7 @@
             class="font-weight-medium"
             v-on:click="handleExport"
           >
-            엑셀 다운로드
+            {{ $t('common.export') }}
           </v-btn>
         </div>
       </div>
@@ -56,7 +56,7 @@
             <v-select
               v-model="searchParams.factoryName"
               :items="factoryFilterOptions"
-              label="소속 공장"
+              :label="$t('table.factoryName')"
               variant="outlined"
               density="compact"
               hide-details
@@ -68,7 +68,7 @@
             <v-select
               v-model="searchParams.stockerName"
               :items="stockerFilterOptions"
-              label="스토커"
+              :label="$t('views.transfer.shelf.stockerFilter')"
               variant="outlined"
               density="compact"
               hide-details
@@ -79,8 +79,8 @@
           <v-col cols="12" sm="6" md="2">
             <v-text-field
               v-model="searchParams.shelfName"
-              label="셸프 코드 / 명"
-              placeholder="예: 010101"
+              :label="$t('table.shelfCode')"
+              :placeholder="$t('views.transfer.shelf.placeholderShelfEx')"
               variant="outlined"
               density="compact"
               hide-details
@@ -94,7 +94,7 @@
             <v-select
               v-model="searchParams.shelfStatus"
               :items="shelfStatusFilterOptions"
-              label="셸프 상태"
+              :label="$t('views.transfer.shelf.shelfStatus')"
               variant="outlined"
               density="compact"
               hide-details
@@ -106,7 +106,7 @@
             <v-select
               v-model="searchParams.zoneName"
               :items="zoneFilterOptions"
-              label="존(Zone)"
+              :label="$t('table.zone')"
               variant="outlined"
               density="compact"
               hide-details
@@ -118,7 +118,7 @@
             <v-select
               v-model="searchParams.useState"
               :items="useStateFilterOptions"
-              label="사용 여부"
+              :label="$t('table.useYn')"
               variant="outlined"
               density="compact"
               hide-details
@@ -134,7 +134,7 @@
               class="mr-1 font-weight-medium"
               v-on:click="handleSearch"
             >
-              검색
+              {{ $t('common.search') }}
             </v-btn>
             <v-btn
               variant="outlined"
@@ -142,7 +142,7 @@
               class="font-weight-medium"
               v-on:click="handleReset"
             >
-              초기화
+              {{ $t('common.reset') }}
             </v-btn>
           </v-col>
         </v-row>
@@ -152,7 +152,7 @@
       <BaseDataTable
         :headers="headers"
         :items="displayItems"
-        :total-items="totalItems"
+        :total-items="Number(totalItems)"
         :loading="loading"
         item-value="compositeKey"
         density="compact"
@@ -209,7 +209,7 @@
         <template #no-data>
           <div class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>등록된 셸프 데이터가 없습니다.</div>
+            <div>{{ $t('views.transfer.shelf.noData') }}</div>
           </div>
         </template>
       </BaseDataTable>
@@ -218,6 +218,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import ShelfViewForm from './components/ShelfViewForm.vue'
@@ -228,6 +229,8 @@ import { fetchWcsShelvesApi } from '@/api/wcsShelf'
 const panelStore = usePanelStore()
 
 // 검색 파라미터 상태
+const { t } = useI18n()
+
 const searchParams = reactive({
   factoryName: '전체',
   stockerName: '전체',
@@ -245,18 +248,18 @@ const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
 
 // 테이블 컬럼 정의
 const headers = [
-  { title: '소속 공장', key: 'factoryName', align: 'center', width: '100px' },
-  { title: '스토커', key: 'stockerName', align: 'center', width: '90px' },
-  { title: '셸프 코드', key: 'shelfName', align: 'start', width: '120px' },
-  { title: '존(Zone)', key: 'zoneName', align: 'center', width: '110px' },
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
+  { title: t('table.stockerName'), key: 'stockerName', align: 'center', width: '90px' },
+  { title: t('table.shelfCode'), key: 'shelfName', align: 'start', width: '120px' },
+  { title: t('table.zone'), key: 'zoneName', align: 'center', width: '110px' },
   { title: 'Bank', key: 'bank', align: 'center', width: '80px' },
-  { title: 'Bay(열)', key: 'bay', align: 'center', width: '80px' },
-  { title: 'Level(단)', key: 'level', align: 'center', width: '80px' },
-  { title: '셸프 상태', key: 'shelfStatus', align: 'center', width: '110px' },
-  { title: '적재 캐리어/트레이', key: 'carrierId', align: 'center', width: '140px' },
-  { title: '사용 여부', key: 'useState', align: 'center', width: '90px' },
-  { title: '수정자', key: 'eventUser', align: 'center', width: '100px' },
-  { title: '수정일시', key: 'eventTime', align: 'center', width: '160px' },
+  { title: t('table.bay'), key: 'bay', align: 'center', width: '80px' },
+  { title: t('table.level'), key: 'level', align: 'center', width: '80px' },
+  { title: t('table.shelfStatus'), key: 'shelfStatus', align: 'center', width: '110px' },
+  { title: t('table.loadedTrayId'), key: 'carrierId', align: 'center', width: '140px' },
+  { title: t('table.useState'), key: 'useState', align: 'center', width: '90px' },
+  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '100px' },
+  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
 ]
 
 // 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
@@ -348,10 +351,10 @@ function getUseStateColor(state) {
 
 function getUseStateText(state) {
   if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return '사용'
+    return t('common.use')
   }
   if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return '미사용'
+    return t('common.unuse')
   }
   return state || '-'
 }
@@ -381,7 +384,7 @@ function onAddShelf() {
   panelStore.openPanel(markRaw(ShelfViewForm), {
     mode: 'CREATE',
     data: null,
-    title: '신규 셸프 등록',
+    title: t('views.transfer.shelf.createTitle'),
     onSuccess: function () {
       loadData(getSanitizedParams())
     },
@@ -394,7 +397,7 @@ function onRowClick(event, row) {
   panelStore.openPanel(markRaw(ShelfViewForm), {
     mode: 'UPDATE',
     data: itemData,
-    title: '셸프 정보 수정',
+    title: t('views.transfer.shelf.editTitle'),
     onSuccess: function () {
       loadData(getSanitizedParams())
     },
@@ -404,14 +407,14 @@ function onRowClick(event, row) {
 function handleExport() {
   const list = displayItems.value
   if (!list || list.length === 0) {
-    alert('내보낼 셸프 데이터가 없습니다.')
+    alert(t('views.transfer.shelf.exportAlert'))
     return
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    '소속 공장,스토커,셸프 코드,존(Zone),Bank,Bay(열),Level(단),셸프 상태,적재 캐리어/트레이,사용 여부,수정자,수정일시\n'
+    `${t('table.factoryName')},${t('table.stockerName')},${t('table.shelfCode')},${t('table.zone')},${t('table.bank')},${t('table.bay')},${t('table.level')},${t('table.shelfStatus')},${t('table.loadedTrayId')},${t('table.useState')},${t('table.eventUser')},${t('table.eventTime')}\n`
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]

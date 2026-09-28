@@ -5,9 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$robotIndustrial" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">캐리어 관리 (RGV / OHT)</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.transfer.carrier.title') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            반송 &gt; 설비 관리 &gt; 캐리어
+            {{ $t('views.transfer.carrier.breadcrumb') }}
           </v-chip>
         </div>
 
@@ -20,7 +20,7 @@
             class="font-weight-bold mr-2"
             v-on:click="onAddCarrier"
           >
-            신규 등록
+            {{ $t('common.create') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -31,7 +31,7 @@
             :loading="isLoading"
             v-on:click="handleSearch"
           >
-            새로고침
+            {{ $t('common.refresh') }}
           </v-btn>
           <v-btn
             color="secondary"
@@ -41,7 +41,7 @@
             class="font-weight-medium"
             v-on:click="handleExport"
           >
-            엑셀 다운로드
+            {{ $t('common.export') }}
           </v-btn>
         </div>
       </div>
@@ -56,7 +56,7 @@
             <v-select
               v-model="searchParams.factoryName"
               :items="factoryFilterOptions"
-              label="소속 공장"
+              :label="$t('table.factoryName')"
               variant="outlined"
               density="compact"
               hide-details
@@ -67,8 +67,8 @@
           <v-col cols="12" sm="6" md="2">
             <v-text-field
               v-model="searchParams.carrierName"
-              label="캐리어 명 / ID"
-              placeholder="예: RGV-01"
+              :label="$t('table.carrierName')"
+              :placeholder="$t('views.transfer.carrier.placeholderCarrierCode')"
               variant="outlined"
               density="compact"
               hide-details
@@ -82,7 +82,7 @@
             <v-select
               v-model="searchParams.carrierType"
               :items="carrierTypeFilterOptions"
-              label="캐리어 타입"
+              :label="$t('table.carrierType')"
               variant="outlined"
               density="compact"
               hide-details
@@ -94,7 +94,7 @@
             <v-select
               v-model="searchParams.carrierStatus"
               :items="statusFilterOptions"
-              label="동작 상태"
+              :label="$t('table.carrierStatus')"
               variant="outlined"
               density="compact"
               hide-details
@@ -106,7 +106,7 @@
             <v-select
               v-model="searchParams.useState"
               :items="useStateFilterOptions"
-              label="사용 여부"
+              :label="$t('table.useYn')"
               variant="outlined"
               density="compact"
               hide-details
@@ -122,7 +122,7 @@
               class="mr-2 font-weight-medium"
               v-on:click="handleSearch"
             >
-              검색
+              {{ $t('common.search') }}
             </v-btn>
             <v-btn
               variant="outlined"
@@ -130,7 +130,7 @@
               class="font-weight-medium"
               v-on:click="handleReset"
             >
-              초기화
+              {{ $t('common.reset') }}
             </v-btn>
           </v-col>
         </v-row>
@@ -140,7 +140,7 @@
       <BaseDataTable
         :headers="headers"
         :items="displayItems"
-        :total-items="totalItems"
+        :total-items="Number(totalItems)"
         :loading="isLoading"
         item-value="compositeKey"
         density="compact"
@@ -205,7 +205,7 @@
         <template #no-data>
           <div class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>등록된 캐리어 데이터가 없습니다.</div>
+            <div>{{ $t('views.transfer.carrier.noData') }}</div>
           </div>
         </template>
       </BaseDataTable>
@@ -214,6 +214,7 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import CarrierViewForm from './components/CarrierViewForm.vue'
@@ -224,6 +225,8 @@ import { fetchWcsCarriersApi } from '@/api/wcsCarrier'
 const panelStore = usePanelStore()
 
 // 검색 파라미터 상태
+const { t } = useI18n()
+
 const searchParams = reactive({
   factoryName: '전체',
   carrierName: '',
@@ -258,17 +261,17 @@ const totalItems = ref(0)
 
 // 테이블 컬럼 정의
 const headers = [
-  { title: '소속 공장', key: 'factoryName', align: 'center', width: '100px' },
-  { title: '캐리어 ID', key: 'carrierName', align: 'start', width: '120px' },
-  { title: '타입', key: 'carrierType', align: 'center', width: '90px' },
-  { title: '현재 위치 노드', key: 'currentNode', align: 'start', width: '130px' },
-  { title: '목적지 노드', key: 'destNode', align: 'start', width: '130px' },
-  { title: '배터리', key: 'battery', align: 'center', width: '110px' },
-  { title: '동작 상태', key: 'carrierStatus', align: 'center', width: '110px' },
-  { title: '적재 트레이', key: 'loadedTrayId', align: 'center', width: '130px' },
-  { title: '사용 여부', key: 'useState', align: 'center', width: '90px' },
-  { title: '수정자', key: 'eventUser', align: 'center', width: '100px' },
-  { title: '수정일시', key: 'eventTime', align: 'center', width: '160px' },
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
+  { title: t('table.carrierName'), key: 'carrierName', align: 'start', width: '120px' },
+  { title: t('table.carrierType'), key: 'carrierType', align: 'center', width: '90px' },
+  { title: t('table.currentNode'), key: 'currentNode', align: 'start', width: '130px' },
+  { title: t('table.destNode'), key: 'destNode', align: 'start', width: '130px' },
+  { title: t('table.battery'), key: 'battery', align: 'center', width: '110px' },
+  { title: t('table.carrierStatus'), key: 'carrierStatus', align: 'center', width: '110px' },
+  { title: t('table.loadedTrayId'), key: 'loadedTrayId', align: 'center', width: '130px' },
+  { title: t('table.useState'), key: 'useState', align: 'center', width: '90px' },
+  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '100px' },
+  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
 ]
 
 // useApi를 통한 목록 조회 API 바인딩
@@ -367,10 +370,10 @@ function getUseStateColor(state) {
 
 function getUseStateText(state) {
   if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return '사용'
+    return t('common.use')
   }
   if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return '미사용'
+    return t('common.unuse')
   }
   return state || '-'
 }
@@ -443,7 +446,7 @@ function onAddCarrier() {
   panelStore.openPanel(markRaw(CarrierViewForm), {
     mode: 'CREATE',
     data: null,
-    title: '신규 캐리어 등록',
+    title: t('views.transfer.carrier.createTitle'),
     onSuccess: fetchCarriers,
   })
 }
@@ -454,7 +457,7 @@ function onRowClick(event, row) {
   panelStore.openPanel(markRaw(CarrierViewForm), {
     mode: 'UPDATE',
     data: itemData,
-    title: '캐리어 정보 수정',
+    title: t('views.transfer.carrier.editTitle'),
     onSuccess: fetchCarriers,
   })
 }
@@ -462,14 +465,14 @@ function onRowClick(event, row) {
 function handleExport() {
   const list = displayItems.value
   if (!list || list.length === 0) {
-    alert('내보낼 캐리어 데이터가 없습니다.')
+    alert(t('views.transfer.carrier.exportAlert'))
     return
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    '소속 공장,캐리어 ID,타입,현재 위치 노드,목적지 노드,배터리,동작 상태,적재 트레이,사용 여부,수정자,수정일시\n'
+    `${t('table.factoryName')},${t('table.carrierName')},${t('table.carrierType')},${t('table.currentNode')},${t('table.destNode')},${t('table.battery')},${t('table.carrierStatus')},${t('table.loadedTrayId')},${t('table.useState')},${t('table.eventUser')},${t('table.eventTime')}\n`
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]

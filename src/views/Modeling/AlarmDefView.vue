@@ -4,18 +4,18 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$alarmPanel" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">알람 정의 (Alarm Definition)</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.modeling.alarmDef.title') }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            모델링 &gt; 제어 규칙 &gt; 알람 정의
+            {{ $t('views.modeling.alarmDef.breadcrumb') }}
           </v-chip>
         </div>
 
         <div class="d-flex align-center gap-2">
           <v-btn color="primary" variant="flat" size="small" prepend-icon="$refresh" v-on:click="handleSearch">
-            새로고침
+            {{ $t('common.refresh') }}
           </v-btn>
           <v-btn color="secondary" variant="tonal" size="small" prepend-icon="$fileExport" v-on:click="handleExport">
-            엑셀 다운로드
+            {{ $t('common.export') }}
           </v-btn>
         </div>
       </div>
@@ -27,8 +27,8 @@
           <v-col cols="12" sm="4" md="3">
             <v-text-field
               v-model="searchKeyword"
-              label="알람 코드 / 알람명"
-              placeholder="ERR-001 등"
+              :label="$t('views.modeling.alarmDef.alarmCode')"
+              :placeholder="$t('views.modeling.alarmDef.placeholderAlarmCode')"
               variant="outlined"
               density="compact"
               hide-details
@@ -40,7 +40,7 @@
             <v-select
               v-model="statusFilter"
               :items="statusOptions"
-              label="알람 심각도 (Severity)"
+              :label="$t('views.modeling.alarmDef.alarmLevel')"
               variant="outlined"
               density="compact"
               hide-details
@@ -48,10 +48,10 @@
           </v-col>
           <v-col cols="12" sm="4" md="3" class="d-flex align-center">
             <v-btn color="primary" variant="flat" size="small" class="mr-2" v-on:click="handleSearch">
-              검색
+              {{ $t('common.search') }}
             </v-btn>
             <v-btn variant="outlined" size="small" v-on:click="handleReset">
-              초기화
+              {{ $t('common.reset') }}
             </v-btn>
           </v-col>
         </v-row>
@@ -73,7 +73,7 @@
         <template #no-data>
           <div class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>등록된 알람 정의 데이터가 없습니다.</div>
+            <div>{{ $t('views.modeling.alarmDef.noData') }}</div>
           </div>
         </template>
       </BaseDataTable>
@@ -82,9 +82,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 
+const { t } = useI18n()
 const searchKeyword = ref('')
 const statusFilter = ref('전체')
 const isLoading = ref(false)
@@ -92,7 +94,7 @@ const isLoading = ref(false)
 const statusOptions = ['전체', 'CRITICAL', 'MAJOR', 'MINOR', 'INFO']
 
 const headers = [
-  { title: '알람 코드', key: 'alarmCode', align: 'start' },
+  { title: t('table.alarmCode'), key: 'alarmCode', align: 'start' },
   { title: '알람 명칭', key: 'alarmName', align: 'start' },
   { title: '심각도', key: 'severity', align: 'center' },
   { title: '발생 대상 설비', key: 'targetEquipment', align: 'start' },
@@ -133,7 +135,7 @@ function handleReset() {
 }
 
 function handleExport() {
-  alert('알람 정의 목록을 엑셀로 내보냅니다.')
+  alert(t('views.modeling.alarmDef.exportAlert'))
 }
 </script>
 

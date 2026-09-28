@@ -1,5 +1,5 @@
 <template>
-  <DataTableWidget title="프로세스 실시간 상태 모니터링">
+  <DataTableWidget :title="$t('views.production.processStatus.title')">
     <!-- [슬롯 1] 검색 패널 -->
     <template v-slot:search>
       <SearchPanel v-on:search="onSearch">
@@ -8,7 +8,7 @@
           <v-select
             v-model="searchParams.systemName"
             :items="systemNameOptions"
-            label="시스템명"
+            :label="$t('table.systemName')"
             density="compact"
             clearable
             hide-details
@@ -20,7 +20,7 @@
           <v-select
             v-model="searchParams.processGroupName"
             :items="processGroupNameOptions"
-            label="프로세스 그룹명"
+            :label="$t('table.processGroupName')"
             density="compact"
             clearable
             hide-details
@@ -31,7 +31,7 @@
         <v-col cols="12" md="4">
           <v-text-field
             v-model="searchParams.processName"
-            label="프로세스명"
+            :label="$t('table.processName')"
             density="compact"
             clearable
             hide-details
@@ -46,19 +46,19 @@
       <div class="d-flex align-center mr-4">
         <v-switch
           v-model="isAutoRefresh"
-          label="자동 갱신"
+          :label="$t('common.autoRefresh')"
           color="primary"
           hide-details
           density="compact"
           class="mr-2"
         ></v-switch>
         <v-chip v-if="isAutoRefresh" size="small" variant="outlined" color="primary" label>
-          {{ remainingTime }}초 후 갱신
+          {{ $t('common.refreshRemaining', { sec: remainingTime }) }}
         </v-chip>
       </div>
-      <v-btn color="primary" prepend-icon="$refresh" v-on:click="manualSearch">새로고침</v-btn>
+      <v-btn color="primary" prepend-icon="$refresh" v-on:click="manualSearch">{{ $t('common.refresh') }}</v-btn>
       <v-divider vertical class="mx-2"></v-divider>
-      <v-btn color="success" prepend-icon="$fileExcel">엑셀 출력</v-btn>
+      <v-btn color="success" prepend-icon="$fileExcel">{{ $t('common.exportOutput') }}</v-btn>
     </template>
 
     <!-- [슬롯 3] 실제 테이블 (좌우 2분할 구조로 개편) -->
@@ -69,7 +69,7 @@
           <v-card variant="outlined" class="pa-2">
             <div class="d-flex align-center justify-between mb-2 pa-2">
               <span class="text-subtitle-1 font-weight-bold text-success">
-                ● 가동 및 기동중 프로세스 ({{ runningItems.length }}건)
+                {{ $t('views.production.processStatus.runningGroupTitle', { count: runningItems.length }) }}
               </span>
               <v-btn
                 color="error"
@@ -78,7 +78,7 @@
                 :disabled="selectedRunningRows.length === 0"
                 v-on:click="onBatchControl('stop')"
               >
-                선택 일괄 정지
+                {{ $t('views.production.processStatus.batchStop') }}
               </v-btn>
             </div>
             <BaseDataTable
@@ -120,7 +120,7 @@
           <v-card variant="outlined" class="pa-2">
             <div class="d-flex align-center justify-between mb-2 pa-2">
               <span class="text-subtitle-1 font-weight-bold text-error">
-                ● 정지 및 오류 프로세스 ({{ stoppedItems.length }}건)
+                {{ $t('views.production.processStatus.stoppedGroupTitle', { count: stoppedItems.length }) }}
               </span>
               <v-btn
                 color="success"
@@ -129,7 +129,7 @@
                 :disabled="selectedStoppedRows.length === 0"
                 v-on:click="onBatchControl('start')"
               >
-                선택 일괄 시작
+                {{ $t('views.production.processStatus.batchStart') }}
               </v-btn>
             </div>
             <BaseDataTable
@@ -175,7 +175,8 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount, watch, markRaw } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch, markRaw } from 'vue'
+import { useI18n } from 'vue-i18n'
 import DataTableWidget from '@/components/widgets/DataTableWidget.vue'
 import SearchPanel from '@/components/widgets/SearchPanel.vue'
 import ProcessStatusForm from './components/ProcessStatusForm.vue'
@@ -185,46 +186,41 @@ import { fetchProcessApi, controlProcessApi } from '@/api/process'
 import { formatDateTime } from '@/utils/dateUtils'
 import { usePanelStore } from '@/stores/panelStore'
 
+const { t } = useI18n()
 const panelStore = usePanelStore()
 const isAutoRefresh = ref(true)
 const remainingTime = ref(30)
 const REFRESH_INTERVAL = 30
 let timer = null
 
-// 각각의 그리드에서 선택된 항목을 담을 반응형 배열 객체
 const selectedRunningRows = ref([])
 const selectedStoppedRows = ref([])
 
-// 분리 대상 데이터 리스트 정의
 const runningItems = ref([])
 const stoppedItems = ref([])
 
-// 콤보박스 바인딩용 목록
 const systemNameOptions = ref([])
 const processGroupNameOptions = ref([])
 
-// 공통 검색 조건 (상태 select는 제거하고 시스템명, 프로세스명만 유지)
 const searchParams = reactive({
   systemName: null,
   processGroupName: null,
   processName: '',
 })
 
-// 가로 너비 균형과 가독성을 위해 헤더 항목 최적화
-const gridHeaders = [
-  { title: 'PORT', key: 'port', align: 'start', sortable: true },
-  { title: '시스템', key: 'systemName', minWidth: '100px' },
-  { title: '그룹', key: 'processGroupName', minWidth: '100px' },
-  { title: '프로세스명', key: 'processName' },
-  { title: '상태', key: 'status', align: 'center' },
-  { title: 'PID', key: 'pid' },
-  { title: '시간', key: 'startTime' }, // 왼쪽은 startTime, 오른쪽은 endTime 바인딩 유연화
-  { title: '제어', key: 'startAction', align: 'center', sortable: false }, // 시작 혹은 정지 단일 액션화
-]
+const gridHeaders = computed(() => [
+  { title: t('table.port'), key: 'port', align: 'start', sortable: true },
+  { title: t('table.system'), key: 'systemName', minWidth: '100px' },
+  { title: t('table.group'), key: 'processGroupName', minWidth: '100px' },
+  { title: t('table.processName'), key: 'processName' },
+  { title: t('common.status'), key: 'status', align: 'center' },
+  { title: t('table.pid'), key: 'pid' },
+  { title: t('table.time'), key: 'startTime' },
+  { title: t('table.control'), key: 'startAction', align: 'center', sortable: false },
+])
 
 const { items, loading, loadData, updateOptions } = useDataTable(fetchProcessApi)
 
-// 콤보박스 목록 갱신 함수 (중복 제거 및 빈 값 필터링)
 function extractComboOptions(itemList) {
   const systemSet = new Set()
   const groupSet = new Set()
@@ -239,28 +235,23 @@ function extractComboOptions(itemList) {
     }
   }
 
-  // 콤보박스 목록 설정
   systemNameOptions.value = Array.from(systemSet)
   processGroupNameOptions.value = Array.from(groupSet)
 }
 
-// [검색 조건 일치 여부 판별 함수]
 function isMatchFilter(item, searchParams) {
-  // 1. 시스템명: 선택값이 존재할 경우 정확히 일치해야 함
   if (searchParams.systemName) {
     if (item.systemName !== searchParams.systemName) {
       return false
     }
   }
 
-  // 2. 프로세스 그룹명: 선택값이 존재할 경우 정확히 일치해야 함
   if (searchParams.processGroupName) {
     if (item.processGroupName !== searchParams.processGroupName) {
       return false
     }
   }
 
-  // 3. 프로세스명: 입력값이 존재할 경우 대소문자 구분 없이 포함(contain)되어야 함
   if (searchParams.processName && searchParams.processName.trim() !== '') {
     if (!item.processName) {
       return false
@@ -276,7 +267,6 @@ function isMatchFilter(item, searchParams) {
   return true
 }
 
-// [핵심] items와 searchParams를 반영하여 좌/우 그리드로 분류하는 함수
 function filterAndCategorizeItems() {
   const sourceItems = items.value || []
   const newRunningItems = []
@@ -285,12 +275,10 @@ function filterAndCategorizeItems() {
   for (let i = 0; i < sourceItems.length; i++) {
     const item = sourceItems[i]
 
-    // 1. 검색 조건 필터 체크 (조건에 맞지 않으면 건너뜀)
     if (!isMatchFilter(item, searchParams)) {
       continue
     }
 
-    // 2. 가동/비가동 상태에 따라 분류
     const status = item.status ? item.status.toUpperCase() : ''
 
     if (status === 'RUNNING' || status === 'STARTING') {
@@ -307,9 +295,7 @@ function filterAndCategorizeItems() {
   stoppedItems.value = newStoppedItems
 }
 
-// [핵심] 원본 데이터(items)가 백엔드로부터 가동되면 감시(watch)하여 가동/비가동 데이터셋으로 분류
 watch(items, function (newItems) {
-  // 콤보박스 옵션은 전체 원본 데이터 기준으로 1회 추출 유지
   if (systemNameOptions.value.length === 0 && processGroupNameOptions.value.length === 0) {
     extractComboOptions(newItems)
   }
@@ -370,50 +356,42 @@ function getStatusColor(status) {
   return 'grey'
 }
 
-// 단일 시작 명령 전송
 async function onStartProcess(item) {
-  if (!confirm(item.processName + '을(를) 시작하시겠습니까?')) return
+  if (!confirm(t('views.production.processStatus.confirmStart', { name: item.processName }))) return
   try {
     await controlProcessApi(item.port, 'start', { port: item.port })
-    alert('시작 명령을 전달했습니다.')
+    alert(t('views.production.processStatus.cmdSent'))
     onSearch()
   } catch (error) {
-    alert('명령 전송 중 오류가 발생했습니다.')
+    alert(t('views.production.processStatus.cmdError'))
   }
 }
 
-// 단일 정지 명령 전송
 async function onStopProcess(item) {
-  if (!confirm(item.processName + '을(를) 정지하시겠습니까?')) return
+  if (!confirm(t('views.production.processStatus.confirmStop', { name: item.processName }))) return
   try {
     await controlProcessApi(item.port, 'stop', { port: item.port })
-    alert('정지 명령을 전달했습니다.')
+    alert(t('views.production.processStatus.cmdStopSent'))
     onSearch()
   } catch (error) {
-    alert('명령 전송 중 오류가 발생했습니다.')
+    alert(t('views.production.processStatus.cmdError'))
   }
 }
 
-// 밀리초(ms) 단위 대기 함수
 function sleep(ms) {
   return new Promise(function (resolve) {
     setTimeout(resolve, ms)
   })
 }
 
-/**
- * [신규 기능] 상단 다중 체크박스 선택 품목 일괄 가동/정지 제어
- * @param {string} commandType - 'start' 또는 'stop'
- */
 async function onBatchControl(commandType) {
   const targetRows = commandType === 'start' ? selectedStoppedRows.value : selectedRunningRows.value
   if (targetRows.length === 0) return
 
-  const confirmMsg =
-    targetRows.length +
-    '개의 프로세스를 일괄 ' +
-    (commandType === 'start' ? '시작' : '정지') +
-    '하시겠습니까?'
+  const confirmMsg = t('views.production.processStatus.confirmBatchAction', {
+    count: targetRows.length,
+    action: commandType === 'start' ? t('common.start') : t('common.stop'),
+  })
   if (!confirm(confirmMsg)) return
 
   let successCount = 0
@@ -428,16 +406,14 @@ async function onBatchControl(commandType) {
       } catch (error) {
         failCount++
       }
-      // 마지막 요소가 아닐 때만 3초(3000ms) 대기
       if (i < targetRows.length - 1) {
         await sleep(3000)
       }
     }
   }
 
-  alert('명령 전송 완료 (성공: ' + successCount + '건, 실패: ' + failCount + '건)')
+  alert(t('views.production.processStatus.batchResult', { success: successCount, fail: failCount }))
 
-  // 선택 배열 초기화 및 재조회
   if (commandType === 'start') selectedStoppedRows.value = []
   else selectedRunningRows.value = []
 
@@ -446,14 +422,11 @@ async function onBatchControl(commandType) {
 
 function onSearch() {
   loadData(searchParams)
-
-  // 이미 로드된 클라이언트 데이터 내에서 즉시 필터링도 함께 반영
   filterAndCategorizeItems()
 }
 
 function onRowClick(event, row) {
   panelStore.setSelectedItem(row.item, markRaw(ProcessStatusForm), 'Process Status', 'view')
-  // [핵심] 성공 시 실행할 조회 함수를 스토어에 바인딩
   panelStore.onSuccess = onSearch
   panelStore.togglePanel()
 }

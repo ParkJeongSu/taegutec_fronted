@@ -4,13 +4,13 @@
     <v-card class="pa-4">
       <v-card-title class="text-h6 d-flex align-center">
         <v-icon color="error" icon="$error" class="mr-2"></v-icon>
-        삭제 확인
+        {{ $t('common.deleteConfirmTitle') }}
       </v-card-title>
-      <v-card-text>{{ message }}</v-card-text>
+      <v-card-text>{{ message || $t('common.deleteConfirmMsg') }}</v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn variant="text" v-on:click="onCancel">취소</v-btn>
-        <v-btn color="error" variant="elevated" v-on:click="onConfirm">삭제</v-btn>
+        <v-btn variant="text" v-on:click="onCancel">{{ $t('common.cancel') }}</v-btn>
+        <v-btn color="error" variant="elevated" v-on:click="onConfirm">{{ $t('common.delete') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -21,7 +21,7 @@ import { computed } from 'vue'
 
 const props = defineProps({
   modelValue: Boolean,
-  message: { type: String, default: '정말로 삭제하시겠습니까?' },
+  message: { type: String, default: '' },
 })
 const emit = defineEmits(['update:modelValue', 'confirm'])
 

@@ -5,11 +5,11 @@
       <div class="d-flex flex-wrap align-center justify-space-between">
         <div class="d-flex align-center">
           <v-icon icon="$formatListBulleted" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis"
-            >메뉴 관리 (Menu Management)</span
-          >
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.settings.menuMgmt.title')
+          }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
-            설정 &gt; 사용자 및 권한 &gt; 메뉴 관리
+            {{ $t('views.settings.menuMgmt.breadcrumb') }}
           </v-chip>
         </div>
 
@@ -22,9 +22,8 @@
             class="font-weight-medium"
             :loading="isLoading"
             v-on:click="handleSearch"
+            >{{ $t('common.refresh') }}</v-btn
           >
-            전체 새로고침
-          </v-btn>
         </div>
       </div>
     </v-card>
@@ -41,7 +40,7 @@
                 <v-select
                   v-model="selectedFactory"
                   :items="factoryFilterOptions"
-                  label="소속 공장 필터"
+                  :label="$t('views.settings.menuMgmt.factoryFilter')"
                   variant="outlined"
                   density="compact"
                   hide-details
@@ -59,9 +58,8 @@
                   prepend-icon="$plus"
                   class="font-weight-bold"
                   v-on:click="onAddRootMenu"
+                  >{{ $t('views.settings.menuMgmt.addRoot') }}</v-btn
                 >
-                  최상위 추가
-                </v-btn>
                 <v-btn
                   color="primary"
                   variant="tonal"
@@ -70,23 +68,21 @@
                   class="font-weight-medium"
                   :disabled="!selectedMenu || selectedMenu.menuLevel >= 4"
                   v-on:click="onAddChildMenu"
+                  >{{ $t('views.settings.menuMgmt.addChild') }}</v-btn
                 >
-                  하위 추가
-                </v-btn>
               </div>
 
               <div class="d-flex align-center expand-btn-gap">
-                <v-btn variant="text" size="x-small" color="primary" v-on:click="expandAllNodes">
-                  모두 펼치기
-                </v-btn>
+                <v-btn variant="text" size="x-small" color="primary" v-on:click="expandAllNodes">{{
+                  $t('views.settings.menuAuth.expandAll')
+                }}</v-btn>
                 <v-btn
                   variant="text"
                   size="x-small"
                   color="secondary"
                   v-on:click="collapseAllNodes"
+                  >{{ $t('views.settings.menuAuth.collapseAll') }}</v-btn
                 >
-                  모두 접기
-                </v-btn>
               </div>
             </div>
           </div>
@@ -104,7 +100,7 @@
               class="empty-tree-state text-center py-8 text-medium-emphasis"
             >
               <v-icon icon="$formatListBulleted" size="36" color="disabled" class="mb-2" />
-              <div>등록된 메뉴 데이터가 없습니다.</div>
+              <div>{{ $t('views.settings.menuAuth.noMenuData') }}</div>
               <v-btn
                 color="primary"
                 variant="tonal"
@@ -152,7 +148,7 @@
                       resolveMenuIcon(
                         node1.iconName,
                         Boolean(node1.children && node1.children.length > 0),
-                        isExpanded(node1.id)
+                        isExpanded(node1.id),
                       )
                     "
                     size="18"
@@ -207,7 +203,7 @@
                           resolveMenuIcon(
                             node2.iconName,
                             Boolean(node2.children && node2.children.length > 0),
-                            isExpanded(node2.id)
+                            isExpanded(node2.id),
                           )
                         "
                         size="18"
@@ -264,7 +260,7 @@
                               resolveMenuIcon(
                                 node3.iconName,
                                 Boolean(node3.children && node3.children.length > 0),
-                                isExpanded(node3.id)
+                                isExpanded(node3.id),
                               )
                             "
                             size="18"
@@ -433,7 +429,7 @@
               <v-col cols="12" sm="6">
                 <v-text-field
                   v-model="formData.menuId"
-                  label="메뉴 ID (MENU_ID)"
+                  :label="$t('views.settings.menuMgmt.form.menuId')"
                   variant="outlined"
                   density="compact"
                   placeholder="예: DASHBOARD, USER_MGMT"
@@ -534,7 +530,9 @@
           <div v-if="mode !== 'READY'" class="form-bottom-actions pt-4 mt-2">
             <v-divider class="mb-4"></v-divider>
             <div class="d-flex align-center justify-space-between">
-              <v-btn variant="outlined" color="secondary" v-on:click="onCancelForm"> 취소 </v-btn>
+              <v-btn variant="outlined" color="secondary" v-on:click="onCancelForm">{{
+                $t('common.cancel')
+              }}</v-btn>
 
               <div class="d-flex align-center btn-group-gap">
                 <!-- UPDATE 모드일 때 삭제 버튼 제공 -->
@@ -544,9 +542,8 @@
                   variant="outlined"
                   :loading="isDeleting"
                   v-on:click="onOpenDelete"
+                  >{{ $t('common.delete') }}</v-btn
                 >
-                  삭제
-                </v-btn>
 
                 <!-- 저장 / 수정 버튼 -->
                 <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onSave">
@@ -571,11 +568,13 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useApi } from '@/composables/useApi'
 import { fetchMenusApi, createMenuApi, updateMenuApi, deleteMenuApi } from '@/api/menu'
 import { resolveMenuIcon } from '@/utils/menuIconUtils'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
+const { t } = useI18n()
 
 // 공장 옵션 목록
 const factoryFilterOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
@@ -587,14 +586,15 @@ const visibleOptions = [
 ]
 
 const statusOptions = [
-  { title: '사용 (ACTIVE)', value: 'ACTIVE' },
-  { title: '미사용 (INACTIVE)', value: 'INACTIVE' },
+  { title: t('common.userStatusActive'), value: 'ACTIVE' },
+  { title: t('common.userStatusInactive'), value: 'INACTIVE' },
 ]
 
 // 화면 상태 변수
 const mode = ref('READY') // 'READY' | 'CREATE' | 'UPDATE'
 const selectedFactory = ref('전체')
 const selectedMenu = ref(null)
+
 const formRef = ref(null)
 const deleteConfirmDialog = ref(false)
 
@@ -946,7 +946,7 @@ function validateRequired(value) {
   if (value !== null && value !== undefined && String(value).trim() !== '') {
     return true
   }
-  return '필수 입력 항목입니다.'
+  return t('validation.required')
 }
 
 // 삭제 모달 열기 (하위 메뉴 존재 여부 사전에 엄격 검증)
@@ -975,7 +975,7 @@ async function onConfirmDelete() {
     console.error('Delete menu failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '메뉴 삭제 처리 중 오류가 발생했습니다.'
+      t('views.settings.menuMgmt.deleteFail')
     alert(errorMsg)
   }
 }
@@ -1008,11 +1008,11 @@ async function onSave() {
 
     if (mode.value === 'CREATE') {
       await executeCreate(payload)
-      alert('신규 메뉴가 등록되었습니다.')
+      alert(t('common.saveSuccess'))
     } else {
       const targetId = formData.id
       await executeUpdate(targetId, payload)
-      alert('메뉴 정보가 수정되었습니다.')
+      alert(t('common.saveSuccess'))
     }
 
     await fetchMenus()

@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="internalVisible" max-width="900px" scrollable>
+  <v-dialog v-model="internalVisible" max-width="960px" scrollable>
     <v-card class="rounded-lg">
       <!-- 모달 상단 헤더 -->
       <v-card-item class="bg-primary-lighten py-3 px-4">
@@ -9,17 +9,22 @@
             <span class="text-subtitle-1 font-weight-bold text-high-emphasis">
               SAP Idoc 인터페이스 상세 정보
             </span>
-            <v-chip size="small" color="primary" variant="flat" class="ml-3 font-weight-bold">
+            <v-chip
+              size="small"
+              :color="factory === 'POWDER' ? 'secondary' : 'primary'"
+              variant="flat"
+              class="ml-3 font-weight-bold"
+            >
               {{ factory }} 공장
             </v-chip>
             <v-chip
-              v-if="item && item.docNum"
+              v-if="item && (item.idocId || item.docNum)"
               size="small"
               variant="tonal"
               color="indigo"
               class="ml-2 font-weight-medium"
             >
-              문서번호: {{ item.docNum }}
+              IDoc ID: {{ item.idocId || item.docNum }}
             </v-chip>
           </div>
           <v-btn
@@ -55,99 +60,175 @@
         <v-window v-model="activeTab">
           <!-- 탭 1: 마스터 정보 (Key-Value Grid) -->
           <v-window-item value="master">
-            <div v-if="item" class="master-info-card pa-3 rounded bg-grey-lighten-4 mb-3">
-              <v-row density="compact">
+            <div v-if="item" class="master-info-card pa-4 rounded-lg bg-surface mb-3">
+              <!-- 공통 상단 요약 -->
+              <div class="d-flex align-center justify-space-between mb-3 pb-2 border-b">
+                <div class="d-flex align-center">
+                  <span class="text-subtitle-1 font-weight-bold mr-2 text-primary">
+                    {{ item.idocId || '-' }}
+                  </span>
+                  <v-chip
+                    size="x-small"
+                    :color="getIdocTypColor(item.idocTypId)"
+                    variant="flat"
+                    class="font-weight-bold"
+                  >
+                    {{ getIdocTypText(item.idocTypId) }}
+                  </v-chip>
+                </div>
+                <div class="d-flex align-center">
+                  <span class="text-caption text-medium-emphasis mr-2">상태:</span>
+                  <v-chip
+                    size="x-small"
+                    color="primary"
+                    variant="tonal"
+                    class="font-weight-bold mr-2"
+                  >
+                    State: {{ item.state || '-' }}
+                  </v-chip>
+                  <v-chip
+                    :color="isErrorCodeZero(item.errorCode) ? 'success' : 'error'"
+                    size="x-small"
+                    variant="flat"
+                    class="font-weight-bold"
+                  >
+                    Error: {{ item.errorCode != null ? item.errorCode : '-' }}
+                  </v-chip>
+                </div>
+              </div>
+
+              <!-- INSERT 공장 전용 마스터 뷰 (소문자 프로퍼티 완전 대응) -->
+              <v-row v-if="factory === 'INSERT'" density="compact">
                 <v-col cols="12" sm="6" md="4">
-                  <div class="detail-label">문서 번호 (Doc Num)</div>
-                  <div class="detail-value font-weight-bold text-primary">{{ item.docNum || '-' }}</div>
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <div class="detail-label">Line ID</div>
-                  <div class="detail-value font-weight-medium">{{ item.lineId != null ? item.lineId : '-' }}</div>
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <div class="detail-label">IDOC 타입 ID</div>
-                  <div class="detail-value">
-                    <v-chip size="x-small" color="secondary" variant="flat" class="font-weight-bold">
-                      {{ item.idocTypId || item.idocType || '-' }}
-                    </v-chip>
+                  <div class="detail-label">IDoc ID</div>
+                  <div class="detail-value font-weight-bold text-primary">
+                    {{ item.idocId || '-' }}
                   </div>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">오더 ID (corderId)</div>
+                  <div class="detail-value font-weight-bold">
+                    {{ item.corderId || item.cOrderId || '-' }}
+                  </div>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">오더 타입 (corderTy)</div>
+                  <div class="detail-value">{{ item.corderTy || item.cOrderTy || '-' }}</div>
                 </v-col>
 
                 <v-col cols="12" sm="6" md="4">
-                  <div class="detail-label">구분 (Trans Type)</div>
-                  <div class="detail-value">{{ item.transTy || (item.direction ? item.direction : '-') }}</div>
+                  <div class="detail-label">캐리어 명 (ccoId)</div>
+                  <div class="detail-value font-weight-medium">
+                    {{ item.ccoId || item.cCoId || '-' }}
+                  </div>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">작업장 ID (cwcId)</div>
+                  <div class="detail-value font-weight-medium">
+                    {{ item.cwcId || item.cWcId || '-' }}
+                  </div>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">위치 ID (clocId)</div>
+                  <div class="detail-value">{{ item.clocId || item.cLocId || '-' }}</div>
+                </v-col>
+
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">GAL ID (cgalId)</div>
+                  <div class="detail-value">{{ item.cgalId || item.cGalId || '-' }}</div>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">GAL 창고 (cgalWhs)</div>
+                  <div class="detail-value">{{ item.cgalWhs || item.cGalWhs || '-' }}</div>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">요청 존 (creqZone)</div>
+                  <div class="detail-value">{{ item.creqZone || item.cReqZone || '-' }}</div>
+                </v-col>
+
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">트랜잭션 코드 (ctransTy)</div>
+                  <div class="detail-value">{{ item.ctransTy || item.cTransTy || '-' }}</div>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <div class="detail-label">송신처 (Source)</div>
-                  <div class="detail-value">{{ item.source || '-' }}</div>
+                  <div class="detail-value">{{ getSystemName(item.source) }}</div>
                 </v-col>
                 <v-col cols="12" sm="6" md="4">
                   <div class="detail-label">수신처 (Destination)</div>
-                  <div class="detail-value">{{ item.destination || item.dest || '-' }}</div>
-                </v-col>
-
-                <v-col cols="12" sm="6" md="4">
-                  <div class="detail-label">처리 상태 (Status)</div>
-                  <div class="detail-value">
-                    <v-chip
-                      :color="getStatusColor(item.status)"
-                      size="x-small"
-                      variant="flat"
-                      class="font-weight-bold"
-                    >
-                      {{ getStatusText(item.status) }}
-                    </v-chip>
-                  </div>
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <div class="detail-label">에러 코드 (Error Code)</div>
-                  <div class="detail-value">
-                    <v-chip
-                      :color="isErrorCodeZero(item.errorCode) ? 'success' : 'error'"
-                      size="x-small"
-                      variant="tonal"
-                      class="font-weight-bold"
-                    >
-                      {{ item.errorCode != null ? item.errorCode : '-' }}
-                    </v-chip>
-                  </div>
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <div class="detail-label">요청 존 (Req Zone)</div>
-                  <div class="detail-value">{{ item.reqZone || '-' }}</div>
-                </v-col>
-
-                <v-col cols="12" sm="6" md="4">
-                  <div class="detail-label">T-Code</div>
-                  <div class="detail-value">{{ item.tCode || '-' }}</div>
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <div class="detail-label">Arc Key</div>
-                  <div class="detail-value">{{ item.arcKey || '-' }}</div>
-                </v-col>
-                <v-col cols="12" sm="6" md="4">
-                  <div class="detail-label">수정자 (User Mod)</div>
-                  <div class="detail-value">{{ item.usrMod || item.modUser || '-' }}</div>
+                  <div class="detail-value">{{ getSystemName(item.destination) }}</div>
                 </v-col>
 
                 <v-col cols="12" sm="6" md="6">
-                  <div class="detail-label">생성 일시 (Create Time)</div>
-                  <div class="detail-value">{{ formatDateTime(item.createTime || item.crtTime) }}</div>
+                  <div class="detail-label">생성 일시 (dtimeCre)</div>
+                  <div class="detail-value">{{ formatDateTime(item.dtimeCre) }}</div>
                 </v-col>
                 <v-col cols="12" sm="6" md="6">
-                  <div class="detail-label">수정 일시 (Modified Time)</div>
-                  <div class="detail-value">{{ formatDateTime(item.modTime || item.updateTime) }}</div>
+                  <div class="detail-label">수정 일시 (dtimeMod)</div>
+                  <div class="detail-value">{{ formatDateTime(item.dtimeMod) }}</div>
+                </v-col>
+              </v-row>
+
+              <!-- POWDER 공장 전용 마스터 뷰 (소문자 프로퍼티 완전 대응) -->
+              <v-row v-else density="compact">
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">IDoc ID</div>
+                  <div class="detail-value font-weight-bold text-secondary">
+                    {{ item.idocId || '-' }}
+                  </div>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">오더 ID (corderId)</div>
+                  <div class="detail-value font-weight-bold">
+                    {{ item.corderId || item.cOrderId || '-' }}
+                  </div>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">오더 타입 (corderTy)</div>
+                  <div class="detail-value">{{ item.corderTy || item.cOrderTy || '-' }}</div>
                 </v-col>
 
-                <v-col cols="12">
-                  <div class="detail-label">에러 내용 / 설명</div>
-                  <div class="detail-value text-error">
-                    {{ item.errorDescription || item.errDsc || item.responseMsg || '-' }}
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">컨테이너 명 (carrierId)</div>
+                  <div class="detail-value font-weight-bold text-indigo">
+                    {{ item.carrierId || '-' }}
                   </div>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">LOT</div>
+                  <div class="detail-value font-weight-medium">{{ item.lot || '-' }}</div>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">공정 번호 (rrn)</div>
+                  <div class="detail-value">{{ item.rrn || '-' }}</div>
+                </v-col>
+
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">GAL Key</div>
+                  <div class="detail-value">{{ item.galKey || '-' }}</div>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">MNG Key</div>
+                  <div class="detail-value">{{ item.mngKey || '-' }}</div>
+                </v-col>
+                <v-col cols="12" sm="6" md="4">
+                  <div class="detail-label">송신처 / 수신처</div>
+                  <div class="detail-value">
+                    {{ getSystemName(item.source) }} -> {{ getSystemName(item.destination) }}
+                  </div>
+                </v-col>
+
+                <v-col cols="12" sm="6" md="6">
+                  <div class="detail-label">생성 일시 (dtimeCre)</div>
+                  <div class="detail-value">{{ formatDateTime(item.dtimeCre) }}</div>
+                </v-col>
+                <v-col cols="12" sm="6" md="6">
+                  <div class="detail-label">수정 일시 (dtimeMod)</div>
+                  <div class="detail-value">{{ formatDateTime(item.dtimeMod) }}</div>
                 </v-col>
               </v-row>
             </div>
+
             <div v-else class="text-center py-6 text-medium-emphasis">
               선택된 마스터 데이터가 없습니다.
             </div>
@@ -157,7 +238,9 @@
           <v-window-item value="detail">
             <div v-if="isDetailLoading" class="text-center py-8">
               <v-progress-circular indeterminate color="primary" size="36"></v-progress-circular>
-              <div class="mt-2 text-caption text-medium-emphasis">상세 품목 데이터를 불러오는 중입니다...</div>
+              <div class="mt-2 text-caption text-medium-emphasis">
+                상세 품목 데이터를 불러오는 중입니다...
+              </div>
             </div>
 
             <div v-else-if="detailItems.length > 0" class="table-container">
@@ -178,16 +261,34 @@
                 </thead>
                 <tbody>
                   <tr v-for="(detail, idx) in detailItems" :key="idx" class="table-body-row">
-                    <td class="text-center font-weight-medium">{{ detail.itemNo || detail.posnr || (idx + 1) }}</td>
-                    <td class="text-start font-weight-bold text-primary">{{ detail.matNr || detail.materialId || detail.materialNo || '-' }}</td>
+                    <td class="text-center font-weight-medium">
+                      {{ detail.itemNo || detail.posnr || idx + 1 }}
+                    </td>
+                    <td class="text-start font-weight-bold text-primary">
+                      {{ detail.matNr || detail.materialId || detail.materialNo || '-' }}
+                    </td>
                     <td class="text-start">{{ detail.matDesc || detail.materialName || '-' }}</td>
-                    <td class="text-end font-weight-medium">{{ formatNumber(detail.quantity != null ? detail.quantity : (detail.menge != null ? detail.menge : detail.qty)) }}</td>
+                    <td class="text-end font-weight-medium">
+                      {{
+                        formatNumber(
+                          detail.quantity != null
+                            ? detail.quantity
+                            : detail.menge != null
+                              ? detail.menge
+                              : detail.qty,
+                        )
+                      }}
+                    </td>
                     <td class="text-center">{{ detail.unit || detail.meins || '-' }}</td>
-                    <td class="text-center">{{ detail.locationId || detail.lgort || detail.locId || '-' }}</td>
+                    <td class="text-center">
+                      {{ detail.locationId || detail.lgort || detail.locId || '-' }}
+                    </td>
                     <td class="text-center">{{ detail.batchNo || detail.charg || '-' }}</td>
                     <td class="text-start">{{ detail.fromLoc || '-' }}</td>
                     <td class="text-start">{{ detail.toLoc || '-' }}</td>
-                    <td class="text-center text-caption">{{ formatDateTime(detail.createTime) }}</td>
+                    <td class="text-center text-caption">
+                      {{ formatDateTime(detail.createTime) }}
+                    </td>
                   </tr>
                 </tbody>
               </v-table>
@@ -203,7 +304,9 @@
           <v-window-item v-if="isPartAvailable" value="part">
             <div v-if="isPartLoading" class="text-center py-8">
               <v-progress-circular indeterminate color="primary" size="36"></v-progress-circular>
-              <div class="mt-2 text-caption text-medium-emphasis">Part 정보를 불러오는 중입니다...</div>
+              <div class="mt-2 text-caption text-medium-emphasis">
+                Part 정보를 불러오는 중입니다...
+              </div>
             </div>
 
             <div v-else-if="partItems.length > 0" class="table-container">
@@ -222,10 +325,16 @@
                 <tbody>
                   <tr v-for="(part, pIdx) in partItems" :key="pIdx" class="table-body-row">
                     <td class="text-center font-weight-medium">{{ pIdx + 1 }}</td>
-                    <td class="text-start font-weight-bold text-primary">{{ part.partNo || part.partId || '-' }}</td>
+                    <td class="text-start font-weight-bold text-primary">
+                      {{ part.partNo || part.partId || '-' }}
+                    </td>
                     <td class="text-start">{{ part.partDesc || part.partName || '-' }}</td>
-                    <td class="text-start font-weight-medium">{{ part.lotId || part.lotNo || '-' }}</td>
-                    <td class="text-end font-weight-medium">{{ formatNumber(part.qty != null ? part.qty : part.quantity) }}</td>
+                    <td class="text-start font-weight-medium">
+                      {{ part.lotId || part.lotNo || '-' }}
+                    </td>
+                    <td class="text-end font-weight-medium">
+                      {{ formatNumber(part.qty != null ? part.qty : part.quantity) }}
+                    </td>
                     <td class="text-center">
                       <v-chip size="x-small" variant="flat" color="info">
                         {{ part.status || '-' }}
@@ -328,8 +437,41 @@ function closeModal() {
   internalVisible.value = false
 }
 
+function getIdocTypColor(type) {
+  if (type === 'I') return 'primary'
+  if (type === 'O') return 'success'
+  if (type === 'R') return 'warning'
+  return 'secondary'
+}
+
+function getIdocTypText(type) {
+  if (type === 'I') return '입고(I)'
+  if (type === 'O') return '출고(O)'
+  if (type === 'R') return '재배치(R)'
+  return type || '-'
+}
+
+function getSystemName(code) {
+  if (code === '20') return 'ERP(20)'
+  if (code === '1') return 'WMS(1)'
+  return code || '-'
+}
+
+function isErrorCodeZero(code) {
+  if (code === null || code === undefined || code === '' || code === '-') return true
+  const str = String(code).trim()
+  return str === '0' || str === '00' || str === 'SUCCESS' || str === 'OK'
+}
+
+function formatNumber(value) {
+  if (value === null || value === undefined || value === '') return '0'
+  const num = Number(value)
+  return isNaN(num) ? String(value) : num.toLocaleString()
+}
+
 async function loadDetailData() {
-  if (!props.item || !props.item.docNum) {
+  const targetId = props.item ? props.item.idocId || props.item.docNum : null
+  if (!targetId) {
     detailItems.value = []
     return
   }
@@ -339,8 +481,8 @@ async function loadDetailData() {
 
   try {
     const params = {
-      docNum: props.item.docNum,
-      lineId: props.item.lineId,
+      docNum: targetId,
+      lineId: props.item.lineId != null ? props.item.lineId : targetId,
       factoryName: props.factory,
       page: 0,
       size: 100,
@@ -367,7 +509,8 @@ async function loadDetailData() {
 }
 
 async function loadPartData() {
-  if (!props.item || !props.item.docNum) {
+  const targetId = props.item ? props.item.idocId || props.item.docNum : null
+  if (!targetId) {
     partItems.value = []
     return
   }
@@ -377,8 +520,8 @@ async function loadPartData() {
 
   try {
     const params = {
-      docNum: props.item.docNum,
-      lineId: props.item.lineId,
+      docNum: targetId,
+      lineId: props.item.lineId != null ? props.item.lineId : targetId,
       factoryName: props.factory,
       page: 0,
       size: 100,
@@ -403,48 +546,13 @@ async function loadPartData() {
     isPartLoading.value = false
   }
 }
-
-function isErrorCodeZero(code) {
-  if (code === null || code === undefined || code === '') return true
-  const str = String(code).trim()
-  return str === '0' || str === '00' || str === 'SUCCESS' || str === 'OK'
-}
-
-function getStatusColor(status) {
-  if (status === null || status === undefined || status === '') return 'grey'
-  const s = String(status).toUpperCase()
-  if (s === 'SUCCESS' || s === 'PROCESSED' || s === '0' || s === 'DONE') {
-    return 'success'
-  }
-  if (s === 'PENDING' || s === 'RECEIVED' || s === '1' || s === 'WAITING') {
-    return 'warning'
-  }
-  if (s === 'ERROR' || s === 'FAIL' || s === 'FAILED' || s === '2') {
-    return 'error'
-  }
-  return 'grey'
-}
-
-function getStatusText(status) {
-  if (status === null || status === undefined || status === '') return '-'
-  const s = String(status).toUpperCase()
-  if (s === '0') return 'SUCCESS(0)'
-  if (s === '1') return 'PENDING(1)'
-  if (s === '2') return 'ERROR(2)'
-  return status
-}
-
-function formatNumber(value) {
-  if (value === null || value === undefined || value === '') return '0'
-  const num = Number(value)
-  return isNaN(num) ? String(value) : num.toLocaleString()
-}
 </script>
 
 <style scoped>
 .modal-content-area {
   max-height: 70vh;
   overflow-y: auto;
+  background-color: #f8fafc;
 }
 
 .bg-primary-lighten {
@@ -452,18 +560,19 @@ function formatNumber(value) {
 }
 
 .master-info-card {
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
 }
 
 .detail-label {
   font-size: 0.75rem;
-  color: rgba(0, 0, 0, 0.6);
+  color: #64748b;
+  font-weight: 500;
   margin-bottom: 2px;
 }
 
 .detail-value {
   font-size: 0.875rem;
-  color: rgba(0, 0, 0, 0.87);
+  color: #0f172a;
   margin-bottom: 8px;
   word-break: break-all;
 }

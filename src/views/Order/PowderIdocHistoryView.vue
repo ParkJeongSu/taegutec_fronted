@@ -5,7 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$fileImport" size="24" color="secondary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.order.powderIdoc.title') }}</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.order.powderIdoc.title')
+          }}</span>
           <v-chip size="small" color="secondary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.order.powderIdoc.breadcrumb') }}
           </v-chip>
@@ -44,36 +46,11 @@
       <!-- 검색 필터 패널 -->
       <div class="search-filter-panel mb-4 pa-3 rounded bg-grey-lighten-4">
         <v-row density="compact" class="align-center">
-          <!-- 조회 시작일 -->
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
-              v-model="searchParams.startDate"
-              :label="$t('common.startDate')"
-              type="date"
-              variant="outlined"
-              density="compact"
-              hide-details
-            ></v-text-field>
-          </v-col>
-
-          <!-- 조회 종료일 -->
-          <v-col cols="12" sm="6" md="3" lg="2">
-            <v-text-field
-              v-model="searchParams.endDate"
-              :label="$t('common.endDate')"
-              type="date"
-              variant="outlined"
-              density="compact"
-              hide-details
-            ></v-text-field>
-          </v-col>
-
-          <!-- 문서 번호 / Idoc Key -->
-          <v-col cols="12" sm="6" md="3" lg="2">
-            <v-text-field
-              v-model="searchParams.docNum"
-              :label="$t('table.docNum')"
-              :placeholder="$t('views.order.powderIdoc.placeholderDocNum')"
+              v-model="searchParams.idocId"
+              label="IDoc ID"
+              placeholder="502529317"
               variant="outlined"
               density="compact"
               hide-details
@@ -82,26 +59,11 @@
             ></v-text-field>
           </v-col>
 
-          <!-- Line ID -->
-          <v-col cols="12" sm="6" md="3" lg="1">
-            <v-text-field
-              v-model="searchParams.lineId"
-              label="Line ID"
-              placeholder="1"
-              type="number"
-              variant="outlined"
-              density="compact"
-              hide-details
-              v-on:keyup.enter="handleSearch"
-            ></v-text-field>
-          </v-col>
-
-          <!-- IDOC 타입 ID -->
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
-              v-model="searchParams.idocTypId"
-              :label="$t('table.idocType')"
-              placeholder="예: 19 (Part포함), 01"
+              v-model="searchParams.corderId"
+              :label="$t('table.cOrderId') || '오더 ID'"
+              placeholder="502529313"
               variant="outlined"
               density="compact"
               hide-details
@@ -110,59 +72,30 @@
             ></v-text-field>
           </v-col>
 
-          <!-- 구분 (Inbound / Outbound) -->
-          <v-col cols="12" sm="6" md="3" lg="1">
-            <v-select
-              v-model="searchParams.transTy"
-              :items="['전체', 'INBOUND', 'OUTBOUND']"
-              :label="$t('table.orderNo')"
-              variant="outlined"
-              density="compact"
-              hide-details
-            ></v-select>
-          </v-col>
-
-          <!-- 처리 상태 -->
-          <v-col cols="12" sm="6" md="3" lg="2">
-            <v-select
-              v-model="searchParams.status"
-              :items="statusFilterOptions"
-              :label="$t('table.status')"
-              variant="outlined"
-              density="compact"
-              hide-details
-            ></v-select>
-          </v-col>
-
-          <!-- 송신처 (Source) -->
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
-              v-model="searchParams.source"
-              :label="$t('table.source')"
-              placeholder="SAP"
+              v-model="searchParams.carrierId"
+              :label="$t('table.carrierId') || '컨테이너 명'"
+              placeholder="CONT-01"
               variant="outlined"
               density="compact"
               hide-details
-              prepend-inner-icon="$magnify"
               v-on:keyup.enter="handleSearch"
             ></v-text-field>
           </v-col>
 
-          <!-- 수신처 (Dest) -->
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
-              v-model="searchParams.destination"
-              :label="$t('table.target')"
-              placeholder="WCS"
+              v-model="searchParams.lot"
+              :label="$t('table.lot') || 'LOT'"
+              placeholder="LOT-1001"
               variant="outlined"
               density="compact"
               hide-details
-              prepend-inner-icon="$magnify"
               v-on:keyup.enter="handleSearch"
             ></v-text-field>
           </v-col>
 
-          <!-- 에러 코드 -->
           <v-col cols="12" sm="6" md="3" lg="2">
             <v-text-field
               v-model="searchParams.errorCode"
@@ -175,8 +108,7 @@
             ></v-text-field>
           </v-col>
 
-          <!-- 검색 및 초기화 버튼 -->
-          <v-col cols="12" sm="6" md="6" lg="6" class="d-flex align-center">
+          <v-col cols="12" sm="6" md="3" lg="2" class="d-flex align-center">
             <v-btn
               color="primary"
               variant="flat"
@@ -198,64 +130,68 @@
         </v-row>
       </div>
 
-      <!-- 중앙 데이터 테이블 (useDataTable 컴포저블 전담 연동) -->
+      <!-- BaseDataTable -->
       <BaseDataTable
         :headers="headers"
         :items="displayItems"
         :total-items="Number(totalItems)"
         :loading="loading"
-        item-value="compositeKey"
+        item-value="idocId"
         density="compact"
         v-on:update:options="onUpdateOptions"
         v-on:dblclick:row="onRowDblClick"
       >
-        <!-- 문서 번호 하이라이트 -->
-        <template #[`item.docNum`]="{ item }">
-          <span class="font-weight-bold text-secondary cursor-pointer">{{ item.docNum }}</span>
+        <!-- IDoc ID 컬럼 강조 -->
+        <template #[`item.idocId`]="{ item }">
+          <span class="font-weight-bold text-secondary cursor-pointer">{{ item.idocId }}</span>
         </template>
 
-        <!-- IDOC 타입 ID 칩 (타입 19인 경우 Part 뱃지 추가) -->
+        <!-- IDOC TypId 칩 (I/O/R) -->
         <template #[`item.idocTypId`]="{ item }">
-          <div class="d-flex align-center justify-center">
-            <v-chip size="x-small" color="secondary" variant="tonal" class="font-weight-bold mr-1">
-              {{ item.idocTypId || item.idocType || '-' }}
-            </v-chip>
-            <v-chip
-              v-if="String(item.idocTypId || item.idocType) === '19'"
-              size="x-small"
-              color="indigo"
-              variant="flat"
-              class="font-weight-bold"
-            >
-              Part포함
-            </v-chip>
-          </div>
+          <v-chip
+            size="x-small"
+            :color="getIdocTypColor(item.idocTypId)"
+            variant="flat"
+            class="font-weight-bold"
+          >
+            {{ getIdocTypText(item.idocTypId) }}
+          </v-chip>
         </template>
 
-        <!-- 구분(Trans Type) 칩 -->
-        <template #[`item.transTy`]="{ item }">
+        <!-- 오더 타입 (corderTy) -->
+        <template #[`item.corderTy`]="{ item }">
           <v-chip
-            v-if="item.transTy || item.direction"
             size="x-small"
-            variant="flat"
-            :color="(item.transTy === 'INBOUND' || item.direction === 'INBOUND') ? 'blue-grey' : 'teal'"
-            class="font-weight-medium"
+            :color="item.corderTy === 'O' ? 'success' : 'primary'"
+            variant="tonal"
+            class="font-weight-bold"
           >
-            {{ item.transTy || item.direction }}
+            {{
+              item.corderTy === 'O' ? '출고(O)' : item.corderTy === 'I' ? '입고(I)' : item.corderTy
+            }}
+          </v-chip>
+        </template>
+
+        <!-- 컨테이너 명 강조 -->
+        <template #[`item.carrierId`]="{ item }">
+          <v-chip
+            v-if="item.carrierId && item.carrierId !== '-'"
+            size="x-small"
+            color="indigo"
+            variant="tonal"
+            class="font-weight-bold"
+          >
+            {{ item.carrierId }}
           </v-chip>
           <span v-else class="text-medium-emphasis">-</span>
         </template>
 
-        <!-- 처리 상태 칩 -->
-        <template #[`item.status`]="{ item }">
-          <v-chip
-            :color="getStatusColor(item.status)"
-            size="x-small"
-            variant="flat"
-            class="font-weight-bold"
-          >
-            {{ getStatusText(item.status) }}
-          </v-chip>
+        <!-- Source / Destination 시스템명 렌더링 -->
+        <template #[`item.source`]="{ item }">
+          <span>{{ getSystemName(item.source) }}</span>
+        </template>
+        <template #[`item.destination`]="{ item }">
+          <span>{{ getSystemName(item.destination) }}</span>
         </template>
 
         <!-- 에러 코드 칩 -->
@@ -270,39 +206,20 @@
           </v-chip>
         </template>
 
-        <!-- 에러 내용 말줄임 및 툴팁 -->
-        <template #[`item.errorDescription`]="{ item }">
-          <span :title="item.errorDescription || item.errDsc || item.responseMsg" class="error-text-cell">
-            {{ item.errorDescription || item.errDsc || item.responseMsg || '-' }}
-          </span>
+        <!-- 생성 일시 -->
+        <template #[`item.dtimeCre`]="{ item }">
+          <span class="text-caption">{{ formatDateTime(item.dtimeCre) }}</span>
         </template>
 
-        <!-- 생성 일시 포맷팅 -->
-        <template #[`item.createTime`]="{ item }">
-          <span class="text-caption">{{ formatDateTime(item.createTime || item.crtTime) }}</span>
-        </template>
-
-        <!-- 수정 일시 포맷팅 -->
-        <template #[`item.modTime`]="{ item }">
-          <span class="text-caption">{{ formatDateTime(item.modTime || item.updateTime) }}</span>
-        </template>
-
-        <!-- 데이터 없음 슬롯 -->
-        <template #no-data>
-          <div class="text-center py-6 text-medium-emphasis">
-            <v-icon icon="$table" size="36" color="disabled" class="mb-2" />
-            <div>{{ $t('views.order.powderIdoc.noData') }}</div>
-          </div>
+        <!-- 수정 일시 -->
+        <template #[`item.dtimeMod`]="{ item }">
+          <span class="text-caption">{{ formatDateTime(item.dtimeMod) }}</span>
         </template>
       </BaseDataTable>
     </v-card>
 
     <!-- 공통 상세 조회 모달 -->
-    <IdocDetailModal
-      v-model="isDetailModalOpen"
-      :item="selectedItem"
-      factory="POWDER"
-    />
+    <IdocDetailModal v-model="isDetailModalOpen" :item="selectedItem" factory="POWDER" />
   </v-container>
 </template>
 
@@ -318,39 +235,43 @@ import { formatDateTime } from '@/utils/dateUtils'
 const { t } = useI18n()
 
 const searchParams = reactive({
-  startDate: '',
-  endDate: '',
-  docNum: '',
-  lineId: '',
-  idocTypId: '',
-  transTy: '전체',
-  status: '전체',
-  source: '',
-  destination: '',
+  idocId: '',
+  corderId: '',
+  carrierId: '',
+  lot: '',
   errorCode: '',
 })
 
-const statusFilterOptions = ['전체', '0', '1', '2', 'SUCCESS', 'PENDING', 'ERROR']
+const headers = computed(function () {
+  return [
+    { title: 'IDoc ID', key: 'idocId', align: 'start', width: '120px', sortable: true },
+    { title: t('table.idocTypId') || '구분', key: 'idocTypId', align: 'center', width: '90px' },
+    { title: t('table.cOrderId') || '오더 ID', key: 'corderId', align: 'start', width: '120px' },
+    { title: t('table.cOrderTy') || '오더 타입', key: 'corderTy', align: 'center', width: '95px' },
+    {
+      title: t('table.carrierId') || '컨테이너 명',
+      key: 'carrierId',
+      align: 'center',
+      width: '110px',
+    },
+    { title: t('table.lot') || 'LOT', key: 'lot', align: 'start', width: '110px' },
+    { title: t('table.processRrn') || '공정 번호', key: 'rrn', align: 'center', width: '100px' },
+    { title: t('table.galKey') || 'GAL Key', key: 'galKey', align: 'center', width: '100px' },
+    { title: t('table.mngKey') || 'MNG Key', key: 'mngKey', align: 'center', width: '100px' },
+    { title: t('table.state') || '상태', key: 'state', align: 'center', width: '80px' },
+    {
+      title: t('views.order.idocModal.labels.errorCode') || '에러코드',
+      key: 'errorCode',
+      align: 'center',
+      width: '90px',
+    },
+    { title: t('table.source') || '송신처', key: 'source', align: 'center', width: '95px' },
+    { title: t('table.target') || '수신처', key: 'destination', align: 'center', width: '95px' },
+    { title: t('table.dtimeCre') || '생성 시간', key: 'dtimeCre', align: 'center', width: '150px' },
+    { title: t('table.dtimeMod') || '수정 시간', key: 'dtimeMod', align: 'center', width: '150px' },
+  ]
+})
 
-const headers = [
-  { title: t('table.docNum'), key: 'docNum', align: 'start', width: '160px', sortable: true },
-  { title: 'Line ID', key: 'lineId', align: 'center', width: '90px' },
-  { title: t('table.idocType'), key: 'idocTypId', align: 'center', width: '140px' },
-  { title: t('table.orderNo'), key: 'transTy', align: 'center', width: '110px' },
-  { title: t('table.source'), key: 'source', align: 'center', width: '100px' },
-  { title: t('table.target'), key: 'destination', align: 'center', width: '100px' },
-  { title: t('table.status'), key: 'status', align: 'center', width: '110px' },
-  { title: t('views.order.idocModal.labels.errorCode'), key: 'errorCode', align: 'center', width: '100px' },
-  { title: t('views.order.idocModal.labels.errorText'), key: 'errorDescription', align: 'start', width: '180px' },
-  { title: t('table.zone'), key: 'reqZone', align: 'center', width: '100px' },
-  { title: 'T-Code', key: 'tCode', align: 'center', width: '100px' },
-  { title: 'Arc Key', key: 'arcKey', align: 'center', width: '100px' },
-  { title: t('table.createTime'), key: 'createTime', align: 'center', width: '160px' },
-  { title: t('table.eventTime'), key: 'modTime', align: 'center', width: '160px' },
-  { title: t('table.eventUser'), key: 'usrMod', align: 'center', width: '100px' },
-]
-
-// 1. 역할 분리 아키텍처: useDataTable 컴포저블 전담 연동
 const { items, totalItems, loading, options, loadData, updateOptions } =
   useDataTable(fetchGalInterfacesApi)
 
@@ -361,38 +282,25 @@ function getSanitizedParams() {
   const params = {
     factoryName: 'POWDER',
   }
-
-  if (searchParams.docNum && searchParams.docNum.trim() !== '') {
-    params.docNum = searchParams.docNum.trim()
+  if (searchParams.idocId && searchParams.idocId.trim() !== '') {
+    params.idocId = searchParams.idocId.trim()
   }
-  if (searchParams.lineId !== '' && searchParams.lineId !== null && searchParams.lineId !== undefined) {
-    params.lineId = Number(searchParams.lineId)
+  if (searchParams.corderId && searchParams.corderId.trim() !== '') {
+    params.corderId = searchParams.corderId.trim()
   }
-  if (searchParams.idocTypId && searchParams.idocTypId.trim() !== '') {
-    params.idocTypId = searchParams.idocTypId.trim()
+  if (searchParams.carrierId && searchParams.carrierId.trim() !== '') {
+    params.carrierId = searchParams.carrierId.trim()
   }
-  if (searchParams.transTy && searchParams.transTy !== '전체') {
-    params.transTy = searchParams.transTy
+  if (searchParams.lot && searchParams.lot.trim() !== '') {
+    params.lot = searchParams.lot.trim()
   }
-  if (searchParams.status && searchParams.status !== '전체') {
-    params.status = searchParams.status
-  }
-  if (searchParams.source && searchParams.source.trim() !== '') {
-    params.source = searchParams.source.trim()
-  }
-  if (searchParams.destination && searchParams.destination.trim() !== '') {
-    params.destination = searchParams.destination.trim()
-  }
-  if (searchParams.errorCode !== '' && searchParams.errorCode !== null && searchParams.errorCode !== undefined) {
+  if (
+    searchParams.errorCode !== '' &&
+    searchParams.errorCode !== null &&
+    searchParams.errorCode !== undefined
+  ) {
     params.errorCode = searchParams.errorCode.trim()
   }
-  if (searchParams.startDate) {
-    params.startDate = searchParams.startDate + 'T00:00:00'
-  }
-  if (searchParams.endDate) {
-    params.endDate = searchParams.endDate + 'T23:59:59'
-  }
-
   return params
 }
 
@@ -403,27 +311,23 @@ const displayItems = computed(function () {
   for (let i = 0; i < list.length; i++) {
     const raw = list[i]
     if (raw) {
-      const docNum = raw.docNum || raw.idocNumber || ''
-      const lineId = raw.lineId != null ? raw.lineId : 1
-
       result.push({
         ...raw,
-        compositeKey: docNum + '_' + lineId,
-        docNum: docNum,
-        lineId: lineId,
-        idocTypId: raw.idocTypId || raw.idocType || raw.msgType || '',
-        transTy: raw.transTy || raw.direction || '',
-        source: raw.source || '',
-        destination: raw.destination || raw.dest || '',
-        status: raw.status != null ? raw.status : '',
-        errorCode: raw.errorCode != null ? raw.errorCode : '',
-        errorDescription: raw.errorDescription || raw.errDsc || raw.responseMsg || '',
-        reqZone: raw.reqZone || '',
-        tCode: raw.tCode || '',
-        arcKey: raw.arcKey || '',
-        createTime: raw.createTime || raw.crtTime || raw.receivedAt || null,
-        modTime: raw.modTime || raw.updateTime || null,
-        usrMod: raw.usrMod || raw.modUser || '',
+        idocId: raw.idocId != null ? String(raw.idocId) : '-',
+        idocTypId: raw.idocTypId || '-',
+        state: raw.state || '-',
+        errorCode: raw.errorCode != null ? String(raw.errorCode) : '-',
+        source: raw.source || '-',
+        destination: raw.destination || '-',
+        dtimeCre: raw.dtimeCre || null,
+        dtimeMod: raw.dtimeMod || null,
+        corderId: raw.corderId || raw.cOrderId || '-',
+        corderTy: raw.corderTy || raw.cOrderTy || '-',
+        rrn: raw.rrn || '-',
+        lot: raw.lot || '-',
+        galKey: raw.galKey || '-',
+        carrierId: raw.carrierId || '-',
+        mngKey: raw.mngKey || '-',
       })
     }
   }
@@ -431,34 +335,30 @@ const displayItems = computed(function () {
   return result
 })
 
+function getIdocTypColor(type) {
+  if (type === 'I') return 'primary'
+  if (type === 'O') return 'success'
+  if (type === 'R') return 'warning'
+  return 'secondary'
+}
+
+function getIdocTypText(type) {
+  if (type === 'I') return '입고(I)'
+  if (type === 'O') return '출고(O)'
+  if (type === 'R') return '재배치(R)'
+  return type || '-'
+}
+
+function getSystemName(code) {
+  if (code === '20') return 'ERP(20)'
+  if (code === '1') return 'WMS(1)'
+  return code || '-'
+}
+
 function isErrorCodeZero(code) {
-  if (code === null || code === undefined || code === '') return true
+  if (code === null || code === undefined || code === '' || code === '-') return true
   const str = String(code).trim()
   return str === '0' || str === '00' || str === 'SUCCESS' || str === 'OK'
-}
-
-function getStatusColor(status) {
-  if (status === null || status === undefined || status === '') return 'grey'
-  const s = String(status).toUpperCase()
-  if (s === 'SUCCESS' || s === 'PROCESSED' || s === '0' || s === 'DONE') {
-    return 'success'
-  }
-  if (s === 'PENDING' || s === 'RECEIVED' || s === '1' || s === 'WAITING') {
-    return 'warning'
-  }
-  if (s === 'ERROR' || s === 'FAIL' || s === 'FAILED' || s === '2') {
-    return 'error'
-  }
-  return 'grey'
-}
-
-function getStatusText(status) {
-  if (status === null || status === undefined || status === '') return '-'
-  const s = String(status).toUpperCase()
-  if (s === '0') return 'SUCCESS(0)'
-  if (s === '1') return 'PENDING(1)'
-  if (s === '2') return 'ERROR(2)'
-  return status
 }
 
 function handleSearch() {
@@ -467,15 +367,10 @@ function handleSearch() {
 }
 
 function handleReset() {
-  searchParams.startDate = ''
-  searchParams.endDate = ''
-  searchParams.docNum = ''
-  searchParams.lineId = ''
-  searchParams.idocTypId = ''
-  searchParams.transTy = '전체'
-  searchParams.status = '전체'
-  searchParams.source = ''
-  searchParams.destination = ''
+  searchParams.idocId = ''
+  searchParams.corderId = ''
+  searchParams.carrierId = ''
+  searchParams.lot = ''
   searchParams.errorCode = ''
   options.page = 0
   loadData(getSanitizedParams())
@@ -486,7 +381,7 @@ function onUpdateOptions(newOptions) {
 }
 
 function onRowDblClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   if (itemData) {
     selectedItem.value = itemData
     isDetailModalOpen.value = true
@@ -496,33 +391,33 @@ function onRowDblClick(event, row) {
 function handleExport() {
   const list = displayItems.value
   if (!list || list.length === 0) {
-    alert(t('common.noDataToExport'))
+    alert(t('common.noDataToExport') || '내보낼 데이터가 없습니다.')
     return
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    `${t('table.docNum')},LineID,${t('table.idocType')},${t('table.orderNo')},${t('table.source')},${t('table.target')},${t('table.status')},${t('views.order.idocModal.labels.errorCode')},${t('views.order.idocModal.labels.errorText')},${t('table.zone')},T-Code,ArcKey,${t('table.createTime')},${t('table.eventTime')},${t('table.eventUser')}\n`
+    'IDoc ID,IDOC 구분,오더 ID,오더 타입,컨테이너 명,LOT,공정 번호,GAL Key,MNG Key,상태,에러코드,송신처,수신처,생성 시간,수정 시간\n'
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]
     const row = [
-      item.docNum || '',
-      item.lineId != null ? item.lineId : '',
+      item.idocId || '',
       item.idocTypId || '',
-      item.transTy || '',
-      item.source || '',
-      item.destination || '',
-      getStatusText(item.status),
-      item.errorCode != null ? item.errorCode : '',
-      '"' + (item.errorDescription ? item.errorDescription.replace(/"/g, '""') : '') + '"',
-      item.reqZone || '',
-      item.tCode || '',
-      item.arcKey || '',
-      formatDateTime(item.createTime),
-      formatDateTime(item.modTime),
-      item.usrMod || '',
+      item.corderId || '',
+      item.corderTy || '',
+      item.carrierId || '',
+      item.lot || '',
+      item.rrn || '',
+      item.galKey || '',
+      item.mngKey || '',
+      item.state || '',
+      item.errorCode || '',
+      getSystemName(item.source),
+      getSystemName(item.destination),
+      formatDateTime(item.dtimeCre),
+      formatDateTime(item.dtimeMod),
     ]
     csvContent = csvContent + row.join(',') + '\n'
   }
@@ -530,7 +425,10 @@ function handleExport() {
   const encodedUri = encodeURI(csvContent)
   const link = document.createElement('a')
   link.setAttribute('href', encodedUri)
-  link.setAttribute('download', 'POWDER_IdocHistory_' + new Date().toISOString().slice(0, 10) + '.csv')
+  link.setAttribute(
+    'download',
+    'POWDER_IdocHistory_' + new Date().toISOString().slice(0, 10) + '.csv',
+  )
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -545,24 +443,12 @@ onMounted(function () {
 .view-page-container {
   max-width: 100%;
 }
-
 .search-filter-panel {
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
-
 .action-button-group {
   gap: 8px;
 }
-
-.error-text-cell {
-  display: block;
-  max-width: 180px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: rgb(var(--v-theme-error));
-}
-
 .cursor-pointer {
   cursor: pointer;
 }

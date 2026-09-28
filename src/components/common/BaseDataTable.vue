@@ -1,4 +1,3 @@
-<!-- src/components/common/BaseDataTable.vue -->
 <template>
   <v-data-table-server
     v-model="selectedItems"
@@ -12,6 +11,7 @@
     :fixed-header="fixedHeader"
     :item-value="itemValue"
     :show-select="showSelect"
+    :row-props="getRowProps"
     return-object
     :class="['base-data-table', { 'hide-footer-table': hideFooter }]"
     v-on:update:options="onUpdateOptions"
@@ -92,9 +92,20 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  selectedKey: {
+    type: [String, Number, Object],
+    default: null,
+  },
 })
 
-const emit = defineEmits(['update:options', 'update:modelValue', 'update:itemsPerPage', 'click:row', 'dblclick:row'])
+const emit = defineEmits([
+  'update:options',
+  'update:modelValue',
+  'update:itemsPerPage',
+  'update:selectedKey',
+  'click:row',
+  'dblclick:row',
+])
 
 const computedTotalItems = computed(function () {
   return Number(props.totalItems || 0)
@@ -102,6 +113,7 @@ const computedTotalItems = computed(function () {
 
 const internalItemsPerPage = ref(props.itemsPerPage)
 const selectedItems = ref(props.modelValue || [])
+const activeSelectedKey = ref(props.selectedKey || null)
 
 watch(
   function () {
@@ -130,21 +142,82 @@ watch(
   },
 )
 
+watch(
+  function () {
+    return props.selectedKey
+  },
+  function (newVal) {
+    activeSelectedKey.value = newVal
+  },
+)
+
+// ✨ 누락되었던 핸들러 함수 정의
 function onUpdateOptions(options) {
   emit('update:options', options)
 }
 
-function onUpdateItemsPerPage(val) {
-  internalItemsPerPage.value = val
-  emit('update:itemsPerPage', val)
+function onUpdateItemsPerPage(itemsPerPage) {
+  internalItemsPerPage.value = itemsPerPage
+  emit('update:itemsPerPage', itemsPerPage)
+}
+
+function extractItem(row) {
+  if (!row) return null
+  if (row.item) {
+    return row.item.raw || row.item
+  }
+  if (row.raw) {
+    return row.raw
+  }
+  return row
+}
+
+function getRowKey(rawItem) {
+  if (!rawItem) return null
+  const item = extractItem(rawItem)
+  if (!item) return null
+
+  const keyProp = props.itemValue || 'id'
+  if (item[keyProp] !== undefined && item[keyProp] !== null) {
+    return item[keyProp]
+  }
+  if (item.compositeKey !== undefined && item.compositeKey !== null) {
+    return item.compositeKey
+  }
+  if (item.id !== undefined && item.id !== null) {
+    return item.id
+  }
+  if (item.code !== undefined && item.code !== null) {
+    return item.code
+  }
+  return item
 }
 
 function onRowClick(event, row) {
+  const itemData = extractItem(row)
+  if (itemData) {
+    activeSelectedKey.value = getRowKey(itemData)
+    emit('update:selectedKey', activeSelectedKey.value)
+  }
   emit('click:row', event, row)
 }
 
 function onRowDblClick(event, row) {
   emit('dblclick:row', event, row)
+}
+
+function getRowProps(data) {
+  const item = extractItem(data)
+  const currentKey = getRowKey(item)
+  const isSelected =
+    activeSelectedKey.value !== null &&
+    currentKey !== null &&
+    (activeSelectedKey.value === currentKey ||
+      (typeof activeSelectedKey.value === 'object' && activeSelectedKey.value === item))
+
+  return {
+    class: isSelected ? 'selected-table-row' : '',
+  }
 }
 </script>
 
@@ -164,6 +237,24 @@ function onRowDblClick(event, row) {
 
 :deep(.v-data-table__tr:hover) {
   background-color: #f9fbe7 !important;
+}
+
+/* ✨ 선택 행: 확실한 시인성을 위해 명도 강화 (배경 진하게 + 4px 진한 초록 바) */
+:deep(.v-data-table__tr.selected-table-row),
+:deep(tr.selected-table-row) {
+  background-color: #c8e6c9 !important; /* 밝고 선명한 민트-연두 계열 */
+  border-left: 4px solid #1b5e20 !important;
+}
+
+:deep(.v-data-table__tr.selected-table-row:hover),
+:deep(tr.selected-table-row:hover) {
+  background-color: #a5d6a7 !important;
+}
+
+:deep(.v-data-table__tr.selected-table-row > td),
+:deep(tr.selected-table-row > td) {
+  background-color: transparent !important;
+  font-weight: 500 !important;
 }
 
 .hide-footer-table :deep(.v-table__wrapper) {

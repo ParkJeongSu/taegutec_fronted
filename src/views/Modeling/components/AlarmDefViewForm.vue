@@ -207,7 +207,7 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.alarmCode = newVal.alarmCode || ''
+      formData.alarmCode = isCreateMode.value ? '' : (newVal.alarmCode || '')
       formData.alarmName = newVal.alarmName || ''
       formData.severity = newVal.severity || 'MAJOR'
       formData.targetEquipment = newVal.targetEquipment || 'STOCKER'

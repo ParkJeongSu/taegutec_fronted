@@ -264,10 +264,10 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.id = newVal.id != null ? Number(newVal.id) : null
+      formData.id = isCreateMode.value ? null : (newVal.id != null ? Number(newVal.id) : null)
       formData.dbName = newVal.dbName || ''
       formData.schemaName = newVal.schemaName || 'dbo'
-      formData.tableName = newVal.tableName || ''
+      formData.tableName = isCreateMode.value ? '' : (newVal.tableName || '')
       formData.targetColumnName = newVal.targetColumnName || ''
       formData.dataType = newVal.dataType || 'DATE'
       formData.operator = newVal.operator || '<'

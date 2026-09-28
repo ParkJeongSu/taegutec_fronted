@@ -241,8 +241,8 @@ watch(
   function (newVal) {
     if (newVal) {
       formData.factoryName = newVal.factoryName || 'INSERT'
-      formData.sourceZoneName = newVal.sourceZoneName || newVal.primaryZone || ''
-      formData.alternativeZoneName = newVal.alternativeZoneName || newVal.altZone || ''
+      formData.sourceZoneName = isCreateMode.value ? '' : (newVal.sourceZoneName || newVal.primaryZone || '')
+      formData.alternativeZoneName = isCreateMode.value ? '' : (newVal.alternativeZoneName || newVal.altZone || '')
       formData.priority = newVal.priority != null ? Number(newVal.priority) : 1
       formData.threshold = newVal.threshold != null ? Number(newVal.threshold) : (newVal.thresholdRate != null ? Number(newVal.thresholdRate) : 90)
       formData.maxCount = newVal.maxCount != null ? Number(newVal.maxCount) : 0

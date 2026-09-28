@@ -213,12 +213,12 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.id = newVal.id || null
-      formData.itemCode = newVal.itemCode || ''
+      formData.id = isCreateMode.value ? null : (newVal.id || null)
+      formData.itemCode = isCreateMode.value ? '' : (newVal.itemCode || '')
       formData.whName = newVal.whName || ''
       formData.whType = newVal.whType || '창고A'
       formData.qty = newVal.qty != null ? Number(newVal.qty) : 0
-      formData.lotNo = newVal.lotNo || ''
+      formData.lotNo = isCreateMode.value ? '' : (newVal.lotNo || '')
       formData.unit = newVal.unit || 'EA'
       formData.useState = newVal.useState || (newVal.useYn === 'N' ? 'UNUSE' : 'USE')
       formData.eventComment = newVal.eventComment || newVal.description || ''

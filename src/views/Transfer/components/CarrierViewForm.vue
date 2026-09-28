@@ -251,7 +251,7 @@ watch(
   function (newVal) {
     if (newVal) {
       formData.factoryName = newVal.factoryName || 'INSERT'
-      formData.carrierName = newVal.carrierName || newVal.carrierId || ''
+      formData.carrierName = isCreateMode.value ? '' : (newVal.carrierName || newVal.carrierId || '')
       formData.carrierType = newVal.carrierType || newVal.type || 'RGV'
       formData.carrierStatus = newVal.carrierStatus || newVal.status || 'IDLE'
       formData.currentNode = newVal.currentNode || ''

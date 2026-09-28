@@ -209,9 +209,9 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.id = newVal.id != null ? Number(newVal.id) : null
+      formData.id = isCreateMode.value ? null : (newVal.id != null ? Number(newVal.id) : null)
       formData.purgeConfigId = newVal.purgeConfigId != null ? Number(newVal.purgeConfigId) : null
-      formData.batchId = newVal.batchId || ''
+      formData.batchId = isCreateMode.value ? '' : (newVal.batchId || '')
       formData.tableName = newVal.tableName || ''
       formData.startDateTime = newVal.startDateTime || ''
       formData.endDateTime = newVal.endDateTime || ''

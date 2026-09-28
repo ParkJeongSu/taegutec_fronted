@@ -96,7 +96,13 @@ watch(
     return panelStore.selectedItem
   },
   function (newVal) {
-    if (newVal) Object.assign(formData, newVal)
+    if (newVal) {
+      Object.assign(formData, newVal)
+      if (panelStore.mode === 'add' || panelStore.mode === 'CREATE') {
+        formData.id = null
+        formData.tableName = ''
+      }
+    }
   },
   { immediate: true },
 )

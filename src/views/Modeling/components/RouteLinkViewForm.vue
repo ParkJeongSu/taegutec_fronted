@@ -299,7 +299,7 @@ watch(
   function (newVal) {
     if (newVal) {
       formData.factoryName = newVal.factoryName || 'INSERT'
-      formData.routeLinkId = newVal.routeLinkId != null ? Number(newVal.routeLinkId) : (newVal.linkId != null ? Number(newVal.linkId) : null)
+      formData.routeLinkId = isCreateMode.value ? null : (newVal.routeLinkId != null ? Number(newVal.routeLinkId) : (newVal.linkId != null ? Number(newVal.linkId) : null))
       formData.linkName = newVal.linkName || newVal.name || ''
       formData.fromNode = newVal.fromNode != null ? String(newVal.fromNode) : (newVal.fromNodeId != null ? String(newVal.fromNodeId) : '')
       formData.toNode = newVal.toNode != null ? String(newVal.toNode) : (newVal.toNodeId != null ? String(newVal.toNodeId) : '')

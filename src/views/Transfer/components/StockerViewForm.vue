@@ -213,7 +213,7 @@ watch(
   function (newVal) {
     if (newVal) {
       formData.factoryName = newVal.factoryName || 'INSERT'
-      formData.stockerName = newVal.stockerName || newVal.stockerId || ''
+      formData.stockerName = isCreateMode.value ? '' : (newVal.stockerName || newVal.stockerId || '')
       formData.areaName = newVal.areaName || ''
       formData.stockerStatus = newVal.stockerStatus || newVal.status || 'IDLE'
       formData.totalShelfCount = Number(newVal.totalShelfCount || newVal.totalSlots) || 0

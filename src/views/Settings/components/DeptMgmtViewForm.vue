@@ -149,9 +149,9 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      currentId.value = newVal.id || null
+      currentId.value = isCreateMode.value ? null : (newVal.id || null)
       formData.factoryName = newVal.factoryName || newVal.plant || 'INSERT'
-      formData.departmentName = newVal.departmentName || newVal.deptName || ''
+      formData.departmentName = isCreateMode.value ? '' : (newVal.departmentName || newVal.deptName || '')
       formData.useState = newVal.useState || (newVal.useYn === 'N' ? 'UNUSE' : 'USE')
       formData.eventComment = newVal.eventComment || ''
     } else {

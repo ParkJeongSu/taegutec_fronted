@@ -304,9 +304,9 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      currentId.value = newVal.id || null
-      formData.userId = newVal.userId || newVal.USER_ID || ''
-      formData.userName = newVal.userName || newVal.USER_NAME || ''
+      currentId.value = isCreateMode.value ? null : (newVal.id || null)
+      formData.userId = isCreateMode.value ? '' : (newVal.userId || newVal.USER_ID || '')
+      formData.userName = isCreateMode.value ? '' : (newVal.userName || newVal.USER_NAME || '')
       formData.password = ''
       formData.factoryName = newVal.factoryName || newVal.FACTORY_NAME || newVal.plant || 'INSERT'
       formData.departmentId = newVal.departmentId || newVal.DEPARTMENT_ID || newVal.deptCode || ''

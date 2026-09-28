@@ -259,7 +259,7 @@ watch(
     if (newVal) {
       formData.factoryName = newVal.factoryName || 'INSERT'
       formData.stockerName = newVal.stockerName || 'WH1'
-      formData.shelfName = newVal.shelfName || newVal.shelfCode || ''
+      formData.shelfName = isCreateMode.value ? '' : (newVal.shelfName || newVal.shelfCode || '')
       formData.shelfStatus = newVal.shelfStatus || newVal.status || 'EMPTY'
       formData.zoneName = newVal.zoneName || 'EMPTY'
       formData.bank = newVal.bank != null ? Number(newVal.bank) : 1

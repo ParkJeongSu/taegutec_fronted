@@ -236,7 +236,7 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.port = newVal.port != null ? Number(newVal.port) : null
+      formData.port = isCreateMode.value ? null : (newVal.port != null ? Number(newVal.port) : null)
       formData.processName = newVal.processName || ''
       formData.status = newVal.status || 'RUNNING'
       formData.pid = newVal.pid != null ? Number(newVal.pid) : null

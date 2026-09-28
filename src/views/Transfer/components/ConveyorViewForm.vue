@@ -266,7 +266,7 @@ watch(
     if (newVal) {
       formData.factoryName = newVal.factoryName || 'INSERT'
       formData.conveyorGroup = newVal.conveyorGroup || ''
-      formData.conveyorName = newVal.conveyorName || newVal.lineName || newVal.cvId || ''
+      formData.conveyorName = isCreateMode.value ? '' : (newVal.conveyorName || newVal.lineName || newVal.cvId || '')
       formData.conveyorNumber = newVal.conveyorNumber != null ? Number(newVal.conveyorNumber) : 1
       formData.localNo = newVal.localNo != null ? Number(newVal.localNo) : 1
       formData.fromNode = newVal.fromNode || ''

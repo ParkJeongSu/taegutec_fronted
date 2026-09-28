@@ -313,7 +313,7 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.transferCommandName = newVal.transferCommandName || ''
+      formData.transferCommandName = isCreateMode.value ? '' : (newVal.transferCommandName || '')
       formData.carrierName = newVal.carrierName || ''
       formData.commandStatus = newVal.commandStatus || 'INIT'
       formData.orderType = newVal.orderType || 'STK_TO_WS'

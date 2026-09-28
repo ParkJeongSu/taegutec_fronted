@@ -303,7 +303,7 @@ watch(
   function (newVal) {
     if (newVal) {
       formData.factoryName = newVal.factoryName || 'INSERT'
-      formData.routeNodeId = newVal.routeNodeId != null ? Number(newVal.routeNodeId) : (newVal.nodeId != null ? Number(newVal.nodeId) : null)
+      formData.routeNodeId = isCreateMode.value ? null : (newVal.routeNodeId != null ? Number(newVal.routeNodeId) : (newVal.nodeId != null ? Number(newVal.nodeId) : null))
       formData.nodeName = newVal.nodeName || newVal.name || ''
       formData.nodeType = newVal.nodeType || newVal.type || 'STATION'
       formData.xCoord = newVal.xCoord != null ? Number(newVal.xCoord) : (newVal.positionX != null ? Number(newVal.positionX) : (newVal.x != null ? Number(newVal.x) : 0))

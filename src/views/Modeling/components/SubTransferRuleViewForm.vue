@@ -283,9 +283,9 @@ watch(
   function (newVal) {
     if (newVal) {
       formData.factoryName = newVal.factoryName || 'INSERT'
-      formData.equipmentName = newVal.equipmentName || ''
-      formData.moduleName = newVal.moduleName || ''
-      formData.routeLinkId = newVal.routeLinkId != null ? Number(newVal.routeLinkId) : null
+      formData.equipmentName = isCreateMode.value ? '' : (newVal.equipmentName || '')
+      formData.moduleName = isCreateMode.value ? '' : (newVal.moduleName || '')
+      formData.routeLinkId = isCreateMode.value ? null : (newVal.routeLinkId != null ? Number(newVal.routeLinkId) : null)
       formData.priority = newVal.priority != null ? Number(newVal.priority) : 1
       formData.ruleName = newVal.ruleName || newVal.subRuleName || ''
       formData.ruleType = newVal.ruleType || newVal.subRuleType || newVal.algorithm || 'DIRECT'

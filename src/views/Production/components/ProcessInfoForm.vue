@@ -82,6 +82,9 @@ watch(
   function (newVal) {
     if (newVal) {
       Object.assign(formData, newVal)
+      if (panelStore.mode === 'add' || panelStore.mode === 'CREATE') {
+        formData.port = null
+      }
     }
   },
   { immediate: true },

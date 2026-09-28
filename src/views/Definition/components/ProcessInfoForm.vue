@@ -233,7 +233,7 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.port = newVal.port != null ? Number(newVal.port) : null
+      formData.port = isCreateMode.value ? null : (newVal.port != null ? Number(newVal.port) : null)
       formData.systemName = newVal.systemName || ''
       formData.fileName = newVal.fileName || ''
       formData.processGroupName = newVal.processGroupName || ''

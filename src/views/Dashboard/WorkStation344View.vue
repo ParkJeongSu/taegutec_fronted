@@ -104,19 +104,29 @@
               :total-items="inboundOrders.length"
               :loading="isLoading"
               :items-per-page="10"
-              item-value="orderNo"
+              item-value="transportOrderId"
               density="compact"
               v-on:click:row="onRowClick"
             >
               <!-- 상태 컬럼 커스텀 슬롯 -->
-              <template #[`item.status`]="{ item }">
+              <template #['item.transportType']="{ item }">
                 <v-chip
-                  :color="getStatusColor(item.status)"
+                  :color="item.transportType === 'O' ? 'success' : 'primary'"
+                  size="x-small"
+                  variant="tonal"
+                  class="font-weight-bold"
+                >
+                  {{ item.transportType === 'O' ? '출고 (OUT)' : '입고 (IN)' }}
+                </v-chip>
+              </template>
+              <template #['item.transportStatus']="{ item }">
+                <v-chip
+                  :color="getStatusColor(item.transportStatus)"
                   size="x-small"
                   variant="flat"
                   class="font-weight-bold"
                 >
-                  {{ item.status }}
+                  {{ item.transportStatus }}
                 </v-chip>
               </template>
               <template #no-data>
@@ -135,19 +145,29 @@
               :total-items="outboundOrders.length"
               :loading="isLoading"
               :items-per-page="10"
-              item-value="orderNo"
+              item-value="transportOrderId"
               density="compact"
               v-on:click:row="onRowClick"
             >
               <!-- 상태 컬럼 커스텀 슬롯 -->
-              <template #[`item.status`]="{ item }">
+              <template #['item.transportType']="{ item }">
                 <v-chip
-                  :color="getStatusColor(item.status)"
+                  :color="item.transportType === 'O' ? 'success' : 'primary'"
+                  size="x-small"
+                  variant="tonal"
+                  class="font-weight-bold"
+                >
+                  {{ item.transportType === 'O' ? '출고 (OUT)' : '입고 (IN)' }}
+                </v-chip>
+              </template>
+              <template #['item.transportStatus']="{ item }">
+                <v-chip
+                  :color="getStatusColor(item.transportStatus)"
                   size="x-small"
                   variant="flat"
                   class="font-weight-bold"
                 >
-                  {{ item.status }}
+                  {{ item.transportStatus }}
                 </v-chip>
               </template>
               <template #no-data>
@@ -222,11 +242,19 @@ const isLoading = ref(false)
 // 7. 오더 테이블 컬럼 정의
 const orderHeaders = computed(function () {
   return [
-    { title: t('table.orderNo'), key: 'orderNo', align: 'start' },
-    { title: t('table.trayId'), key: 'trayId', align: 'start' },
-    { title: t('table.matCode'), key: 'matCode', align: 'start' },
-    { title: t('table.status'), key: 'status', align: 'center' },
-    { title: t('table.occurredTime'), key: 'timestamp', align: 'center' },
+    { title: t('table.orderNo') || '오더 번호', key: 'transportOrderId', align: 'start', minWidth: '110px' },
+    { title: t('table.idocId') || 'IDoc ID', key: 'idocId', align: 'start', minWidth: '110px' },
+    { title: t('table.trayId') || '트레이 ID', key: 'carrierName', align: 'start', minWidth: '100px' },
+    { title: t('table.transportType') || '구분', key: 'transportType', align: 'center', minWidth: '80px' },
+    { title: t('table.status') || '상태', key: 'transportStatus', align: 'center', minWidth: '100px' },
+    { title: t('table.carrierType') || '트레이 타입', key: 'carrierType', align: 'center', minWidth: '100px' },
+    { title: t('table.galId') || 'GAL ID', key: 'galId', align: 'center', minWidth: '90px' },
+    { title: t('table.galWarehouse') || '창고', key: 'galWarehouse', align: 'center', minWidth: '90px' },
+    { title: t('table.locationId') || '컨베이어', key: 'locationId', align: 'center', minWidth: '100px' },
+    { title: t('table.workStationId') || '워크스테이션', key: 'workStationId', align: 'center', minWidth: '110px' },
+    { title: t('table.requestedZoneName') || '요청 존', key: 'requestedZoneName', align: 'center', minWidth: '90px' },
+    { title: t('table.travelProfile') || '주행 프로파일', key: 'travelProfile', align: 'center', minWidth: '110px' },
+    { title: t('table.createTime') || '생성 일시', key: 'createTime', align: 'center', minWidth: '160px' },
   ]
 })
 
@@ -242,11 +270,19 @@ function mapTransportOrderItem(item) {
   }
   return {
     ...item,
-    orderNo: item.orderNo || item.transportOrderNo || item.transportOrderId || item.orderId || (item.id != null ? String(item.id) : ''),
-    trayId: item.trayId || item.carrierId || item.palletId || item.trayNo || '',
-    matCode: item.matCode || item.materialCode || item.itemCode || item.matId || '',
-    status: item.status || item.transportStatus || item.orderStatus || item.state || '',
-    timestamp: item.timestamp || item.createdTime || item.createdAt || item.createDt || item.orderTime || '',
+    transportOrderId: item.transportOrderId || item.orderNo || item.transportOrderNo || item.orderId || (item.id != null ? String(item.id) : '-'),
+    idocId: item.idocId || item.idoc || '-',
+    carrierName: item.carrierName || item.trayId || item.carrierId || item.palletId || item.trayNo || '-',
+    transportType: item.transportType || (item.orderType && item.orderType.startsWith('WS_TO') ? 'O' : 'I'),
+    transportStatus: item.transportStatus || item.status || item.orderStatus || item.state || 'IDLE',
+    carrierType: item.carrierType || item.trayType || item.type || 'TBD',
+    galId: item.galId || '-',
+    galWarehouse: item.galWarehouse || '-',
+    locationId: item.locationId || item.location || item.conveyorId || '-',
+    workStationId: item.workStationId || item.wsNo || wsNo || '-',
+    requestedZoneName: item.requestedZoneName || item.targetZone || item.zone || '-',
+    travelProfile: item.travelProfile || item.profile || '-',
+    createTime: item.createTime || item.timestamp || item.createdTime || item.createdAt || item.createDt || '-',
   }
 }
 
@@ -304,16 +340,18 @@ async function handleRefreshOrders() {
 
 // 13. 상태 칩 색상 변환 함수
 function getStatusColor(status) {
-  if (status === '진행중' || status === 'PROCESSING' || status === 'RUNNING' || status === 'IN_PROGRESS') {
+  if (!status) return 'default'
+  const s = String(status).toUpperCase()
+  if (s === '진행중' || s === 'STARTED' || s === 'PROCESSING' || s === 'RUNNING' || s === 'IN_PROGRESS' || s === 'EXECUTING') {
     return 'primary'
   }
-  if (status === '대기' || status === 'WAITING' || status === 'PENDING' || status === 'READY') {
+  if (s === '대기' || s === 'INIT' || s === 'WAITING' || s === 'PENDING' || s === 'READY' || s === 'REQUESTED') {
     return 'warning'
   }
-  if (status === '완료' || status === 'COMPLETED' || status === 'DONE' || status === 'SUCCESS') {
+  if (s === '완료' || s === 'COMPLETED' || s === 'DONE' || s === 'SUCCESS') {
     return 'success'
   }
-  if (status === '에러' || status === 'ERROR' || status === 'FAILED' || status === 'ABORTED') {
+  if (s === '에러' || s === 'ERROR' || s === 'FAILED' || s === 'ABORTED' || s === 'CANCEL') {
     return 'error'
   }
   return 'default'
@@ -327,15 +365,19 @@ function handlePositionClick(posId) {
 
 // 15. 행(Row) 클릭 시 반송 오더 상세 정보 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = (row && row.item) ? (row.item.raw || row.item) : row
   if (itemData) {
     panelStore.openPanel(markRaw(WorkStationOrderDetailView), {
       mode: 'VIEW',
       data: {
         ...itemData,
-        transportType: activeTab.value === 'inbound' ? 'I' : 'O',
+        orderNo: itemData.transportOrderId,
+        trayId: itemData.carrierName,
+        status: itemData.transportStatus,
+        timestamp: itemData.createTime,
+        transportType: itemData.transportType || (activeTab.value === 'inbound' ? 'I' : 'O'),
         wsNo: wsNo,
-        workStationId: wsNo,
+        workStationId: itemData.workStationId || wsNo,
       },
       title: t('views.dashboard.orderDetailTitle') || '반송 오더 상세 정보',
     })

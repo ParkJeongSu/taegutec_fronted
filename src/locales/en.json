@@ -921,7 +921,9 @@
       "inboundOrderList": "Inbound Orders ({count})",
       "outboundOrderList": "Outbound Orders ({count})",
       "noInboundOrder": "No inbound order history.",
-      "noOutboundOrder": "No outbound order history."
+      "noOutboundOrder": "No outbound order history.",
+      "stockerDetailTitle": "Stocker Details",
+      "orderDetailTitle": "Transport Order Details"
     },
     "transfer": {
       "carrier": {

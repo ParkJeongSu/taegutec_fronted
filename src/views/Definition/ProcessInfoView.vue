@@ -20,7 +20,7 @@
     </template>
 
     <template v-slot:actions>
-      <v-btn color="primary" prepend-icon="$plus" v-on:click="onAdd">{{ $t('common.create') }}</v-btn>
+      <v-btn color="primary" prepend-icon="$plus" class="mr-2" v-on:click="onAdd">{{ $t('common.create') }}</v-btn>
       <v-btn color="error" prepend-icon="$delete" v-on:click="onOpenDelete">{{ $t('common.delete') }}</v-btn>
     </template>
 
@@ -31,6 +31,7 @@
         :items="items"
         :total-items="totalItems"
         :loading="loading"
+        density="compact"
         item-value="port"
         v-on:click:row="onRowClick"
         v-on:update:options="onUpdateOptions"
@@ -67,14 +68,16 @@ const searchParams = reactive({
   systemName: '',
 })
 
-const headers = computed(() => [
-  { title: t('table.port'), key: 'port', width: '100px' },
-  { title: t('table.systemName'), key: 'systemName' },
-  { title: t('table.groupName'), key: 'processGroupName' },
-  { title: t('table.processName'), key: 'processName' },
-  { title: t('table.batchName'), key: 'batchName' },
-  { title: t('table.description'), key: 'description' },
-])
+const headers = computed(function () {
+  return [
+    { title: t('table.port'), key: 'port', width: '100px' },
+    { title: t('table.systemName'), key: 'systemName' },
+    { title: t('table.groupName'), key: 'processGroupName' },
+    { title: t('table.processName'), key: 'processName' },
+    { title: t('table.batchName'), key: 'batchName' },
+    { title: t('table.description'), key: 'description' },
+  ]
+})
 
 const { items, totalItems, loading, loadData, updateOptions } = useDataTable(fetchProcessInfoApi)
 
@@ -87,13 +90,31 @@ function onUpdateOptions(options) {
 }
 
 function onAdd() {
-  panelStore.setSelectedItem(null, markRaw(ProcessInfoForm), t('views.definition.processInfo.createTitle'), 'add')
-  panelStore.onSuccess = onSearch
-  if (!panelStore.isOpen) panelStore.togglePanel()
+  panelStore.openPanel(markRaw(ProcessInfoForm), {
+    mode: 'CREATE',
+    data: null,
+    title: t('views.definition.processInfo.createTitle'),
+    onSuccess: onSearch,
+  })
+}
+
+function onRowClick(event, row) {
+  const itemData = (row && row.item) ? row.item : row
+  if (itemData) {
+    panelStore.openPanel(markRaw(ProcessInfoForm), {
+      mode: 'UPDATE',
+      data: itemData,
+      title: t('views.definition.processInfo.editTitle'),
+      onSuccess: onSearch,
+    })
+  }
 }
 
 function onOpenDelete() {
-  if (selectedRows.value.length === 0) return alert(t('validation.selectItemToDelete'))
+  if (selectedRows.value.length === 0) {
+    alert(t('validation.selectItemToDelete'))
+    return
+  }
   deleteDialog.value = true
 }
 
@@ -116,11 +137,5 @@ async function onDeleteConfirm() {
   } finally {
     selectedRows.value = []
   }
-}
-
-function onRowClick(event, row) {
-  panelStore.setSelectedItem(row.item, markRaw(ProcessInfoForm), t('views.definition.processInfo.editTitle'), 'edit')
-  panelStore.onSuccess = onSearch
-  if (!panelStore.isOpen) panelStore.togglePanel()
 }
 </script>

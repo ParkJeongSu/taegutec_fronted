@@ -67,6 +67,7 @@
         :loading="isLoading"
         item-value="stationId"
         density="compact"
+        v-on:click:row="onRowClick"
       >
         <template #[`item.status`]="{ item }">
           <v-chip
@@ -90,11 +91,15 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, markRaw } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { usePanelStore } from '@/stores/panelStore'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
+import WorkStationOrderDetailView from './components/WorkStationOrderDetailView.vue'
 
 const { t } = useI18n()
+const panelStore = usePanelStore()
+
 const searchKeyword = ref('')
 const statusFilter = ref('전체')
 const isLoading = ref(false)
@@ -183,6 +188,25 @@ function handleReset() {
 
 function handleExport() {
   alert(t('views.dashboard.exportWorkstationAlert'))
+}
+
+// 행(Row) 클릭 시 오더/작업 상세 슬라이드 패널 오픈
+function onRowClick(event, row) {
+  const itemData = (row && row.item) ? row.item : row
+  if (itemData) {
+    panelStore.openPanel(markRaw(WorkStationOrderDetailView), {
+      mode: 'VIEW',
+      data: {
+        orderNo: itemData.currentJob,
+        workStationId: itemData.stationId,
+        stationName: itemData.stationName,
+        sourceLocation: itemData.zone,
+        status: itemData.status,
+        timestamp: itemData.updatedAt,
+      },
+      title: t('views.dashboard.orderDetailTitle') || '반송 오더 상세 정보',
+    })
+  }
 }
 </script>
 

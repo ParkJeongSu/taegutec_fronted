@@ -3,97 +3,99 @@
     <!-- 입력 폼 영역 -->
     <v-form ref="formRef" class="flex-grow-1 overflow-y-auto pa-4">
       <v-row density="comfortable">
-        <!-- 품목 코드 (PK) -->
+        <!-- 알람 코드 (PK) -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model="formData.itemCode"
-            :label="$t('table.itemCode')"
+            v-model="formData.alarmCode"
+            :label="$t('table.alarmCode')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            placeholder="ITEM-001"
+            :placeholder="$t('views.modeling.alarmDef.placeholderAlarmCode')"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
         </v-col>
 
-        <!-- 창고 명칭 -->
+        <!-- 알람 명칭 -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model="formData.whName"
-            :label="$t('table.whName')"
+            v-model="formData.alarmName"
+            label="알람 명칭"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            placeholder="자재1창고"
+            placeholder="예: 스토커 포크 타임아웃"
             required
           ></v-text-field>
         </v-col>
 
-        <!-- 창고 유형 -->
+        <!-- 알람 심각도 -->
         <v-col cols="12" sm="6">
           <v-select
-            v-model="formData.whType"
-            :items="whTypeOptions"
-            :label="$t('views.production.inventory.whType')"
+            v-model="formData.severity"
+            :items="severityOptions"
+            label="심각도 (Severity)"
+            variant="outlined"
+            density="compact"
+            :rules="[validateRequired]"
+            required
+          ></v-select>
+        </v-col>
+
+        <!-- 발생 대상 설비 -->
+        <v-col cols="12" sm="6">
+          <v-select
+            v-model="formData.targetEquipment"
+            :items="targetEquipmentOptions"
+            label="발생 대상 설비"
             variant="outlined"
             density="compact"
           ></v-select>
         </v-col>
 
-        <!-- 현재 재고 수량 -->
+        <!-- 자동 복구 여부 -->
         <v-col cols="12" sm="6">
-          <v-text-field
-            v-model.number="formData.qty"
-            type="number"
-            :label="$t('table.currentQty')"
+          <v-select
+            v-model="formData.autoRecover"
+            :items="autoRecoverOptions"
+            label="자동 복구 여부"
             variant="outlined"
             density="compact"
-            placeholder="500"
-          ></v-text-field>
-        </v-col>
-
-        <!-- LOT 번호 -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.lotNo"
-            label="LOT 번호"
-            variant="outlined"
-            density="compact"
-            placeholder="LOT-2026-0928"
-          ></v-text-field>
-        </v-col>
-
-        <!-- 단위 -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.unit"
-            label="수량 단위"
-            variant="outlined"
-            density="compact"
-            placeholder="EA"
-          ></v-text-field>
+          ></v-select>
         </v-col>
 
         <!-- 사용 여부 -->
         <v-col cols="12" sm="6">
           <v-select
-            v-model="formData.useState"
-            :items="useStateOptions"
+            v-model="formData.useYn"
+            :items="useYnOptions"
             :label="$t('table.useYn')"
             variant="outlined"
             density="compact"
           ></v-select>
         </v-col>
 
-        <!-- 비고 / 설명 -->
+        <!-- 조치 가이드 -->
         <v-col cols="12">
           <v-textarea
-            v-model="formData.eventComment"
-            :label="$t('common.comment')"
+            v-model="formData.actionGuide"
+            label="조치 가이드"
             variant="outlined"
             density="compact"
             rows="3"
+            placeholder="현장 조치 및 대응 가이드를 입력하세요."
+          ></v-textarea>
+        </v-col>
+
+        <!-- 비고 / 설명 -->
+        <v-col cols="12">
+          <v-textarea
+            v-model="formData.description"
+            :label="$t('common.comment')"
+            variant="outlined"
+            density="compact"
+            rows="2"
             :placeholder="$t('common.comment')"
           ></v-textarea>
         </v-col>
@@ -146,8 +148,6 @@
 import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panelStore'
-import { useApi } from '@/composables/useApi'
-import { saveInventoryApi, deleteInventoryApi } from '@/api/inventory'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const { t } = useI18n()
@@ -161,50 +161,44 @@ const props = defineProps({
 const panelStore = usePanelStore()
 const formRef = ref(null)
 const deleteConfirmDialog = ref(false)
+const isSaving = ref(false)
+const isDeleting = ref(false)
 
-const whTypeOptions = ['창고A', '창고B', '원자재창고', '완제품창고', '공정간창고']
-const useStateOptions = [
-  { title: t('common.use'), value: 'USE' },
-  { title: t('common.unuse'), value: 'UNUSE' },
+const severityOptions = ['CRITICAL', 'MAJOR', 'MINOR', 'INFO']
+const targetEquipmentOptions = ['STOCKER', 'CONVEYOR', 'CARRIER', 'OHT', 'ROBOT', 'COMMON']
+const autoRecoverOptions = [
+  { title: 'Y (자동 복구)', value: 'Y' },
+  { title: 'N (수동 복구)', value: 'N' },
 ]
-
-const { loading: isSavingApi, execute: executeSave } = useApi(saveInventoryApi)
-const { loading: isDeletingApi, execute: executeDelete } = useApi(deleteInventoryApi)
-
-const isSaving = computed(function () {
-  return isSavingApi.value
-})
-
-const isDeleting = computed(function () {
-  return isDeletingApi.value
-})
+const useYnOptions = [
+  { title: t('common.use'), value: 'Y' },
+  { title: t('common.unuse'), value: 'N' },
+]
 
 const isCreateMode = computed(function () {
   return panelStore.mode === 'CREATE' || panelStore.mode === 'add'
 })
 
 const formData = reactive({
-  id: null,
-  itemCode: '',
-  whName: '',
-  whType: '창고A',
-  qty: 0,
-  lotNo: '',
-  unit: 'EA',
-  useState: 'USE',
-  eventComment: '',
+  alarmCode: '',
+  alarmName: '',
+  severity: 'MAJOR',
+  targetEquipment: 'STOCKER',
+  autoRecover: 'N',
+  actionGuide: '',
+  useYn: 'Y',
+  description: '',
 })
 
 function resetForm() {
-  formData.id = null
-  formData.itemCode = ''
-  formData.whName = ''
-  formData.whType = '창고A'
-  formData.qty = 0
-  formData.lotNo = ''
-  formData.unit = 'EA'
-  formData.useState = 'USE'
-  formData.eventComment = ''
+  formData.alarmCode = ''
+  formData.alarmName = ''
+  formData.severity = 'MAJOR'
+  formData.targetEquipment = 'STOCKER'
+  formData.autoRecover = 'N'
+  formData.actionGuide = ''
+  formData.useYn = 'Y'
+  formData.description = ''
 }
 
 watch(
@@ -213,15 +207,14 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.id = newVal.id || null
-      formData.itemCode = newVal.itemCode || ''
-      formData.whName = newVal.whName || ''
-      formData.whType = newVal.whType || '창고A'
-      formData.qty = newVal.qty != null ? Number(newVal.qty) : 0
-      formData.lotNo = newVal.lotNo || ''
-      formData.unit = newVal.unit || 'EA'
-      formData.useState = newVal.useState || (newVal.useYn === 'N' ? 'UNUSE' : 'USE')
-      formData.eventComment = newVal.eventComment || newVal.description || ''
+      formData.alarmCode = newVal.alarmCode || ''
+      formData.alarmName = newVal.alarmName || ''
+      formData.severity = newVal.severity || 'MAJOR'
+      formData.targetEquipment = newVal.targetEquipment || 'STOCKER'
+      formData.autoRecover = newVal.autoRecover || 'N'
+      formData.actionGuide = newVal.actionGuide || ''
+      formData.useYn = newVal.useYn || 'Y'
+      formData.description = newVal.description || newVal.eventComment || ''
     } else {
       resetForm()
     }
@@ -254,53 +247,48 @@ async function onHandleSave() {
     return
   }
 
+  isSaving.value = true
   try {
     const payload = {
-      id: formData.id || undefined,
-      itemCode: formData.itemCode,
-      whName: formData.whName,
-      whType: formData.whType,
-      qty: Number(formData.qty) || 0,
-      lotNo: formData.lotNo || undefined,
-      unit: formData.unit || 'EA',
-      useState: formData.useState,
-      eventComment: formData.eventComment || undefined,
+      alarmCode: formData.alarmCode,
+      alarmName: formData.alarmName,
+      severity: formData.severity,
+      targetEquipment: formData.targetEquipment,
+      autoRecover: formData.autoRecover,
+      actionGuide: formData.actionGuide || '',
+      useYn: formData.useYn,
+      description: formData.description || '',
     }
 
-    const apiMode = isCreateMode.value ? 'add' : 'edit'
-    await executeSave(apiMode, payload)
+    // 성공 처리 콜백 및 패널 종료
     alert(t('common.saveSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {
-      panelStore.onSuccess()
+      panelStore.onSuccess(payload, isCreateMode.value ? 'CREATE' : 'UPDATE')
     }
     panelStore.closePanel()
   } catch (error) {
-    console.error('Save inventory failed:', error)
-    const errorMsg =
-      (error.response && error.response.data && error.response.data.message) ||
-      t('common.saveFail')
-    alert(errorMsg)
+    console.error('Save alarm definition failed:', error)
+    alert(t('common.saveFail'))
+  } finally {
+    isSaving.value = false
   }
 }
 
 async function onConfirmDelete() {
+  isDeleting.value = true
   try {
-    if (formData.id) {
-      await executeDelete(formData.id)
-    }
     alert(t('common.deleteSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {
-      panelStore.onSuccess()
+      panelStore.onSuccess({ alarmCode: formData.alarmCode }, 'DELETE')
     }
     panelStore.closePanel()
   } catch (error) {
-    console.error('Delete inventory failed:', error)
-    const errorMsg =
-      (error.response && error.response.data && error.response.data.message) ||
-      t('common.deleteFail')
-    alert(errorMsg)
+    console.error('Delete alarm definition failed:', error)
+    alert(t('common.deleteFail'))
+  } finally {
+    isDeleting.value = false
   }
 }
 </script>

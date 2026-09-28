@@ -21,7 +21,7 @@
     </template>
 
     <template v-slot:actions>
-      <v-btn color="primary" prepend-icon="$plus" v-on:click="onAdd">{{ $t('common.create') }}</v-btn>
+      <v-btn color="primary" prepend-icon="$plus" class="mr-2" v-on:click="onAdd">{{ $t('common.create') }}</v-btn>
       <v-btn color="error" prepend-icon="$delete" v-on:click="onOpenDelete">{{ $t('common.delete') }}</v-btn>
     </template>
 
@@ -32,6 +32,7 @@
         :items="items"
         :total-items="totalItems"
         :loading="loading"
+        density="compact"
         item-value="id"
         v-on:click:row="onRowClick"
         v-on:update:options="onUpdateOptions"
@@ -71,15 +72,17 @@ const deleteDialog = ref(false)
 
 const searchParams = reactive({ tableName: '', isActive: '전체' })
 
-const headers = computed(() => [
-  { title: 'ID', key: 'id', width: '80px' },
-  { title: t('table.dbName'), key: 'dbName' },
-  { title: t('table.tableName'), key: 'tableName' },
-  { title: t('table.targetColumn'), key: 'targetColumnName' },
-  { title: t('table.compValue'), key: 'compValue' },
-  { title: t('table.batchSize'), key: 'batchSize' },
-  { title: t('table.isActive'), key: 'isActive', align: 'center' },
-])
+const headers = computed(function () {
+  return [
+    { title: 'ID', key: 'id', width: '80px' },
+    { title: t('table.dbName'), key: 'dbName' },
+    { title: t('table.tableName'), key: 'tableName' },
+    { title: t('table.targetColumn'), key: 'targetColumnName' },
+    { title: t('table.compValue'), key: 'compValue' },
+    { title: t('table.batchSize'), key: 'batchSize' },
+    { title: t('table.isActive'), key: 'isActive', align: 'center' },
+  ]
+})
 
 const { items, totalItems, loading, loadData, updateOptions } = useDataTable(fetchPurgeConfigApi)
 
@@ -91,19 +94,31 @@ function onUpdateOptions(options) {
 }
 
 function onAdd() {
-  panelStore.setSelectedItem(null, markRaw(PurgeConfigForm), t('views.definition.purgeConfig.createTitle'), 'add')
-  panelStore.onSuccess = onSearch
-  panelStore.togglePanel()
+  panelStore.openPanel(markRaw(PurgeConfigForm), {
+    mode: 'CREATE',
+    data: null,
+    title: t('views.definition.purgeConfig.createTitle'),
+    onSuccess: onSearch,
+  })
 }
 
 function onRowClick(event, row) {
-  panelStore.setSelectedItem(row.item, markRaw(PurgeConfigForm), t('views.definition.purgeConfig.editTitle'), 'edit')
-  panelStore.onSuccess = onSearch
-  panelStore.togglePanel()
+  const itemData = (row && row.item) ? row.item : row
+  if (itemData) {
+    panelStore.openPanel(markRaw(PurgeConfigForm), {
+      mode: 'UPDATE',
+      data: itemData,
+      title: t('views.definition.purgeConfig.editTitle'),
+      onSuccess: onSearch,
+    })
+  }
 }
 
 function onOpenDelete() {
-  if (selectedRows.value.length === 0) return alert(t('validation.selectItemToDelete'))
+  if (selectedRows.value.length === 0) {
+    alert(t('validation.selectItemToDelete'))
+    return
+  }
   deleteDialog.value = true
 }
 

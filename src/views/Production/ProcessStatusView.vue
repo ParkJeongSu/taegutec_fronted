@@ -44,7 +44,8 @@
           {{ $t('common.refreshRemaining', { sec: remainingTime }) }}
         </v-chip>
       </div>
-      <v-btn color="primary" prepend-icon="$refresh" v-on:click="manualSearch">{{ $t('common.refresh') }}</v-btn>
+      <v-btn color="primary" prepend-icon="$plus" class="mr-2" v-on:click="onAddProcess">{{ $t('common.create') }}</v-btn>
+      <v-btn color="secondary" variant="tonal" prepend-icon="$refresh" class="mr-2" v-on:click="manualSearch">{{ $t('common.refresh') }}</v-btn>
       <v-divider vertical class="mx-2"></v-divider>
       <v-btn color="success" prepend-icon="$fileExcel">{{ $t('common.exportOutput') }}</v-btn>
     </template>
@@ -56,6 +57,7 @@
         :items="items"
         :total-items="totalItems"
         :loading="loading"
+        density="compact"
         v-on:click:row="onRowClick"
         v-on:update:options="onUpdateOptions"
       >
@@ -91,7 +93,7 @@
             color="success"
             size="small"
             :disabled="!isStatus(item.status, 'DOWN')"
-            v-on:click="onStartProcess(item)"
+            v-on:click.stop="onStartProcess(item)"
           ></v-btn>
         </template>
 
@@ -104,7 +106,7 @@
             color="error"
             size="small"
             :disabled="!isStatus(item.status, 'RUNNING')"
-            v-on:click="onStopProcess(item)"
+            v-on:click.stop="onStopProcess(item)"
           ></v-btn>
         </template>
       </BaseDataTable>
@@ -140,20 +142,22 @@ const searchParams = reactive({
   status: '전체',
 })
 
-const statusHeaders = computed(() => [
-  { title: t('table.port'), key: 'port', align: 'start', sortable: true },
-  { title: t('table.system'), key: 'systemName' },
-  { title: t('table.group'), key: 'processGroupName' },
-  { title: t('table.processName'), key: 'processName' },
-  { title: t('common.status'), key: 'status', align: 'center' },
-  { title: t('table.pid'), key: 'pid' },
-  { title: t('table.startRequestTime'), key: 'startRequestTime' },
-  { title: t('table.startTime'), key: 'startTime' },
-  { title: t('table.endRequestTime'), key: 'endRequestTime' },
-  { title: t('table.endTime'), key: 'endTime' },
-  { title: t('common.start'), key: 'startAction', align: 'center', sortable: false },
-  { title: t('common.stop'), key: 'stopAction', align: 'center', sortable: false },
-])
+const statusHeaders = computed(function () {
+  return [
+    { title: t('table.port'), key: 'port', align: 'start', sortable: true },
+    { title: t('table.system'), key: 'systemName' },
+    { title: t('table.group'), key: 'processGroupName' },
+    { title: t('table.processName'), key: 'processName' },
+    { title: t('common.status'), key: 'status', align: 'center' },
+    { title: t('table.pid'), key: 'pid' },
+    { title: t('table.startRequestTime'), key: 'startRequestTime' },
+    { title: t('table.startTime'), key: 'startTime' },
+    { title: t('table.endRequestTime'), key: 'endRequestTime' },
+    { title: t('table.endTime'), key: 'endTime' },
+    { title: t('common.start'), key: 'startAction', align: 'center', sortable: false },
+    { title: t('common.stop'), key: 'stopAction', align: 'center', sortable: false },
+  ]
+})
 
 // 3. Composable 연결
 const { items, totalItems, loading, loadData, updateOptions } = useDataTable(fetchProcessApi)
@@ -244,10 +248,27 @@ function onSearch() {
   loadData(searchParams)
 }
 
+// [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
+function onAddProcess() {
+  panelStore.openPanel(markRaw(ProcessStatusForm), {
+    mode: 'CREATE',
+    data: null,
+    title: t('views.production.processStatus.title') + ' ' + t('common.create'),
+    onSuccess: onSearch,
+  })
+}
+
+// 행(Row) 클릭 시 수정 모드로 우측 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  panelStore.setSelectedItem(row.item, markRaw(ProcessStatusForm), 'Process Status', 'view')
-  panelStore.onSuccess = onSearch
-  panelStore.togglePanel()
+  const itemData = (row && row.item) ? row.item : row
+  if (itemData) {
+    panelStore.openPanel(markRaw(ProcessStatusForm), {
+      mode: 'UPDATE',
+      data: itemData,
+      title: t('views.production.processStatus.title') + ' ' + t('common.detail'),
+      onSuccess: onSearch,
+    })
+  }
 }
 
 function onUpdateOptions(options) {

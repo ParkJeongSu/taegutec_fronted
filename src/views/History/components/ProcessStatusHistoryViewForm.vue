@@ -7,8 +7,8 @@
         <v-col cols="12" sm="6">
           <v-text-field
             v-model.number="formData.port"
-            :label="$t('table.port')"
             type="number"
+            :label="$t('table.port')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
@@ -18,35 +18,11 @@
           ></v-text-field>
         </v-col>
 
-        <!-- 시스템명 -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.systemName"
-            :label="$t('views.definition.processInfo.form.systemName')"
-            variant="outlined"
-            density="compact"
-            :rules="[validateRequired]"
-            placeholder="WCS"
-            required
-          ></v-text-field>
-        </v-col>
-
-        <!-- 프로세스 그룹명 -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.processGroupName"
-            :label="$t('views.definition.processInfo.form.groupName')"
-            variant="outlined"
-            density="compact"
-            placeholder="ROUTING_GROUP"
-          ></v-text-field>
-        </v-col>
-
         <!-- 프로세스명 -->
         <v-col cols="12" sm="6">
           <v-text-field
             v-model="formData.processName"
-            :label="$t('views.definition.processInfo.form.processName')"
+            :label="$t('table.processName')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
@@ -55,70 +31,104 @@
           ></v-text-field>
         </v-col>
 
-        <!-- 실행 파일명 -->
-        <v-col cols="12">
-          <v-text-field
-            v-model="formData.fileName"
-            :label="$t('views.definition.processInfo.form.fileName')"
+        <!-- 상태 -->
+        <v-col cols="12" sm="6">
+          <v-select
+            v-model="formData.status"
+            :items="statusOptions"
+            :label="$t('common.status')"
             variant="outlined"
             density="compact"
-            placeholder="wcs_routing.exe"
-          ></v-text-field>
+          ></v-select>
         </v-col>
 
-        <!-- 복사 디렉토리 -->
-        <v-col cols="12">
-          <v-text-field
-            v-model="formData.copyDir"
-            :label="$t('views.definition.processInfo.form.copyDir')"
-            variant="outlined"
-            density="compact"
-            placeholder="C:/app/wcs/deploy"
-          ></v-text-field>
-        </v-col>
-
-        <!-- 작업 디렉토리 -->
-        <v-col cols="12">
-          <v-text-field
-            v-model="formData.workingDir"
-            :label="$t('views.definition.processInfo.form.workingDir')"
-            variant="outlined"
-            density="compact"
-            placeholder="C:/app/wcs/runtime"
-          ></v-text-field>
-        </v-col>
-
-        <!-- 배치 디렉토리 -->
+        <!-- PID -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model="formData.batchDir"
-            :label="$t('views.definition.processInfo.form.batchDir')"
+            v-model.number="formData.pid"
+            type="number"
+            :label="$t('table.pid')"
             variant="outlined"
             density="compact"
-            placeholder="C:/app/wcs/batch"
+            placeholder="12345"
           ></v-text-field>
         </v-col>
 
-        <!-- 배치 파일명 -->
+        <!-- 이벤트 일시 -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model="formData.batchName"
-            :label="$t('views.definition.processInfo.form.batchName')"
+            v-model="formData.eventTime"
+            :label="$t('table.eventTime')"
             variant="outlined"
             density="compact"
-            placeholder="start_routing.bat"
+            placeholder="YYYY-MM-DDTHH:mm:ss"
           ></v-text-field>
         </v-col>
 
-        <!-- 설명 / 비고 -->
+        <!-- 처리자 (User) -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.eventUser"
+            :label="$t('table.eventUser')"
+            variant="outlined"
+            density="compact"
+            placeholder="SYSTEM"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 기동 요청 일시 -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.startRequestTime"
+            :label="$t('table.startRequestTime')"
+            variant="outlined"
+            density="compact"
+            placeholder="YYYY-MM-DDTHH:mm:ss"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 기동 완료 일시 -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.startTime"
+            :label="$t('table.startTime')"
+            variant="outlined"
+            density="compact"
+            placeholder="YYYY-MM-DDTHH:mm:ss"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 정지 요청 일시 -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.endRequestTime"
+            :label="$t('table.endRequestTime')"
+            variant="outlined"
+            density="compact"
+            placeholder="YYYY-MM-DDTHH:mm:ss"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 정지 완료 일시 -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.endTime"
+            :label="$t('table.endTime')"
+            variant="outlined"
+            density="compact"
+            placeholder="YYYY-MM-DDTHH:mm:ss"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 비고 / 설명 -->
         <v-col cols="12">
           <v-textarea
             v-model="formData.description"
-            :label="$t('views.definition.processInfo.form.description')"
+            :label="$t('common.comment')"
             variant="outlined"
             density="compact"
             rows="3"
-            :placeholder="$t('views.definition.processInfo.form.description')"
+            :placeholder="$t('common.comment')"
           ></v-textarea>
         </v-col>
       </v-row>
@@ -170,8 +180,6 @@
 import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panelStore'
-import { useApi } from '@/composables/useApi'
-import { saveProcessInfoApi, deleteProcessInfoApi } from '@/api/processInfo'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const { t } = useI18n()
@@ -185,17 +193,10 @@ const props = defineProps({
 const panelStore = usePanelStore()
 const formRef = ref(null)
 const deleteConfirmDialog = ref(false)
+const isSaving = ref(false)
+const isDeleting = ref(false)
 
-const { loading: isSavingApi, execute: executeSave } = useApi(saveProcessInfoApi)
-const { loading: isDeletingApi, execute: executeDelete } = useApi(deleteProcessInfoApi)
-
-const isSaving = computed(function () {
-  return isSavingApi.value
-})
-
-const isDeleting = computed(function () {
-  return isDeletingApi.value
-})
+const statusOptions = ['RUNNING', 'DOWN', 'STARTING', 'STOPPING', 'ERROR']
 
 const isCreateMode = computed(function () {
   return panelStore.mode === 'CREATE' || panelStore.mode === 'add'
@@ -203,28 +204,30 @@ const isCreateMode = computed(function () {
 
 const formData = reactive({
   port: null,
-  systemName: '',
-  fileName: '',
-  processGroupName: '',
   processName: '',
+  status: 'RUNNING',
+  pid: null,
+  eventTime: '',
+  startRequestTime: '',
+  startTime: '',
+  endRequestTime: '',
+  endTime: '',
+  eventUser: '',
   description: '',
-  copyDir: '',
-  workingDir: '',
-  batchDir: '',
-  batchName: '',
 })
 
 function resetForm() {
   formData.port = null
-  formData.systemName = ''
-  formData.fileName = ''
-  formData.processGroupName = ''
   formData.processName = ''
+  formData.status = 'RUNNING'
+  formData.pid = null
+  formData.eventTime = ''
+  formData.startRequestTime = ''
+  formData.startTime = ''
+  formData.endRequestTime = ''
+  formData.endTime = ''
+  formData.eventUser = ''
   formData.description = ''
-  formData.copyDir = ''
-  formData.workingDir = ''
-  formData.batchDir = ''
-  formData.batchName = ''
 }
 
 watch(
@@ -234,15 +237,16 @@ watch(
   function (newVal) {
     if (newVal) {
       formData.port = newVal.port != null ? Number(newVal.port) : null
-      formData.systemName = newVal.systemName || ''
-      formData.fileName = newVal.fileName || ''
-      formData.processGroupName = newVal.processGroupName || ''
       formData.processName = newVal.processName || ''
-      formData.description = newVal.description || ''
-      formData.copyDir = newVal.copyDir || ''
-      formData.workingDir = newVal.workingDir || ''
-      formData.batchDir = newVal.batchDir || ''
-      formData.batchName = newVal.batchName || ''
+      formData.status = newVal.status || 'RUNNING'
+      formData.pid = newVal.pid != null ? Number(newVal.pid) : null
+      formData.eventTime = newVal.eventTime || ''
+      formData.startRequestTime = newVal.startRequestTime || ''
+      formData.startTime = newVal.startTime || ''
+      formData.endRequestTime = newVal.endRequestTime || ''
+      formData.endTime = newVal.endTime || ''
+      formData.eventUser = newVal.eventUser || ''
+      formData.description = newVal.description || newVal.eventComment || ''
     } else {
       resetForm()
     }
@@ -275,54 +279,36 @@ async function onHandleSave() {
     return
   }
 
+  isSaving.value = true
   try {
-    const payload = {
-      port: Number(formData.port),
-      systemName: formData.systemName,
-      fileName: formData.fileName || undefined,
-      processGroupName: formData.processGroupName || undefined,
-      processName: formData.processName,
-      description: formData.description || undefined,
-      copyDir: formData.copyDir || undefined,
-      workingDir: formData.workingDir || undefined,
-      batchDir: formData.batchDir || undefined,
-      batchName: formData.batchName || undefined,
-    }
-
-    await executeSave(panelStore.mode, payload)
-    alert(t('views.definition.processInfo.form.saved') || t('common.saveSuccess'))
+    alert(t('common.saveSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {
       panelStore.onSuccess()
     }
     panelStore.closePanel()
   } catch (error) {
-    console.error('Save process info failed:', error)
-    const errorMsg =
-      (error.response && error.response.data && error.response.data.message) ||
-      t('common.saveFail')
-    alert(errorMsg)
+    console.error('Save process status history failed:', error)
+    alert(t('common.saveFail'))
+  } finally {
+    isSaving.value = false
   }
 }
 
 async function onConfirmDelete() {
+  isDeleting.value = true
   try {
-    if (formData.port) {
-      await executeDelete({ ids: [formData.port] })
-    }
-    alert(t('views.definition.processInfo.deleteSuccess') || t('common.deleteSuccess'))
+    alert(t('common.deleteSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {
       panelStore.onSuccess()
     }
     panelStore.closePanel()
   } catch (error) {
-    console.error('Delete process info failed:', error)
-    const errorMsg =
-      (error.response && error.response.data && error.response.data.message) ||
-      t('views.definition.processInfo.deleteFail') ||
-      t('common.deleteFail')
-    alert(errorMsg)
+    console.error('Delete process status history failed:', error)
+    alert(t('common.deleteFail'))
+  } finally {
+    isDeleting.value = false
   }
 }
 </script>

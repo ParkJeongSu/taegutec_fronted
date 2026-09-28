@@ -91,6 +91,7 @@
         v-model:sort-by="options.sortBy"
         item-value="stockerName"
         density="compact"
+        v-on:click:row="onRowClick"
         v-on:update:options="handleOptionsUpdate"
       >
         <!-- 적재율 프로그레스 바 커스텀 슬롯 -->
@@ -131,13 +132,16 @@
 </template>
 
 <script setup>
-import { reactive, computed, onMounted, onBeforeUnmount } from 'vue'
+import { markRaw, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { usePanelStore } from '@/stores/panelStore'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
+import WarehouseDetailView from './components/WarehouseDetailView.vue'
 import { useDataTable } from '@/composables/useDataTable'
 import { fetchWcsStockersApi } from '@/api/wcsStocker'
 
 const { t } = useI18n()
+const panelStore = usePanelStore()
 
 // 1. 검색 파라미터 상태
 const searchParams = reactive({
@@ -257,6 +261,18 @@ function handleReset() {
 
 function handleExport() {
   alert(t('views.dashboard.exportStockerAlert'))
+}
+
+// 행(Row) 클릭 시 스토커 상세 정보 슬라이드 패널 오픈
+function onRowClick(event, row) {
+  const itemData = (row && row.item) ? row.item : row
+  if (itemData) {
+    panelStore.openPanel(markRaw(WarehouseDetailView), {
+      mode: 'VIEW',
+      data: itemData,
+      title: t('views.dashboard.stockerDetailTitle') || '스토커 상세 현황',
+    })
+  }
 }
 
 // 라이프사이클: 초기 로드 및 30초 폴링 타이머

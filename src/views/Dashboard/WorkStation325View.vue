@@ -105,6 +105,8 @@
               :loading="isLoading"
               :items-per-page="10"
               item-value="orderNo"
+              density="compact"
+              v-on:click:row="onRowClick"
             >
               <!-- 상태 컬럼 커스텀 슬롯 -->
               <template #[`item.status`]="{ item }">
@@ -134,6 +136,8 @@
               :loading="isLoading"
               :items-per-page="10"
               item-value="orderNo"
+              density="compact"
+              v-on:click:row="onRowClick"
             >
               <!-- 상태 컬럼 커스텀 슬롯 -->
               <template #[`item.status`]="{ item }">
@@ -161,15 +165,18 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, markRaw, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import SvgDrawingViewer from '@/components/widgets/SvgDrawingViewer.vue'
+import WorkStationOrderDetailView from './components/WorkStationOrderDetailView.vue'
+import { usePanelStore } from '@/stores/panelStore'
 import { useStompSocket } from '@/composables/useStompSocket'
 import { fetchRecentTransportOrdersApi } from '@/api/transportOrder'
 
 // script setup 영역
 const { t } = useI18n()
+const panelStore = usePanelStore()
 const baseUrl = import.meta.env.BASE_URL // '/wcs-web/' (로컬 개발 서버에선 '/')
 const warehouseId = '2'
 const wsNo = '325'
@@ -316,6 +323,23 @@ function getStatusColor(status) {
 function handlePositionClick(posId) {
   selectedPosition.value = posId
   console.log('[WorkStation' + wsNo + '] Tray position clicked:', posId)
+}
+
+// 15. 행(Row) 클릭 시 반송 오더 상세 정보 슬라이드 패널 오픈
+function onRowClick(event, row) {
+  const itemData = (row && row.item) ? row.item : row
+  if (itemData) {
+    panelStore.openPanel(markRaw(WorkStationOrderDetailView), {
+      mode: 'VIEW',
+      data: {
+        ...itemData,
+        transportType: activeTab.value === 'inbound' ? 'I' : 'O',
+        wsNo: wsNo,
+        workStationId: wsNo,
+      },
+      title: t('views.dashboard.orderDetailTitle') || '반송 오더 상세 정보',
+    })
+  }
 }
 
 // 라이프사이클: 웹소켓 토픽 구독, 초기 오더 조회 및 30초 자동 폴링 타이머 설정

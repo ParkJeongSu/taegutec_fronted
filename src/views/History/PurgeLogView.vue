@@ -51,6 +51,8 @@
         :items="items"
         :total-items="totalItems"
         :loading="loading"
+        density="compact"
+        v-on:click:row="onRowClick"
         v-on:update:options="onUpdateOptions"
       >
         <template v-slot:[`item.status`]="{ item }">
@@ -81,16 +83,19 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue'
+import { reactive, computed, markRaw } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DataTableWidget from '@/components/widgets/DataTableWidget.vue'
 import SearchPanel from '@/components/widgets/SearchPanel.vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
+import PurgeLogViewForm from './components/PurgeLogViewForm.vue'
+import { usePanelStore } from '@/stores/panelStore'
 import { useDataTable } from '@/composables/useDataTable'
 import { fetchPurgeLogApi } from '@/api/purgeLog'
 import { formatDateTime } from '@/utils/dateUtils'
 
 const { t } = useI18n()
+const panelStore = usePanelStore()
 
 const uiParams = reactive({
   fromDate: '',
@@ -99,17 +104,19 @@ const uiParams = reactive({
   status: '전체',
 })
 
-const logHeaders = computed(() => [
-  { title: t('table.logId'), key: 'id', sortable: true, width: '100px' },
-  { title: t('table.configId'), key: 'purgeConfigId', width: '90px' },
-  { title: t('table.batchId'), key: 'batchId', width: '130px' },
-  { title: t('table.targetTable'), key: 'tableName' },
-  { title: t('table.startDateTime'), key: 'startDateTime', width: '160px' },
-  { title: t('table.endDateTime'), key: 'endDateTime', width: '160px' },
-  { title: t('table.deleteCount'), key: 'deleteCount', align: 'end', width: '110px' },
-  { title: t('common.status'), key: 'status', align: 'center', width: '100px' },
-  { title: t('table.errorMsg'), key: 'errorMsg', sortable: false, width: '200px' },
-])
+const logHeaders = computed(function () {
+  return [
+    { title: t('table.logId'), key: 'id', sortable: true, width: '100px' },
+    { title: t('table.configId'), key: 'purgeConfigId', width: '90px' },
+    { title: t('table.batchId'), key: 'batchId', width: '130px' },
+    { title: t('table.targetTable'), key: 'tableName' },
+    { title: t('table.startDateTime'), key: 'startDateTime', width: '160px' },
+    { title: t('table.endDateTime'), key: 'endDateTime', width: '160px' },
+    { title: t('table.deleteCount'), key: 'deleteCount', align: 'end', width: '110px' },
+    { title: t('common.status'), key: 'status', align: 'center', width: '100px' },
+    { title: t('table.errorMsg'), key: 'errorMsg', sortable: false, width: '200px' },
+  ]
+})
 
 const { items, totalItems, loading, loadData, updateOptions } = useDataTable(fetchPurgeLogApi)
 
@@ -139,6 +146,18 @@ function onSearch() {
 function onUpdateOptions(options) {
   const finalParams = getFormattedParams()
   updateOptions(options, finalParams)
+}
+
+function onRowClick(event, row) {
+  const itemData = (row && row.item) ? row.item : row
+  if (itemData) {
+    panelStore.openPanel(markRaw(PurgeLogViewForm), {
+      mode: 'UPDATE',
+      data: itemData,
+      title: t('views.history.purgeLog.title') + ' ' + t('common.detail'),
+      onSuccess: onSearch,
+    })
+  }
 }
 
 function getPurgeStatusColor(status) {

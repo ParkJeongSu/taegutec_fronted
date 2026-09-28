@@ -426,9 +426,15 @@ function onSearch() {
 }
 
 function onRowClick(event, row) {
-  panelStore.setSelectedItem(row.item, markRaw(ProcessStatusForm), 'Process Status', 'view')
-  panelStore.onSuccess = onSearch
-  panelStore.togglePanel()
+  const itemData = (row && row.item) ? row.item : row
+  if (itemData) {
+    panelStore.openPanel(markRaw(ProcessStatusForm), {
+      mode: 'UPDATE',
+      data: itemData,
+      title: t('views.production.processStatus.title') + ' ' + t('common.detail'),
+      onSuccess: onSearch,
+    })
+  }
 }
 
 function onUpdateOptions(options) {

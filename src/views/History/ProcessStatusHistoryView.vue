@@ -61,6 +61,8 @@
         :items="items"
         :total-items="totalItems"
         :loading="loading"
+        density="compact"
+        v-on:click:row="onRowClick"
         v-on:update:options="onUpdateOptions"
       >
         <template v-slot:[`item.status`]="{ item }">
@@ -90,16 +92,19 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue'
+import { reactive, computed, markRaw } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DataTableWidget from '@/components/widgets/DataTableWidget.vue'
 import SearchPanel from '@/components/widgets/SearchPanel.vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
+import ProcessStatusHistoryViewForm from './components/ProcessStatusHistoryViewForm.vue'
+import { usePanelStore } from '@/stores/panelStore'
 import { useDataTable } from '@/composables/useDataTable'
 import { fetchProcessHistoryApi } from '@/api/processStatusHistory'
 import { formatDateTime } from '@/utils/dateUtils'
 
 const { t } = useI18n()
+const panelStore = usePanelStore()
 
 const uiParams = reactive({
   fromDate: '',
@@ -109,17 +114,19 @@ const uiParams = reactive({
   status: '전체',
 })
 
-const historyHeaders = computed(() => [
-  { title: t('table.eventTime'), key: 'eventTime', sortable: true, width: '160px' },
-  { title: t('table.port'), key: 'port', width: '90px' },
-  { title: t('table.processName'), key: 'processName' },
-  { title: t('common.status'), key: 'status', align: 'center', width: '110px' },
-  { title: t('table.pid'), key: 'pid', width: '90px' },
-  { title: t('table.startRequestTime'), key: 'startRequestTime', width: '160px' },
-  { title: t('table.startTime'), key: 'startTime', width: '160px' },
-  { title: t('table.endRequestTime'), key: 'endRequestTime', width: '160px' },
-  { title: t('table.endTime'), key: 'endTime', width: '160px' },
-])
+const historyHeaders = computed(function () {
+  return [
+    { title: t('table.eventTime'), key: 'eventTime', sortable: true, width: '160px' },
+    { title: t('table.port'), key: 'port', width: '90px' },
+    { title: t('table.processName'), key: 'processName' },
+    { title: t('common.status'), key: 'status', align: 'center', width: '110px' },
+    { title: t('table.pid'), key: 'pid', width: '90px' },
+    { title: t('table.startRequestTime'), key: 'startRequestTime', width: '160px' },
+    { title: t('table.startTime'), key: 'startTime', width: '160px' },
+    { title: t('table.endRequestTime'), key: 'endRequestTime', width: '160px' },
+    { title: t('table.endTime'), key: 'endTime', width: '160px' },
+  ]
+})
 
 const { items, totalItems, loading, loadData, updateOptions } = useDataTable(fetchProcessHistoryApi)
 
@@ -150,6 +157,18 @@ function onSearch() {
 function onUpdateOptions(options) {
   const finalParams = getFormattedParams()
   updateOptions(options, finalParams)
+}
+
+function onRowClick(event, row) {
+  const itemData = (row && row.item) ? row.item : row
+  if (itemData) {
+    panelStore.openPanel(markRaw(ProcessStatusHistoryViewForm), {
+      mode: 'UPDATE',
+      data: itemData,
+      title: t('views.history.processStatusHistory.title') + ' ' + t('common.detail'),
+      onSuccess: onSearch,
+    })
+  }
 }
 
 function getStatusColor(status) {

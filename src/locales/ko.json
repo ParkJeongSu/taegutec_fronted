@@ -921,7 +921,9 @@
       "inboundOrderList": "입고 오더 목록 ({count})",
       "outboundOrderList": "출고 오더 목록 ({count})",
       "noInboundOrder": "입고 오더 내역이 없습니다.",
-      "noOutboundOrder": "출고 오더 내역이 없습니다."
+      "noOutboundOrder": "출고 오더 내역이 없습니다.",
+      "stockerDetailTitle": "스토커 상세 현황",
+      "orderDetailTitle": "반송 오더 상세 정보"
     },
     "transfer": {
       "carrier": {

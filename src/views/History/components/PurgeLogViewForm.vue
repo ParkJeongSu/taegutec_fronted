@@ -3,59 +3,56 @@
     <!-- 입력 폼 영역 -->
     <v-form ref="formRef" class="flex-grow-1 overflow-y-auto pa-4">
       <v-row density="comfortable">
-        <!-- 포트 번호 (PK) -->
+        <!-- 로그 ID (PK) -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model.number="formData.port"
+            v-model.number="formData.id"
             type="number"
-            :label="$t('table.port')"
+            :label="$t('table.logId')"
             variant="outlined"
             density="compact"
-            :rules="[validateRequired]"
-            placeholder="8080"
             :disabled="!isCreateMode"
-            required
+            placeholder="1"
           ></v-text-field>
         </v-col>
 
-        <!-- 시스템명 -->
+        <!-- 정책 ID (PurgeConfig ID) -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model="formData.systemName"
-            :label="$t('table.systemName')"
+            v-model.number="formData.purgeConfigId"
+            type="number"
+            :label="$t('table.configId')"
+            variant="outlined"
+            density="compact"
+            placeholder="101"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 배치 실행 ID -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.batchId"
+            :label="$t('table.batchId')"
+            variant="outlined"
+            density="compact"
+            placeholder="BATCH-PURGE-01"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 대상 테이블명 -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.tableName"
+            :label="$t('table.targetTable')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            placeholder="WCS"
+            placeholder="TB_WCS_TRANSFER_COMMAND_HIST"
             required
           ></v-text-field>
         </v-col>
 
-        <!-- 프로세스 그룹명 -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.processGroupName"
-            :label="$t('table.processGroupName')"
-            variant="outlined"
-            density="compact"
-            placeholder="TRANSFER_GROUP"
-          ></v-text-field>
-        </v-col>
-
-        <!-- 프로세스명 -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.processName"
-            :label="$t('table.processName')"
-            variant="outlined"
-            density="compact"
-            :rules="[validateRequired]"
-            placeholder="PROCESS_ROUTER"
-            required
-          ></v-text-field>
-        </v-col>
-
-        <!-- 상태 -->
+        <!-- 처리 상태 -->
         <v-col cols="12" sm="6">
           <v-select
             v-model="formData.status"
@@ -66,45 +63,23 @@
           ></v-select>
         </v-col>
 
-        <!-- PID -->
+        <!-- 삭제 건수 -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model.number="formData.pid"
+            v-model.number="formData.deleteCount"
             type="number"
-            :label="$t('table.pid')"
+            :label="$t('table.deleteCount')"
             variant="outlined"
             density="compact"
-            placeholder="12345"
-          ></v-text-field>
-        </v-col>
-
-        <!-- 시작 요청 일시 -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.startRequestTime"
-            :label="$t('table.startRequestTime')"
-            variant="outlined"
-            density="compact"
-            placeholder="YYYY-MM-DDTHH:mm:ss"
+            placeholder="5000"
           ></v-text-field>
         </v-col>
 
         <!-- 시작 일시 -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model="formData.startTime"
-            :label="$t('table.startTime')"
-            variant="outlined"
-            density="compact"
-            placeholder="YYYY-MM-DDTHH:mm:ss"
-          ></v-text-field>
-        </v-col>
-
-        <!-- 종료 요청 일시 -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.endRequestTime"
-            :label="$t('table.endRequestTime')"
+            v-model="formData.startDateTime"
+            :label="$t('table.startDateTime')"
             variant="outlined"
             density="compact"
             placeholder="YYYY-MM-DDTHH:mm:ss"
@@ -114,23 +89,23 @@
         <!-- 종료 일시 -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model="formData.endTime"
-            :label="$t('table.endTime')"
+            v-model="formData.endDateTime"
+            :label="$t('table.endDateTime')"
             variant="outlined"
             density="compact"
             placeholder="YYYY-MM-DDTHH:mm:ss"
           ></v-text-field>
         </v-col>
 
-        <!-- 설명 / 비고 -->
+        <!-- 오류 메시지 / 상세 내용 -->
         <v-col cols="12">
           <v-textarea
-            v-model="formData.description"
-            :label="$t('table.description')"
+            v-model="formData.errorMsg"
+            :label="$t('table.errorMsg')"
             variant="outlined"
             density="compact"
             rows="3"
-            :placeholder="$t('table.description')"
+            placeholder="오류 발생 시 상세 메시지가 여기에 표시됩니다."
           ></v-textarea>
         </v-col>
       </v-row>
@@ -182,8 +157,6 @@
 import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panelStore'
-import { useApi } from '@/composables/useApi'
-import { saveProcessInfoApi, deleteProcessInfoApi } from '@/api/processInfo'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const { t } = useI18n()
@@ -197,50 +170,37 @@ const props = defineProps({
 const panelStore = usePanelStore()
 const formRef = ref(null)
 const deleteConfirmDialog = ref(false)
+const isSaving = ref(false)
+const isDeleting = ref(false)
 
-const statusOptions = ['RUNNING', 'DOWN', 'STARTING', 'STOPPING', 'ERROR']
-
-const { loading: isSavingApi, execute: executeSave } = useApi(saveProcessInfoApi)
-const { loading: isDeletingApi, execute: executeDelete } = useApi(deleteProcessInfoApi)
-
-const isSaving = computed(function () {
-  return isSavingApi.value
-})
-
-const isDeleting = computed(function () {
-  return isDeletingApi.value
-})
+const statusOptions = ['SUCCESS', 'FAIL', 'RUNNING', 'ERROR']
 
 const isCreateMode = computed(function () {
   return panelStore.mode === 'CREATE' || panelStore.mode === 'add'
 })
 
 const formData = reactive({
-  port: null,
-  systemName: '',
-  processGroupName: '',
-  processName: '',
-  status: 'RUNNING',
-  pid: null,
-  startRequestTime: null,
-  startTime: null,
-  endRequestTime: null,
-  endTime: '',
-  description: '',
+  id: null,
+  purgeConfigId: null,
+  batchId: '',
+  tableName: '',
+  startDateTime: '',
+  endDateTime: '',
+  deleteCount: 0,
+  status: 'SUCCESS',
+  errorMsg: '',
 })
 
 function resetForm() {
-  formData.port = null
-  formData.systemName = ''
-  formData.processGroupName = ''
-  formData.processName = ''
-  formData.status = 'RUNNING'
-  formData.pid = null
-  formData.startRequestTime = null
-  formData.startTime = null
-  formData.endRequestTime = null
-  formData.endTime = ''
-  formData.description = ''
+  formData.id = null
+  formData.purgeConfigId = null
+  formData.batchId = ''
+  formData.tableName = ''
+  formData.startDateTime = ''
+  formData.endDateTime = ''
+  formData.deleteCount = 0
+  formData.status = 'SUCCESS'
+  formData.errorMsg = ''
 }
 
 watch(
@@ -249,17 +209,15 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.port = newVal.port != null ? Number(newVal.port) : null
-      formData.systemName = newVal.systemName || ''
-      formData.processGroupName = newVal.processGroupName || ''
-      formData.processName = newVal.processName || ''
-      formData.status = newVal.status || 'RUNNING'
-      formData.pid = newVal.pid != null ? Number(newVal.pid) : null
-      formData.startRequestTime = newVal.startRequestTime || null
-      formData.startTime = newVal.startTime || null
-      formData.endRequestTime = newVal.endRequestTime || null
-      formData.endTime = newVal.endTime || ''
-      formData.description = newVal.description || ''
+      formData.id = newVal.id != null ? Number(newVal.id) : null
+      formData.purgeConfigId = newVal.purgeConfigId != null ? Number(newVal.purgeConfigId) : null
+      formData.batchId = newVal.batchId || ''
+      formData.tableName = newVal.tableName || ''
+      formData.startDateTime = newVal.startDateTime || ''
+      formData.endDateTime = newVal.endDateTime || ''
+      formData.deleteCount = newVal.deleteCount != null ? Number(newVal.deleteCount) : 0
+      formData.status = newVal.status || 'SUCCESS'
+      formData.errorMsg = newVal.errorMsg || ''
     } else {
       resetForm()
     }
@@ -292,22 +250,8 @@ async function onHandleSave() {
     return
   }
 
+  isSaving.value = true
   try {
-    const payload = {
-      port: Number(formData.port),
-      systemName: formData.systemName,
-      processGroupName: formData.processGroupName || undefined,
-      processName: formData.processName,
-      status: formData.status,
-      pid: formData.pid != null ? Number(formData.pid) : undefined,
-      startRequestTime: formData.startRequestTime || undefined,
-      startTime: formData.startTime || undefined,
-      endRequestTime: formData.endRequestTime || undefined,
-      endTime: formData.endTime || undefined,
-      description: formData.description || undefined,
-    }
-
-    await executeSave(panelStore.mode, payload)
     alert(t('common.saveSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {
@@ -315,17 +259,16 @@ async function onHandleSave() {
     }
     panelStore.closePanel()
   } catch (error) {
-    console.error('Save process failed:', error)
-    const errorMsg =
-      (error.response && error.response.data && error.response.data.message) ||
-      t('common.saveFail')
-    alert(errorMsg)
+    console.error('Save purge log failed:', error)
+    alert(t('common.saveFail'))
+  } finally {
+    isSaving.value = false
   }
 }
 
 async function onConfirmDelete() {
+  isDeleting.value = true
   try {
-    await executeDelete({ ids: [formData.port] })
     alert(t('common.deleteSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {
@@ -333,11 +276,10 @@ async function onConfirmDelete() {
     }
     panelStore.closePanel()
   } catch (error) {
-    console.error('Delete process failed:', error)
-    const errorMsg =
-      (error.response && error.response.data && error.response.data.message) ||
-      t('common.deleteFail')
-    alert(errorMsg)
+    console.error('Delete purge log failed:', error)
+    alert(t('common.deleteFail'))
+  } finally {
+    isDeleting.value = false
   }
 }
 </script>

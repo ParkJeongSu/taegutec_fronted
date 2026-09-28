@@ -16,6 +16,16 @@
             color="primary"
             variant="flat"
             size="small"
+            prepend-icon="$plus"
+            class="font-weight-bold mr-2"
+            v-on:click="onAddTransferCommand"
+          >
+            {{ $t('common.create') }}
+          </v-btn>
+          <v-btn
+            color="secondary"
+            variant="tonal"
+            size="small"
             prepend-icon="$refresh"
             class="font-weight-medium mr-2"
             :loading="loading"
@@ -276,143 +286,20 @@
         </template>
       </BaseDataTable>
     </v-card>
-
-    <!-- 상세 보기 다이얼로그 모달 -->
-    <v-dialog v-model="isDetailDialogOpen" max-width="700px" scrollable>
-      <v-card v-if="selectedDetailItem" class="rounded-lg">
-        <v-card-item class="bg-primary-lighten py-3 px-4">
-          <div class="d-flex align-center justify-space-between">
-            <div class="d-flex align-center">
-              <v-icon icon="$history" size="20" color="primary" class="mr-2" />
-              <span class="text-subtitle-1 font-weight-bold text-high-emphasis">{{ $t('views.transfer.commandHistory.detailTitle') }}</span>
-            </div>
-            <v-btn
-              icon="$close"
-              variant="text"
-              size="small"
-              density="compact"
-              v-on:click="isDetailDialogOpen = false"
-            ></v-btn>
-          </div>
-        </v-card-item>
-
-        <v-divider></v-divider>
-
-        <v-card-text class="pa-4">
-          <v-row density="compact">
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.timeKey') }}</div>
-              <div class="detail-value">{{ selectedDetailItem.eventTimeKey || '-' }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.eventTime') }}</div>
-              <div class="detail-value font-weight-medium">{{ formatDateTime(selectedDetailItem.eventTime) }}</div>
-            </v-col>
-
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.eventName') }}</div>
-              <div class="detail-value">
-                <v-chip size="x-small" variant="tonal" color="indigo" class="font-weight-bold">
-                  {{ selectedDetailItem.eventName || '-' }}
-                </v-chip>
-              </div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.eventUser') }}</div>
-              <div class="detail-value">{{ selectedDetailItem.eventUser || '-' }}</div>
-            </v-col>
-
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.commandId') }}</div>
-              <div class="detail-value font-weight-bold text-primary">{{ selectedDetailItem.transferCommandName }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.carrierId') }}</div>
-              <div class="detail-value font-weight-medium">{{ selectedDetailItem.carrierName || '-' }}</div>
-            </v-col>
-
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.commandStatus') }}</div>
-              <div class="detail-value">
-                <v-chip
-                  :color="getCommandStatusColor(selectedDetailItem.commandStatus)"
-                  size="x-small"
-                  variant="flat"
-                  class="font-weight-bold"
-                >
-                  {{ selectedDetailItem.commandStatus || '-' }}
-                </v-chip>
-              </div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.orderType') }}</div>
-              <div class="detail-value">{{ selectedDetailItem.orderType || '-' }}</div>
-            </v-col>
-
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.source') }}</div>
-              <div class="detail-value">{{ selectedDetailItem.source || '-' }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.target') }}</div>
-              <div class="detail-value">{{ selectedDetailItem.target || '-' }}</div>
-            </v-col>
-
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.currentEq') }}</div>
-              <div class="detail-value">{{ selectedDetailItem.currentEquipmentName || '-' }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.targetEq') }}</div>
-              <div class="detail-value">{{ selectedDetailItem.targetEquipmentName || '-' }}</div>
-            </v-col>
-
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.subJobNo') }}</div>
-              <div class="detail-value">{{ selectedDetailItem.subCommandJobNo != null ? selectedDetailItem.subCommandJobNo : '-' }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.subStatus') }}</div>
-              <div class="detail-value">{{ selectedDetailItem.subCommandStatus || '-' }}</div>
-            </v-col>
-
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.jobStart') }}</div>
-              <div class="detail-value">{{ formatDateTime(selectedDetailItem.jobStartTime) }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.jobEnd') }}</div>
-              <div class="detail-value">{{ formatDateTime(selectedDetailItem.jobCompletedTime) }}</div>
-            </v-col>
-
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.createTime') }}</div>
-              <div class="detail-value">{{ formatDateTime(selectedDetailItem.createTime) }}</div>
-            </v-col>
-            <v-col cols="12" sm="6">
-              <div class="detail-label">{{ $t('views.transfer.commandHistory.detailLabels.comment') }}</div>
-              <div class="detail-value">{{ selectedDetailItem.eventComment || '-' }}</div>
-            </v-col>
-          </v-row>
-        </v-card-text>
-
-        <v-divider></v-divider>
-
-        <v-card-actions class="pa-3 justify-end">
-          <v-btn variant="outlined" size="small" v-on:click="isDetailDialogOpen = false">{{ $t('common.close') }}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-container>
 </template>
 
 <script setup>
 import { useI18n } from 'vue-i18n'
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
+import TransferCommandHistoryViewForm from './components/TransferCommandHistoryViewForm.vue'
+import { usePanelStore } from '@/stores/panelStore'
 import { useDataTable } from '@/composables/useDataTable'
 import { fetchTransferCommandHistoriesApi } from '@/api/wcsTransferCommand'
 import { formatDateTime } from '@/utils/dateUtils'
+
+const panelStore = usePanelStore()
 
 // 검색 파라미터 상태
 const { t } = useI18n()
@@ -585,11 +472,26 @@ function onUpdateOptions(newOptions) {
   updateOptions(newOptions, getSanitizedParams())
 }
 
+// [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
+function onAddTransferCommand() {
+  panelStore.openPanel(markRaw(TransferCommandHistoryViewForm), {
+    mode: 'CREATE',
+    data: null,
+    title: t('views.transfer.commandHistory.title') + ' ' + t('common.create'),
+    onSuccess: handleSearch,
+  })
+}
+
+// 행(Row) 클릭 시 수정/상세 모드로 우측 슬라이드 패널 오픈
 function onRowClick(event, row) {
   const itemData = (row && row.item) ? row.item : row
   if (itemData) {
-    selectedDetailItem.value = itemData
-    isDetailDialogOpen.value = true
+    panelStore.openPanel(markRaw(TransferCommandHistoryViewForm), {
+      mode: 'UPDATE',
+      data: itemData,
+      title: t('views.transfer.commandHistory.detailTitle'),
+      onSuccess: handleSearch,
+    })
   }
 }
 

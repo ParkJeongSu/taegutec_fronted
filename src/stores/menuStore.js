@@ -10,7 +10,7 @@ export const useMenuStore = defineStore('menu', function () {
   const isLoaded = ref(false)
   const error = ref(null)
 
-  // 선택된 메뉴 ID 상태
+  // 선택된 메뉴 ID 상태 (문자열 일관성 보장)
   const selectedL1Id = ref('')
   const selectedL2Id = ref('')
   const isSidebarOpen = ref(true)
@@ -21,7 +21,7 @@ export const useMenuStore = defineStore('menu', function () {
       return null
     }
     for (let i = 0; i < menuTree.value.length; i++) {
-      if (menuTree.value[i].id === selectedL1Id.value) {
+      if (String(menuTree.value[i].id) === String(selectedL1Id.value)) {
         return menuTree.value[i]
       }
     }
@@ -43,7 +43,7 @@ export const useMenuStore = defineStore('menu', function () {
       return null
     }
     for (let i = 0; i < l2List.length; i++) {
-      if (l2List[i].id === selectedL2Id.value) {
+      if (String(l2List[i].id) === String(selectedL2Id.value)) {
         return l2List[i]
       }
     }
@@ -58,21 +58,26 @@ export const useMenuStore = defineStore('menu', function () {
     return []
   })
 
-  // 대메뉴 선택: selectedL1Id 갱신 및 첫 번째 자식 L2 ID 즉시 할당
+  // 대메뉴 선택: selectedL1Id 갱신 및 첫 번째 자식 L2 ID 즉시 할당 (문자열로 통일)
   function selectL1(menuOrId) {
-    const l1Id = typeof menuOrId === 'object' && menuOrId !== null ? menuOrId.id : menuOrId
+    if (menuOrId === null || menuOrId === undefined) {
+      return
+    }
+    const rawId = typeof menuOrId === 'object' && menuOrId !== null ? menuOrId.id : menuOrId
+    const l1Id = String(rawId)
     selectedL1Id.value = l1Id
 
     let targetL1 = null
     for (let i = 0; i < menuTree.value.length; i++) {
-      if (menuTree.value[i].id === l1Id) {
+      if (String(menuTree.value[i].id) === l1Id) {
         targetL1 = menuTree.value[i]
         break
       }
     }
 
+    // 첫 번째 L2 ID 즉시 할당 (문자열)
     if (targetL1 && targetL1.children && targetL1.children.length > 0) {
-      selectedL2Id.value = targetL1.children[0].id
+      selectedL2Id.value = String(targetL1.children[0].id)
       isSidebarOpen.value = true
     } else {
       selectedL2Id.value = ''
@@ -81,8 +86,11 @@ export const useMenuStore = defineStore('menu', function () {
 
   // 중메뉴 선택: selectedL2Id 갱신 및 사이드바 오픈 보장
   function selectL2(menuOrId) {
-    const l2Id = typeof menuOrId === 'object' && menuOrId !== null ? menuOrId.id : menuOrId
-    selectedL2Id.value = l2Id
+    if (menuOrId === null || menuOrId === undefined) {
+      return
+    }
+    const rawId = typeof menuOrId === 'object' && menuOrId !== null ? menuOrId.id : menuOrId
+    selectedL2Id.value = String(rawId)
     if (!isSidebarOpen.value) {
       isSidebarOpen.value = true
     }
@@ -133,13 +141,11 @@ export const useMenuStore = defineStore('menu', function () {
       return map[upper]
     }
 
-    // WORK_STATION_311 -> WorkStation311View 형식 처리
     if (upper.indexOf('WORK_STATION_') === 0) {
       const suffix = upper.replace('WORK_STATION_', '')
       return 'WorkStation' + suffix + 'View'
     }
 
-    // 스네이크 케이스 -> 파스칼 케이스 변환
     const words = upper.split('_')
     let pascal = ''
     for (let i = 0; i < words.length; i++) {
@@ -154,16 +160,22 @@ export const useMenuStore = defineStore('menu', function () {
     return pascal
   }
 
-  // 컴포넌트 명칭 추출 함수
+  // 컴포넌트 명칭 추출 함수 (명시적 getKnownComponentMapping 우선 검사)
   function resolveComponentName(rawNode) {
     if (!rawNode) return ''
 
-    // 1. DTO에 componentName이 직접 지정된 경우
     if (rawNode.componentName) {
       return rawNode.componentName
     }
 
-    // 2. filePath 경로가 있는 경우 (예: "@/views/Transfer/StockerView.vue")
+    const menuId = rawNode.menuId || rawNode.id
+    if (menuId) {
+      const mapped = getKnownComponentMapping(menuId)
+      if (mapped) {
+        return mapped
+      }
+    }
+
     if (rawNode.filePath) {
       const pathStr = String(rawNode.filePath).trim()
       const parts = pathStr.split('/')
@@ -174,33 +186,29 @@ export const useMenuStore = defineStore('menu', function () {
       }
     }
 
-    // 3. menuId 기준 매핑 테이블 및 변환 규칙 적용
-    const menuId = rawNode.menuId || rawNode.id
-    if (menuId) {
-      const mapped = getKnownComponentMapping(menuId)
-      if (mapped) {
-        return mapped
-      }
-    }
-
     return ''
   }
 
-  // 백엔드 트리 노드 정규화
+  // 백엔드 트리 노드 정규화 (id를 String으로 강제 통일)
   function normalizeMenuNode(rawNode) {
     if (!rawNode) return null
 
-    const id = rawNode.menuId || (rawNode.id != null ? String(rawNode.id) : '')
-    const title = rawNode.menuName || rawNode.title || id
+    // ✨ 핵심: id를 DB 숫자 PK가 아니라 menuId 문자열 코드로 유지해야 i18n(menu.DASHBOARD 등)이 동작함
+    const menuCode = rawNode.menuId
+      ? String(rawNode.menuId)
+      : rawNode.id != null
+        ? String(rawNode.id)
+        : ''
+    const title = rawNode.menuName || rawNode.title || menuCode
     const path = rawNode.routerPath || rawNode.path || ''
     const icon = rawNode.iconName || rawNode.icon || ''
     const compName = resolveComponentName(rawNode)
 
     const normalized = {
       ...rawNode,
-      id: id,
-      dbId: rawNode.id,
-      menuId: rawNode.menuId || id,
+      id: menuCode, // ✨ 다국어 및 탭 선택 기준 키 (문자열 코드)
+      dbId: rawNode.id, // DB PK(Long) 보존
+      menuId: menuCode,
       title: title,
       menuName: rawNode.menuName || title,
       path: path,
@@ -226,7 +234,7 @@ export const useMenuStore = defineStore('menu', function () {
     return normalized
   }
 
-  // 초기 선택값 (selectedL1Id, selectedL2Id) 재동기화
+  // 초기 선택값 재동기화
   function syncSelectedIds() {
     if (!menuTree.value || menuTree.value.length === 0) {
       selectedL1Id.value = ''
@@ -237,7 +245,7 @@ export const useMenuStore = defineStore('menu', function () {
     let currentL1Exists = false
     let matchedL1 = null
     for (let i = 0; i < menuTree.value.length; i++) {
-      if (menuTree.value[i].id === selectedL1Id.value) {
+      if (String(menuTree.value[i].id) === String(selectedL1Id.value)) {
         currentL1Exists = true
         matchedL1 = menuTree.value[i]
         break
@@ -246,26 +254,25 @@ export const useMenuStore = defineStore('menu', function () {
 
     if (!currentL1Exists) {
       matchedL1 = menuTree.value[0]
-      selectedL1Id.value = matchedL1.id
+      selectedL1Id.value = String(matchedL1.id)
     }
 
     if (matchedL1 && matchedL1.children && matchedL1.children.length > 0) {
       let currentL2Exists = false
       for (let j = 0; j < matchedL1.children.length; j++) {
-        if (matchedL1.children[j].id === selectedL2Id.value) {
+        if (String(matchedL1.children[j].id) === String(selectedL2Id.value)) {
           currentL2Exists = true
           break
         }
       }
       if (!currentL2Exists) {
-        selectedL2Id.value = matchedL1.children[0].id
+        selectedL2Id.value = String(matchedL1.children[0].id)
       }
     } else {
       selectedL2Id.value = ''
     }
   }
 
-  // 사용자 권한 메뉴 트리 조회 액션
   async function fetchUserMenuTree(userId) {
     if (!userId) {
       console.warn('fetchUserMenuTree: userId가 유효하지 않습니다.')
@@ -300,7 +307,6 @@ export const useMenuStore = defineStore('menu', function () {
       menuTree.value = normalizedTree
       isLoaded.value = true
 
-      // L1 / L2 선택값 동기화
       syncSelectedIds()
 
       return menuTree.value
@@ -313,7 +319,6 @@ export const useMenuStore = defineStore('menu', function () {
     }
   }
 
-  // 메뉴 상태 초기화 (로그아웃 등)
   function clearMenu() {
     menuTree.value = []
     selectedL1Id.value = ''

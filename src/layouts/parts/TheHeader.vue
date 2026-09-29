@@ -1,37 +1,38 @@
 <template>
   <div class="header-container">
-    <!-- L1: 최상단 바 (좌-중-우 3분할 정렬) -->
+    <!-- L1: 최상단 대메뉴 바 -->
     <v-app-bar color="primary" density="comfortable" elevation="0" flat class="l1-app-bar px-4">
       <div class="l1-nav-grid w-100">
-        <!-- 좌측: 로고 및 타이틀 -->
+        <!-- 좌측: 로고 -->
         <div class="nav-left d-flex align-center">
           <v-icon icon="$robotIndustrial" size="24" color="white" class="mr-2" />
           <span class="font-weight-bold brand-title text-truncate">{{ currentPlantTitle }}</span>
         </div>
 
-        <!-- 중앙: 대메뉴 탭 네비게이션 (헤더 정중앙 배치 & i18n 적용) -->
+        <!-- 중앙: 대메뉴 탭 -->
         <div class="nav-center d-flex justify-center align-center">
           <v-tabs
-            :model-value="menuStore.selectedL1Id"
+            :model-value="String(menuStore.selectedL1Id)"
             color="white"
+            slider-color="white"
             align-tabs="center"
+            selected-class="l1-tab-active"
             class="l1-tabs"
-            v-on:update:model-value="menuStore.selectL1"
+            v-on:update:model-value="handleL1Change"
           >
             <v-tab
               v-for="l1 in menuStore.menuTree"
               :key="l1.id"
-              :value="l1.id"
-              class="l1-tab-item font-weight-bold"
+              :value="String(l1.id)"
+              class="l1-tab-item font-weight-medium"
             >
               {{ getMenuTitle(l1) }}
             </v-tab>
           </v-tabs>
         </div>
 
-        <!-- 우측: 알람 버튼 & 플랜트 칩 & 사용자 메뉴 드롭다운 -->
+        <!-- 우측: 알람 / 플랜트 칩 / 사용자 드롭다운 -->
         <div class="nav-right d-flex align-center justify-end">
-          <!-- 실시간 알람 벨 아이콘 버튼 -->
           <v-btn
             icon
             variant="text"
@@ -93,7 +94,6 @@
 
                 <v-divider class="my-1"></v-divider>
 
-                <!-- 언어(Locale) 변경 항목 -->
                 <v-list-item prepend-icon="$translate" :title="$t('common.language')">
                   <template #append>
                     <v-btn-toggle
@@ -111,7 +111,6 @@
                   </template>
                 </v-list-item>
 
-                <!-- 실시간 알람 항목 (언어 변경 아래, 로그아웃 위) -->
                 <v-list-item
                   prepend-icon="$bellRing"
                   :title="$t('common.realtimeAlarm')"
@@ -128,12 +127,7 @@
                     >
                       {{ alarmStore.unreadCount }}{{ $t('common.countUnit') }}
                     </v-chip>
-                    <v-chip
-                      v-else
-                      color="grey-lighten-1"
-                      size="x-small"
-                      variant="tonal"
-                    >
+                    <v-chip v-else color="grey-lighten-1" size="x-small" variant="tonal">
                       {{ alarmStore.alarmList.length }}{{ $t('common.countUnit') }}
                     </v-chip>
                   </template>
@@ -141,7 +135,6 @@
 
                 <v-divider class="my-1"></v-divider>
 
-                <!-- 로그아웃 항목 -->
                 <v-list-item
                   prepend-icon="$logout"
                   :title="$t('common.logout')"
@@ -155,25 +148,31 @@
       </div>
     </v-app-bar>
 
-    <!-- L2: 중메뉴 바 (여기에 토글 버튼 배치 & i18n 적용) -->
+    <!-- L2: 중메뉴 바 -->
     <v-sheet color="secondary" class="l2-menu-bar d-flex align-center">
-      <!-- 사이드바 토글 버튼 -->
+      <!-- 사이드바 열기/닫기 토글 -->
       <v-btn icon variant="text" color="white" class="mx-2" v-on:click="menuStore.toggleSidebar">
         <v-icon :icon="menuStore.isSidebarOpen ? '$close' : '$menu'" />
       </v-btn>
 
+      <!--
+        ✨ 해결 포인트 1: :key="menuStore.selectedL1Id"
+        L1 대메뉴가 바뀔 때마다 L2 탭 인스턴스를 완전히 리셋하여,
+        첫 번째 탭에 l2-tab-active CSS와 슬라이더가 100% 즉시 활성화됩니다.
+      -->
       <v-tabs
-        :model-value="menuStore.selectedL2Id"
+        :key="String(menuStore.selectedL1Id)"
+        :model-value="String(menuStore.selectedL2Id)"
         color="white"
         slider-color="white"
-        density="compact"
         selected-class="l2-tab-active"
-        v-on:update:model-value="menuStore.selectL2"
+        class="l2-tabs-container"
+        v-on:update:model-value="handleL2Change"
       >
         <v-tab
           v-for="l2 in menuStore.currentL2List"
           :key="l2.id"
-          :value="l2.id"
+          :value="String(l2.id)"
           class="l2-tab-item"
         >
           {{ getMenuTitle(l2) }}
@@ -197,7 +196,6 @@ const authStore = useAuthStore()
 const alarmStore = useAlarmStore()
 
 const currentLocale = ref(locale.value)
-
 const currentPlantTitle = APP_TITLE
 const plantCode = PLANT_TYPE
 
@@ -205,11 +203,26 @@ function getMenuTitle(item) {
   if (!item) {
     return ''
   }
-  const key = 'menu.' + item.id
-  if (te(key)) {
-    return t(key)
+  const code = item.menuId || item.id
+  if (code) {
+    const key = 'menu.' + code
+    if (te(key)) {
+      return t(key)
+    }
   }
-  return item.title || item.id
+  return item.title || item.menuName || item.id
+}
+
+function handleL1Change(newVal) {
+  if (newVal !== null && newVal !== undefined) {
+    menuStore.selectL1(String(newVal))
+  }
+}
+
+function handleL2Change(newVal) {
+  if (newVal !== null && newVal !== undefined) {
+    menuStore.selectL2(String(newVal))
+  }
 }
 
 function changeLocale(newLocale) {
@@ -230,7 +243,9 @@ const displayEmployeeId = computed(function () {
 const displayUserLabel = computed(function () {
   if (authStore.currentUser && authStore.currentUser.employeeId) {
     const suffix = t('common.userSuffix')
-    return suffix ? `${authStore.currentUser.employeeId} ${suffix}` : authStore.currentUser.employeeId
+    return suffix
+      ? `${authStore.currentUser.employeeId} ${suffix}`
+      : authStore.currentUser.employeeId
   }
   return t('common.user')
 })
@@ -295,6 +310,15 @@ function handleLogout() {
 
 .l1-tab-item {
   letter-spacing: 0.3px;
+  color: rgba(255, 255, 255, 0.75);
+  transition: all 0.2s ease-in-out;
+  border-radius: 4px 4px 0 0;
+}
+
+.l1-tab-item.l1-tab-active {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  background-color: rgba(255, 255, 255, 0.18) !important;
 }
 
 .plant-tag-chip {
@@ -327,6 +351,7 @@ function handleLogout() {
   background-color: rgba(255, 82, 82, 0.08);
 }
 
+/* L2 부모 컨테이너: 정확히 48px */
 .l2-menu-bar {
   height: 48px;
   position: fixed;
@@ -336,16 +361,54 @@ function handleLogout() {
   z-index: 999;
 }
 
+/*
+  ✨ 해결 포인트 2: 중메뉴 수직 정중앙 정렬
+  - 부모 48px 전체를 채우도록 설정
+  - 내부 슬라이드 그룹 컨테이너를 세로 중앙으로 강제 정렬
+*/
+.l2-tabs-container {
+  height: 48px !important;
+}
+
+:deep(.l2-tabs-container .v-slide-group__container) {
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+}
+
+:deep(.l2-tabs-container .v-slide-group__content) {
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+}
+
+/* 탭 버튼 자체의 높이 및 내부 글씨 정렬 */
 .l2-tab-item {
-  color: rgba(255, 255, 255, 0.75);
+  height: 36px !important;
+  min-height: 36px !important;
+  color: rgba(255, 255, 255, 0.85);
   letter-spacing: 0.2px;
+  font-size: 0.875rem;
+  margin: 0 2px;
+  padding: 0 16px;
+  border-radius: 4px;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   transition: all 0.2s ease-in-out;
 }
 
+/* L2 탭 내부의 Vuetify 텍스트 래퍼 (.v-btn__content) 중앙 강제 */
+:deep(.l2-tab-item .v-btn__content) {
+  display: flex !important;
+  align-items: center !important;
+  line-height: 1 !important;
+}
+
+/* L2 선택된 탭 활성 스타일 */
 .l2-tab-item.l2-tab-active {
   color: #ffffff !important;
   font-weight: 700 !important;
-  background-color: rgba(255, 255, 255, 0.15) !important;
-  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.22) !important;
 }
 </style>

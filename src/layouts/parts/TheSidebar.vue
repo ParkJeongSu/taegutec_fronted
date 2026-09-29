@@ -35,7 +35,8 @@
             :title="getMenuTitle(l4)"
             color="primary"
             rounded="lg"
-            class="mb-1 pl-6 text-body-2"
+            class="mb-1 pl-6 text-body-2 sidebar-menu-item"
+            :class="{ 'sidebar-item-active': isMenuActive(l4) }"
             v-on:click="onMenuClick(l4)"
           />
         </v-list-group>
@@ -48,7 +49,8 @@
           :title="getMenuTitle(l3)"
           color="primary"
           rounded="lg"
-          class="mb-1 font-weight-medium"
+          class="mb-1 font-weight-medium sidebar-menu-item"
+          :class="{ 'sidebar-item-active': isMenuActive(l3) }"
           v-on:click="onMenuClick(l3)"
         />
       </template>
@@ -87,11 +89,48 @@ function getMenuTitle(item) {
   if (!item) {
     return ''
   }
-  const key = 'menu.' + item.id
-  if (te(key)) {
-    return t(key)
+  const code = item.menuId || item.id
+  if (code) {
+    const key = 'menu.' + code
+    if (te(key)) {
+      return t(key)
+    }
   }
-  return item.title || item.id
+  return item.title || item.menuName || item.id
+}
+
+// ✨ 현재 열려있는 활성 탭과 메뉴 일치 여부 판별 함수
+function isMenuActive(item) {
+  if (!item || !tabStore.activeTabId) {
+    return false
+  }
+
+  // 1. 탭 ID와 메뉴 ID 직접 비교
+  if (String(tabStore.activeTabId) === String(item.id)) {
+    return true
+  }
+
+  // 2. menuId 기준 비교
+  if (item.menuId && String(tabStore.activeTabId) === String(item.menuId)) {
+    return true
+  }
+
+  // 3. 현재 열려있는 탭 목록에서 활성 탭 객체를 찾아 컴포넌트 명칭으로 비교
+  const tabs = tabStore.openTabs || []
+  for (let i = 0; i < tabs.length; i++) {
+    const tab = tabs[i]
+    if (String(tab.id) === String(tabStore.activeTabId)) {
+      if (tab.componentName && item.componentName && tab.componentName === item.componentName) {
+        return true
+      }
+      if (tab.menuId && item.menuId && tab.menuId === item.menuId) {
+        return true
+      }
+      break
+    }
+  }
+
+  return false
 }
 
 function onMenuClick(menuItem) {
@@ -112,5 +151,27 @@ function onMenuClick(menuItem) {
   min-height: 48px;
   display: flex;
   align-items: center;
+}
+
+.sidebar-menu-item {
+  transition: all 0.2s ease-in-out;
+  border-left: 3px solid transparent;
+}
+
+/*
+  ✨ 활성화된 사이드바 메뉴 스타일
+  - 좌측에 깔끔한 포인트 보더(Primary 컬러)
+  - 은은한 톤의 배경 하이라이트
+  - 폰트 굵기 강조
+*/
+.sidebar-menu-item.sidebar-item-active {
+  background-color: rgba(46, 125, 50, 0.12) !important;
+  border-left: 3px solid #2e7d32 !important;
+  color: #2e7d32 !important;
+  font-weight: 700 !important;
+}
+
+.sidebar-menu-item.sidebar-item-active :deep(.v-icon) {
+  color: #2e7d32 !important;
 }
 </style>

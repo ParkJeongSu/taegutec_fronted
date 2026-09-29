@@ -26,7 +26,7 @@
             size="small"
             prepend-icon="$refresh"
             class="font-weight-medium"
-            :loading="isLoading"
+            :loading="loading"
             v-on:click="handleSearch"
           >{{ $t('common.refresh') }}</v-btn>
         </div>
@@ -97,12 +97,13 @@
       <!-- 중앙 데이터 테이블 -->
       <BaseDataTable
         :headers="headers"
-        :items="userItems"
-        :total-items="totalItems"
-        :loading="isLoading"
+        :items="items"
+        :total-items="Number(totalItems)"
+        :loading="loading"
         item-value="id"
         density="compact"
         v-on:click:row="onRowClick"
+        v-on:update:options="onUpdateOptions"
       >
         <!-- 상태 컬럼 커스텀 렌더링 -->
         <template #[`item.userState`]="{ item }">
@@ -129,12 +130,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, markRaw, onMounted } from 'vue'
+import { reactive, computed, markRaw, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import UserMgmtViewForm from './components/UserMgmtViewForm.vue'
 import { usePanelStore } from '@/stores/panelStore'
-import { useApi } from '@/composables/useApi'
+import { useDataTable } from '@/composables/useDataTable'
 import { fetchUsersApi } from '@/api/user'
 
 const { t } = useI18n()
@@ -150,10 +151,6 @@ const searchParams = reactive({
 const factoryOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
 const stateFilterOptions = ['전체', 'ACTIVE', 'INACTIVE']
 
-// 그리드 데이터 상태
-const userItems = ref([])
-const totalItems = ref(0)
-
 // 테이블 컬럼 정의 (id는 헤더에 미노출, departmentName 추가)
 const headers = computed(() => [
   { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
@@ -167,8 +164,25 @@ const headers = computed(() => [
   { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
 ])
 
-// useApi 컴포저블을 활용한 목록 조회 바인딩
-const { loading: isLoading, execute: executeFetchUsers } = useApi(fetchUsersApi)
+// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
+const { items, totalItems, loading, options, loadData, updateOptions } =
+  useDataTable(fetchUsersApi)
+
+function getSanitizedParams() {
+  const params = {}
+  if (searchParams.keyword && searchParams.keyword.trim() !== '') {
+    params.keyword = searchParams.keyword.trim()
+    params.searchKeyword = searchParams.keyword.trim()
+  }
+  if (searchParams.factoryName && searchParams.factoryName !== '전체') {
+    params.factoryName = searchParams.factoryName
+  }
+  if (searchParams.userState && searchParams.userState !== '전체') {
+    params.userState = searchParams.userState
+    params.status = searchParams.userState
+  }
+  return params
+}
 
 // 상태별 칩 색상 및 텍스트 매핑 함수
 function getUserStateColor(state) {
@@ -191,53 +205,21 @@ function getUserStateText(state) {
   return state || '-'
 }
 
-// 사용자 목록 API 조회 함수
-async function fetchUsers() {
-  try {
-    const params = {
-      keyword: searchParams.keyword || undefined,
-      searchKeyword: searchParams.keyword || undefined,
-      factoryName: searchParams.factoryName !== '전체' ? searchParams.factoryName : undefined,
-      userState: searchParams.userState !== '전체' ? searchParams.userState : undefined,
-      status: searchParams.userState !== '전체' ? searchParams.userState : undefined,
-    }
-
-    const response = await executeFetchUsers(params)
-
-    if (response) {
-      if (response.data && Array.isArray(response.data.content)) {
-        userItems.value = response.data.content
-        totalItems.value = response.data.totalElements || response.data.content.length
-      } else if (response.content && Array.isArray(response.content)) {
-        userItems.value = response.content
-        totalItems.value = response.totalElements || (response.page && response.page.totalElements) || response.content.length
-      } else if (response.data && Array.isArray(response.data)) {
-        userItems.value = response.data
-        totalItems.value = response.total || response.data.length
-      } else if (Array.isArray(response)) {
-        userItems.value = response
-        totalItems.value = response.length
-      } else {
-        userItems.value = []
-        totalItems.value = 0
-      }
-    }
-  } catch (error) {
-    console.error('Fetch users error:', error)
-    userItems.value = []
-    totalItems.value = 0
-  }
-}
-
 function handleSearch() {
-  fetchUsers()
+  options.page = 0
+  loadData(getSanitizedParams())
 }
 
 function handleReset() {
   searchParams.keyword = ''
   searchParams.factoryName = '전체'
   searchParams.userState = '전체'
-  fetchUsers()
+  options.page = 0
+  loadData(getSanitizedParams())
+}
+
+function onUpdateOptions(newOptions) {
+  updateOptions(newOptions, getSanitizedParams())
 }
 
 // [신규 등록] 버튼 클릭 시 우측 패널 오픈
@@ -246,7 +228,9 @@ function onAddUser() {
     mode: 'CREATE',
     data: null,
     title: t('views.settings.userMgmt.createTitle'),
-    onSuccess: fetchUsers,
+    onSuccess: function () {
+      loadData(getSanitizedParams())
+    },
   })
 }
 
@@ -257,12 +241,14 @@ function onRowClick(event, row) {
     mode: 'UPDATE',
     data: itemData,
     title: t('views.settings.userMgmt.editTitle'),
-    onSuccess: fetchUsers,
+    onSuccess: function () {
+      loadData(getSanitizedParams())
+    },
   })
 }
 
 onMounted(function () {
-  fetchUsers()
+  loadData(getSanitizedParams())
 })
 </script>
 

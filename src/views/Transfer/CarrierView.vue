@@ -28,7 +28,7 @@
             size="small"
             prepend-icon="$refresh"
             class="font-weight-medium mr-2"
-            :loading="isLoading"
+            :loading="loading"
             v-on:click="handleSearch"
           >
             {{ $t('common.refresh') }}
@@ -141,7 +141,7 @@
         :headers="headers"
         :items="displayItems"
         :total-items="Number(totalItems)"
-        :loading="isLoading"
+        :loading="loading"
         item-value="compositeKey"
         density="compact"
         v-on:click:row="onRowClick"
@@ -215,11 +215,11 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
-import { ref, reactive, computed, markRaw, onMounted } from 'vue'
+import { reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import CarrierViewForm from './components/CarrierViewForm.vue'
 import { usePanelStore } from '@/stores/panelStore'
-import { useApi } from '@/composables/useApi'
+import { useDataTable } from '@/composables/useDataTable'
 import { fetchWcsCarriersApi } from '@/api/wcsCarrier'
 
 const panelStore = usePanelStore()
@@ -233,12 +233,6 @@ const searchParams = reactive({
   carrierType: '전체',
   carrierStatus: '전체',
   useState: '전체',
-})
-
-// 페이징 상태
-const pagination = reactive({
-  page: 1,
-  itemsPerPage: 10,
 })
 
 const factoryFilterOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
@@ -255,10 +249,6 @@ const statusFilterOptions = [
 ]
 const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
 
-// 그리드 데이터 상태
-const rawCarrierItems = ref([])
-const totalItems = ref(0)
-
 // 테이블 컬럼 정의
 const headers = [
   { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
@@ -274,12 +264,33 @@ const headers = [
   { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
 ]
 
-// useApi를 통한 목록 조회 API 바인딩
-const { loading: isLoading, execute: executeFetchCarriers } = useApi(fetchWcsCarriersApi)
+// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
+const { items, totalItems, loading, options, loadData, updateOptions } =
+  useDataTable(fetchWcsCarriersApi)
+
+function getSanitizedParams() {
+  const params = {}
+  if (searchParams.factoryName && searchParams.factoryName !== '전체') {
+    params.factoryName = searchParams.factoryName
+  }
+  if (searchParams.carrierName && searchParams.carrierName.trim() !== '') {
+    params.carrierName = searchParams.carrierName.trim()
+  }
+  if (searchParams.carrierType && searchParams.carrierType !== '전체') {
+    params.carrierType = searchParams.carrierType
+  }
+  if (searchParams.carrierStatus && searchParams.carrierStatus !== '전체') {
+    params.carrierStatus = searchParams.carrierStatus
+  }
+  if (searchParams.useState && searchParams.useState !== '전체') {
+    params.useState = searchParams.useState
+  }
+  return params
+}
 
 // 복합키 결합 및 데이터 정규화
 const displayItems = computed(function () {
-  const list = rawCarrierItems.value || []
+  const list = items.value || []
   const result = []
 
   for (let i = 0; i < list.length; i++) {
@@ -378,57 +389,9 @@ function getUseStateText(state) {
   return state || '-'
 }
 
-// 캐리어 목록 API 조회 함수
-async function fetchCarriers() {
-  try {
-    const params = {
-      page: pagination.page - 1,
-      size: pagination.itemsPerPage,
-      factoryName: searchParams.factoryName !== '전체' ? searchParams.factoryName : undefined,
-      carrierName: searchParams.carrierName ? searchParams.carrierName.trim() : undefined,
-      carrierType: searchParams.carrierType !== '전체' ? searchParams.carrierType : undefined,
-      carrierStatus: searchParams.carrierStatus !== '전체' ? searchParams.carrierStatus : undefined,
-      useState: searchParams.useState !== '전체' ? searchParams.useState : undefined,
-    }
-
-    const response = await executeFetchCarriers(params)
-
-    if (response) {
-      if (response.data && Array.isArray(response.data.content)) {
-        rawCarrierItems.value = response.data.content
-        totalItems.value = response.data.totalElements || response.data.content.length
-      } else if (response.content && Array.isArray(response.content)) {
-        rawCarrierItems.value = response.content
-        totalItems.value = response.totalElements || (response.page && response.page.totalElements) || response.content.length
-      } else if (response.data && Array.isArray(response.data)) {
-        rawCarrierItems.value = response.data
-        totalItems.value = response.total || response.data.length
-      } else if (Array.isArray(response)) {
-        rawCarrierItems.value = response
-        totalItems.value = response.length
-      } else {
-        rawCarrierItems.value = []
-        totalItems.value = 0
-      }
-    }
-  } catch (error) {
-    console.error('Fetch carriers error:', error)
-    rawCarrierItems.value = []
-    totalItems.value = 0
-  }
-}
-
-function onUpdateOptions(options) {
-  if (options) {
-    pagination.page = options.page || 1
-    pagination.itemsPerPage = options.itemsPerPage || 10
-  }
-  fetchCarriers()
-}
-
 function handleSearch() {
-  pagination.page = 1
-  fetchCarriers()
+  options.page = 0
+  loadData(getSanitizedParams())
 }
 
 function handleReset() {
@@ -437,8 +400,12 @@ function handleReset() {
   searchParams.carrierType = '전체'
   searchParams.carrierStatus = '전체'
   searchParams.useState = '전체'
-  pagination.page = 1
-  fetchCarriers()
+  options.page = 0
+  loadData(getSanitizedParams())
+}
+
+function onUpdateOptions(newOptions) {
+  updateOptions(newOptions, getSanitizedParams())
 }
 
 // [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
@@ -447,7 +414,9 @@ function onAddCarrier() {
     mode: 'CREATE',
     data: null,
     title: t('views.transfer.carrier.createTitle'),
-    onSuccess: fetchCarriers,
+    onSuccess: function () {
+      loadData(getSanitizedParams())
+    },
   })
 }
 
@@ -458,7 +427,9 @@ function onRowClick(event, row) {
     mode: 'UPDATE',
     data: itemData,
     title: t('views.transfer.carrier.editTitle'),
-    onSuccess: fetchCarriers,
+    onSuccess: function () {
+      loadData(getSanitizedParams())
+    },
   })
 }
 
@@ -502,7 +473,7 @@ function handleExport() {
 }
 
 onMounted(function () {
-  fetchCarriers()
+  loadData(getSanitizedParams())
 })
 </script>
 

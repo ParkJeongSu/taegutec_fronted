@@ -26,7 +26,7 @@
             size="small"
             prepend-icon="$refresh"
             class="font-weight-medium"
-            :loading="isLoading"
+            :loading="loading"
             v-on:click="handleSearch"
           >{{ $t('common.refresh') }}</v-btn>
         </div>
@@ -97,9 +97,9 @@
       <!-- 중앙 데이터 테이블 -->
       <BaseDataTable
         :headers="headers"
-        :items="deptItems"
-        :total-items="totalItems"
-        :loading="isLoading"
+        :items="items"
+        :total-items="Number(totalItems)"
+        :loading="loading"
         item-value="id"
         density="compact"
         v-on:click:row="onRowClick"
@@ -130,12 +130,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, markRaw, onMounted } from 'vue'
+import { reactive, computed, markRaw, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import DeptMgmtViewForm from './components/DeptMgmtViewForm.vue'
 import { usePanelStore } from '@/stores/panelStore'
-import { useApi } from '@/composables/useApi'
+import { useDataTable } from '@/composables/useDataTable'
 import { fetchDepartmentsApi } from '@/api/department'
 
 const { t } = useI18n()
@@ -148,18 +148,8 @@ const searchParams = reactive({
   useState: '전체',
 })
 
-// 페이징 상태
-const pagination = reactive({
-  page: 1,
-  itemsPerPage: 10,
-})
-
 const factoryOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
 const stateFilterOptions = ['전체', 'ACTIVE', 'INACTIVE']
-
-// 그리드 데이터 상태
-const deptItems = ref([])
-const totalItems = ref(0)
 
 // 테이블 컬럼 정의 (id는 대리키이므로 그리드에는 미노출)
 const headers = computed(() => [
@@ -170,8 +160,24 @@ const headers = computed(() => [
   { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '180px' },
 ])
 
-// useApi 컴포저블을 활용한 목록 조회 바인딩
-const { loading: isLoading, execute: executeFetchDepartments } = useApi(fetchDepartmentsApi)
+// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
+const { items, totalItems, loading, options, loadData, updateOptions } =
+  useDataTable(fetchDepartmentsApi)
+
+function getSanitizedParams() {
+  const params = {}
+  if (searchParams.factoryName && searchParams.factoryName !== '전체') {
+    params.factoryName = searchParams.factoryName
+  }
+  if (searchParams.departmentName && searchParams.departmentName.trim() !== '') {
+    params.departmentName = searchParams.departmentName.trim()
+    params.keyword = searchParams.departmentName.trim()
+  }
+  if (searchParams.useState && searchParams.useState !== '전체') {
+    params.useState = searchParams.useState
+  }
+  return params
+}
 
 // 상태별 칩 색상 및 텍스트 매핑 함수
 function getUseStateColor(state) {
@@ -194,64 +200,21 @@ function getUseStateText(state) {
   return state || '-'
 }
 
-// 부서 목록 API 조회 함수
-async function fetchDepartments() {
-  try {
-    const params = {
-      page: pagination.page - 1,
-      size: pagination.itemsPerPage,
-      factoryName: searchParams.factoryName !== '전체' ? searchParams.factoryName : undefined,
-      departmentName: searchParams.departmentName || undefined,
-      keyword: searchParams.departmentName || undefined,
-      useState: searchParams.useState !== '전체' ? searchParams.useState : undefined,
-    }
-
-    const response = await executeFetchDepartments(params)
-
-    if (response) {
-      if (response.data && Array.isArray(response.data.content)) {
-        deptItems.value = response.data.content
-        totalItems.value = response.data.totalElements || response.data.content.length
-      } else if (response.content && Array.isArray(response.content)) {
-        deptItems.value = response.content
-        totalItems.value = response.totalElements || (response.page && response.page.totalElements) || response.content.length
-      } else if (response.data && Array.isArray(response.data)) {
-        deptItems.value = response.data
-        totalItems.value = response.total || response.data.length
-      } else if (Array.isArray(response)) {
-        deptItems.value = response
-        totalItems.value = response.length
-      } else {
-        deptItems.value = []
-        totalItems.value = 0
-      }
-    }
-  } catch (error) {
-    console.error('Fetch departments error:', error)
-    deptItems.value = []
-    totalItems.value = 0
-  }
-}
-
-function onUpdateOptions(options) {
-  if (options) {
-    pagination.page = options.page || 1
-    pagination.itemsPerPage = options.itemsPerPage || 10
-  }
-  fetchDepartments()
-}
-
 function handleSearch() {
-  pagination.page = 1
-  fetchDepartments()
+  options.page = 0
+  loadData(getSanitizedParams())
 }
 
 function handleReset() {
   searchParams.factoryName = '전체'
   searchParams.departmentName = ''
   searchParams.useState = '전체'
-  pagination.page = 1
-  fetchDepartments()
+  options.page = 0
+  loadData(getSanitizedParams())
+}
+
+function onUpdateOptions(newOptions) {
+  updateOptions(newOptions, getSanitizedParams())
 }
 
 // [신규 등록] 버튼 클릭 시 우측 패널 오픈
@@ -260,7 +223,9 @@ function onAddDepartment() {
     mode: 'CREATE',
     data: null,
     title: t('views.settings.deptMgmt.createTitle'),
-    onSuccess: fetchDepartments,
+    onSuccess: function () {
+      loadData(getSanitizedParams())
+    },
   })
 }
 
@@ -271,12 +236,14 @@ function onRowClick(event, row) {
     mode: 'UPDATE',
     data: itemData,
     title: t('views.settings.deptMgmt.editTitle'),
-    onSuccess: fetchDepartments,
+    onSuccess: function () {
+      loadData(getSanitizedParams())
+    },
   })
 }
 
 onMounted(function () {
-  fetchDepartments()
+  loadData(getSanitizedParams())
 })
 </script>
 

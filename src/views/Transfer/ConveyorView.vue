@@ -28,7 +28,7 @@
             size="small"
             prepend-icon="$refresh"
             class="font-weight-medium mr-2"
-            :loading="isLoading"
+            :loading="loading"
             v-on:click="handleSearch"
           >
             {{ $t('common.refresh') }}
@@ -143,7 +143,7 @@
         :headers="headers"
         :items="displayItems"
         :total-items="Number(totalItems)"
-        :loading="isLoading"
+        :loading="loading"
         item-value="compositeKey"
         density="compact"
         v-on:click:row="onRowClick"
@@ -195,11 +195,11 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
-import { ref, reactive, computed, markRaw, onMounted } from 'vue'
+import { reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import ConveyorViewForm from './components/ConveyorViewForm.vue'
 import { usePanelStore } from '@/stores/panelStore'
-import { useApi } from '@/composables/useApi'
+import { useDataTable } from '@/composables/useDataTable'
 import { fetchWcsConveyorsApi } from '@/api/wcsConveyor'
 
 const panelStore = usePanelStore()
@@ -215,19 +215,9 @@ const searchParams = reactive({
   useState: '전체',
 })
 
-// 페이징 상태
-const pagination = reactive({
-  page: 1,
-  itemsPerPage: 10,
-})
-
 const factoryFilterOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
 const statusFilterOptions = ['전체', 'RUN', 'STOP', 'ALARM', 'IDLE', 'ERROR']
 const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
-
-// 그리드 데이터 상태
-const rawConveyorItems = ref([])
-const totalItems = ref(0)
 
 // 테이블 컬럼 정의
 const headers = [
@@ -245,12 +235,33 @@ const headers = [
   { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
 ]
 
-// useApi를 통한 목록 조회 API 바인딩
-const { loading: isLoading, execute: executeFetchConveyors } = useApi(fetchWcsConveyorsApi)
+// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
+const { items, totalItems, loading, options, loadData, updateOptions } =
+  useDataTable(fetchWcsConveyorsApi)
+
+function getSanitizedParams() {
+  const params = {}
+  if (searchParams.factoryName && searchParams.factoryName !== '전체') {
+    params.factoryName = searchParams.factoryName
+  }
+  if (searchParams.conveyorGroup && searchParams.conveyorGroup.trim() !== '') {
+    params.conveyorGroup = searchParams.conveyorGroup.trim()
+  }
+  if (searchParams.conveyorName && searchParams.conveyorName.trim() !== '') {
+    params.conveyorName = searchParams.conveyorName.trim()
+  }
+  if (searchParams.conveyorStatus && searchParams.conveyorStatus !== '전체') {
+    params.conveyorStatus = searchParams.conveyorStatus
+  }
+  if (searchParams.useState && searchParams.useState !== '전체') {
+    params.useState = searchParams.useState
+  }
+  return params
+}
 
 // 5개 복합키 결합 및 데이터 정규화
 const displayItems = computed(function () {
-  const list = rawConveyorItems.value || []
+  const list = items.value || []
   const result = []
 
   for (let i = 0; i < list.length; i++) {
@@ -320,57 +331,9 @@ function getUseStateText(state) {
   return state || '-'
 }
 
-// 컨베이어 목록 API 조회 함수
-async function fetchConveyors() {
-  try {
-    const params = {
-      page: pagination.page - 1,
-      size: pagination.itemsPerPage,
-      factoryName: searchParams.factoryName !== '전체' ? searchParams.factoryName : undefined,
-      conveyorGroup: searchParams.conveyorGroup ? searchParams.conveyorGroup.trim() : undefined,
-      conveyorName: searchParams.conveyorName ? searchParams.conveyorName.trim() : undefined,
-      conveyorStatus: searchParams.conveyorStatus !== '전체' ? searchParams.conveyorStatus : undefined,
-      useState: searchParams.useState !== '전체' ? searchParams.useState : undefined,
-    }
-
-    const response = await executeFetchConveyors(params)
-
-    if (response) {
-      if (response.data && Array.isArray(response.data.content)) {
-        rawConveyorItems.value = response.data.content
-        totalItems.value = response.data.totalElements || response.data.content.length
-      } else if (response.content && Array.isArray(response.content)) {
-        rawConveyorItems.value = response.content
-        totalItems.value = response.totalElements || (response.page && response.page.totalElements) || response.content.length
-      } else if (response.data && Array.isArray(response.data)) {
-        rawConveyorItems.value = response.data
-        totalItems.value = response.total || response.data.length
-      } else if (Array.isArray(response)) {
-        rawConveyorItems.value = response
-        totalItems.value = response.length
-      } else {
-        rawConveyorItems.value = []
-        totalItems.value = 0
-      }
-    }
-  } catch (error) {
-    console.error('Fetch conveyors error:', error)
-    rawConveyorItems.value = []
-    totalItems.value = 0
-  }
-}
-
-function onUpdateOptions(options) {
-  if (options) {
-    pagination.page = options.page || 1
-    pagination.itemsPerPage = options.itemsPerPage || 10
-  }
-  fetchConveyors()
-}
-
 function handleSearch() {
-  pagination.page = 1
-  fetchConveyors()
+  options.page = 0
+  loadData(getSanitizedParams())
 }
 
 function handleReset() {
@@ -379,8 +342,12 @@ function handleReset() {
   searchParams.conveyorName = ''
   searchParams.conveyorStatus = '전체'
   searchParams.useState = '전체'
-  pagination.page = 1
-  fetchConveyors()
+  options.page = 0
+  loadData(getSanitizedParams())
+}
+
+function onUpdateOptions(newOptions) {
+  updateOptions(newOptions, getSanitizedParams())
 }
 
 // [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
@@ -389,7 +356,9 @@ function onAddConveyor() {
     mode: 'CREATE',
     data: null,
     title: t('views.transfer.conveyor.createTitle'),
-    onSuccess: fetchConveyors,
+    onSuccess: function () {
+      loadData(getSanitizedParams())
+    },
   })
 }
 
@@ -400,7 +369,9 @@ function onRowClick(event, row) {
     mode: 'UPDATE',
     data: itemData,
     title: t('views.transfer.conveyor.editTitle'),
-    onSuccess: fetchConveyors,
+    onSuccess: function () {
+      loadData(getSanitizedParams())
+    },
   })
 }
 
@@ -445,7 +416,7 @@ function handleExport() {
 }
 
 onMounted(function () {
-  fetchConveyors()
+  loadData(getSanitizedParams())
 })
 </script>
 

@@ -28,7 +28,7 @@
             size="small"
             prepend-icon="$refresh"
             class="font-weight-medium mr-2"
-            :loading="isLoading"
+            :loading="loading"
             v-on:click="handleSearch"
           >
             {{ $t('common.refresh') }}
@@ -129,7 +129,7 @@
         :headers="headers"
         :items="displayItems"
         :total-items="Number(totalItems)"
-        :loading="isLoading"
+        :loading="loading"
         item-value="compositeKey"
         density="compact"
         v-on:click:row="onRowClick"
@@ -185,11 +185,11 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
-import { ref, reactive, computed, markRaw, onMounted } from 'vue'
+import { reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
 import StockerViewForm from './components/StockerViewForm.vue'
 import { usePanelStore } from '@/stores/panelStore'
-import { useApi } from '@/composables/useApi'
+import { useDataTable } from '@/composables/useDataTable'
 import { fetchWcsStockersApi } from '@/api/wcsStocker'
 
 const panelStore = usePanelStore()
@@ -204,19 +204,9 @@ const searchParams = reactive({
   useState: '전체',
 })
 
-// 페이징 상태
-const pagination = reactive({
-  page: 1,
-  itemsPerPage: 10,
-})
-
 const factoryFilterOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
 const statusFilterOptions = ['전체', 'IDLE', 'RUNNING', 'ERROR', 'DOWN', 'OFFLINE']
 const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
-
-// 그리드 데이터 상태
-const rawStockerItems = ref([])
-const totalItems = ref(0)
 
 // 테이블 컬럼 정의
 const headers = [
@@ -233,12 +223,30 @@ const headers = [
   { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
 ]
 
-// useApi를 통한 목록 조회 API 바인딩
-const { loading: isLoading, execute: executeFetchStockers } = useApi(fetchWcsStockersApi)
+// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
+const { items, totalItems, loading, options, loadData, updateOptions } =
+  useDataTable(fetchWcsStockersApi)
+
+function getSanitizedParams() {
+  const params = {}
+  if (searchParams.factoryName && searchParams.factoryName !== '전체') {
+    params.factoryName = searchParams.factoryName
+  }
+  if (searchParams.stockerName && searchParams.stockerName.trim() !== '') {
+    params.stockerName = searchParams.stockerName.trim()
+  }
+  if (searchParams.stockerStatus && searchParams.stockerStatus !== '전체') {
+    params.stockerStatus = searchParams.stockerStatus
+  }
+  if (searchParams.useState && searchParams.useState !== '전체') {
+    params.useState = searchParams.useState
+  }
+  return params
+}
 
 // 적재율 계산 및 복합키 매핑
 const displayItems = computed(function () {
-  const list = rawStockerItems.value || []
+  const list = items.value || []
   const result = []
 
   for (let i = 0; i < list.length; i++) {
@@ -320,56 +328,9 @@ function getOccupancyTextColor(rate) {
   return 'text-primary'
 }
 
-// 스토커 목록 API 조회 함수
-async function fetchStockers() {
-  try {
-    const params = {
-      page: pagination.page - 1,
-      size: pagination.itemsPerPage,
-      factoryName: searchParams.factoryName !== '전체' ? searchParams.factoryName : undefined,
-      stockerName: searchParams.stockerName ? searchParams.stockerName.trim() : undefined,
-      stockerStatus: searchParams.stockerStatus !== '전체' ? searchParams.stockerStatus : undefined,
-      useState: searchParams.useState !== '전체' ? searchParams.useState : undefined,
-    }
-
-    const response = await executeFetchStockers(params)
-
-    if (response) {
-      if (response.data && Array.isArray(response.data.content)) {
-        rawStockerItems.value = response.data.content
-        totalItems.value = response.data.totalElements || response.data.content.length
-      } else if (response.content && Array.isArray(response.content)) {
-        rawStockerItems.value = response.content
-        totalItems.value = response.totalElements || (response.page && response.page.totalElements) || response.content.length
-      } else if (response.data && Array.isArray(response.data)) {
-        rawStockerItems.value = response.data
-        totalItems.value = response.total || response.data.length
-      } else if (Array.isArray(response)) {
-        rawStockerItems.value = response
-        totalItems.value = response.length
-      } else {
-        rawStockerItems.value = []
-        totalItems.value = 0
-      }
-    }
-  } catch (error) {
-    console.error('Fetch stockers error:', error)
-    rawStockerItems.value = []
-    totalItems.value = 0
-  }
-}
-
-function onUpdateOptions(options) {
-  if (options) {
-    pagination.page = options.page || 1
-    pagination.itemsPerPage = options.itemsPerPage || 10
-  }
-  fetchStockers()
-}
-
 function handleSearch() {
-  pagination.page = 1
-  fetchStockers()
+  options.page = 0
+  loadData(getSanitizedParams())
 }
 
 function handleReset() {
@@ -377,8 +338,12 @@ function handleReset() {
   searchParams.stockerName = ''
   searchParams.stockerStatus = '전체'
   searchParams.useState = '전체'
-  pagination.page = 1
-  fetchStockers()
+  options.page = 0
+  loadData(getSanitizedParams())
+}
+
+function onUpdateOptions(newOptions) {
+  updateOptions(newOptions, getSanitizedParams())
 }
 
 // [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
@@ -387,7 +352,9 @@ function onAddStocker() {
     mode: 'CREATE',
     data: null,
     title: t('views.transfer.stocker.createTitle'),
-    onSuccess: fetchStockers,
+    onSuccess: function () {
+      loadData(getSanitizedParams())
+    },
   })
 }
 
@@ -398,7 +365,9 @@ function onRowClick(event, row) {
     mode: 'UPDATE',
     data: itemData,
     title: t('views.transfer.stocker.editTitle'),
-    onSuccess: fetchStockers,
+    onSuccess: function () {
+      loadData(getSanitizedParams())
+    },
   })
 }
 
@@ -440,7 +409,7 @@ function handleExport() {
 }
 
 onMounted(function () {
-  fetchStockers()
+  loadData(getSanitizedParams())
 })
 </script>
 

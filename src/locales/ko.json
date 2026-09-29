@@ -1352,6 +1352,7 @@
         "noGroupData": "등록된 사용자 그룹이 없습니다.",
         "noMenuData": "공장에 등록된 메뉴가 없습니다.",
         "saveConfirm": "'{group}' 그룹의 메뉴 권한 변경사항을 저장하시겠습니까?",
+        "saveConfirmTitle": "메뉴 권한 설정",
         "saveSuccess": "'{group}' 그룹의 메뉴 권한이 성공적으로 저장되었습니다.",
         "saveFail": "메뉴 권한 저장 중 오류가 발생했습니다."
       },

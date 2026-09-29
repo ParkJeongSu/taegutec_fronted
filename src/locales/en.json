@@ -1353,6 +1353,7 @@
         "noMenuData": "No menus available for this factory.",
         "saveConfirm": "Save menu permissions for group '{group}'?",
         "saveSuccess": "Menu permissions for group '{group}' saved successfully.",
+        "saveConfirmTitle": "Menu Permissions Settings",
         "saveFail": "Error saving menu permissions."
       },
       "menuMgmt": {

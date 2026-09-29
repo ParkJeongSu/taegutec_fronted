@@ -7,7 +7,8 @@ import axiosInstance from '@/api/index'
  * @returns {Promise<Object>} API 응답 데이터
  */
 export function fetchAuthorizedMenuTreeApi(userId) {
-  const targetId = typeof userId === 'object' && userId !== null ? (userId.id || userId.userId) : userId
+  const targetId =
+    typeof userId === 'object' && userId !== null ? userId.id || userId.userId : userId
   const url = '/v1/mng/menu/authorized/' + encodeURIComponent(targetId)
   return axiosInstance.get(url)
 }
@@ -24,6 +25,22 @@ export function fetchMenusApi(params) {
   }
   const mergedParams = Object.assign({}, defaultParams, params)
   return axiosInstance.get('/v1/mng/menu', { params: mergedParams })
+}
+
+/**
+ * 메뉴 목록 조회 (검색 및 페이징)
+ * @param {Object} [params] - { page, size, factoryName, menuName, useState, ... }
+ * @returns {Promise<Object>} API 응답 데이터
+ */
+export function fetchMenusByUserGroupIdApi(userGroupId, params) {
+  const defaultParams = {
+    page: 0,
+    size: 200,
+  }
+  const mergedParams = Object.assign({}, defaultParams, params)
+  return axiosInstance.get('/v1/mng/menu/auth/group/' + encodeURIComponent(userGroupId), {
+    params: mergedParams,
+  })
 }
 
 /**
@@ -89,6 +106,7 @@ export function deleteMenuApi(id, params) {
 // 하위 호환성을 위한 별칭 export
 export const fetchAuthorizedMenuTree = fetchAuthorizedMenuTreeApi
 export const fetchMenus = fetchMenusApi
+export const fetchMenusByUserGroupId = fetchMenusByUserGroupIdApi
 export const fetchMenuTree = fetchMenuTreeApi
 export const fetchMenu = fetchMenuApi
 export const createMenu = createMenuApi

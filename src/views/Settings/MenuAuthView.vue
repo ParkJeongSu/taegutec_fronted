@@ -1,11 +1,13 @@
 <template>
   <v-container fluid class="pa-4 menu-auth-container">
-    <!-- 상단 헤더 -->
+    <!-- 상단 페이지 헤더 -->
     <v-card class="elevation-1 rounded-lg pa-4 mb-4">
       <div class="d-flex flex-wrap align-center justify-space-between">
         <div class="d-flex align-center">
           <v-icon icon="$accountKey" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.settings.menuAuth.title') }}</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.settings.menuAuth.title')
+          }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.settings.menuAuth.breadcrumb') }}
           </v-chip>
@@ -20,7 +22,8 @@
             class="font-weight-medium"
             :loading="isGroupLoading || isMenuLoading"
             v-on:click="onRefreshAll"
-          >{{ $t('common.refresh') }}</v-btn>
+            >{{ $t('common.refresh') }}</v-btn
+          >
         </div>
       </div>
     </v-card>
@@ -54,13 +57,16 @@
 
           <v-divider class="mb-3"></v-divider>
 
-          <!-- 사용자 그룹 리스트 -->
+          <!-- 사용자 그룹 리스트 영역 -->
           <div class="group-list-scroll-area flex-grow-1">
             <div v-if="isGroupLoading" class="d-flex justify-center align-center py-8">
               <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
             </div>
 
-            <div v-else-if="userGroupList.length === 0" class="empty-group-state text-center py-8 text-medium-emphasis">
+            <div
+              v-else-if="userGroupList.length === 0"
+              class="empty-group-state text-center py-8 text-medium-emphasis"
+            >
               <v-icon icon="$accountGroup" size="36" color="disabled" class="mb-2" />
               <div>{{ $t('views.settings.menuAuth.noGroupData') }}</div>
             </div>
@@ -78,7 +84,9 @@
                     <v-icon
                       icon="$accountGroup"
                       size="18"
-                      :color="selectedGroup && selectedGroup.id === group.id ? 'primary' : 'grey-darken-1'"
+                      :color="
+                        selectedGroup && selectedGroup.id === group.id ? 'primary' : 'grey-darken-1'
+                      "
                       class="mr-2"
                     />
                     <span class="font-weight-bold group-title text-truncate">
@@ -87,11 +95,17 @@
                   </div>
                   <v-chip
                     size="x-small"
-                    :color="group.useState === 'ACTIVE' || group.useState === 'USE' ? 'success' : 'grey'"
+                    :color="
+                      group.useState === 'ACTIVE' || group.useState === 'USE' ? 'success' : 'grey'
+                    "
                     variant="flat"
                     class="font-weight-medium status-badge"
                   >
-                    {{ group.useState === 'ACTIVE' || group.useState === 'USE' ? $t('common.use') : $t('common.unuse') }}
+                    {{
+                      group.useState === 'ACTIVE' || group.useState === 'USE'
+                        ? $t('common.use')
+                        : $t('common.unuse')
+                    }}
                   </v-chip>
                 </div>
 
@@ -114,7 +128,11 @@
                 <v-icon icon="$shieldCheck" size="22" color="primary" class="mr-2" />
                 <div>
                   <span class="text-subtitle-1 font-weight-bold text-high-emphasis">
-                    {{ selectedGroup ? selectedGroup.userGroupName + ' 권한 설정' : '사용자 그룹을 선택해주세요' }}
+                    {{
+                      selectedGroup
+                        ? selectedGroup.userGroupName + ' 권한 설정'
+                        : '사용자 그룹을 선택해주세요'
+                    }}
                   </span>
                   <span v-if="selectedGroup" class="text-caption text-medium-emphasis ml-2">
                     (체크된 메뉴: {{ checkedMenuIds.length }}개)
@@ -124,32 +142,32 @@
 
               <!-- 우측 액션 버튼들 -->
               <div class="d-flex flex-wrap align-center btn-actions-gap">
-                <v-btn
-                  variant="text"
-                  size="x-small"
-                  color="primary"
-                  v-on:click="expandAllNodes"
-                >{{ $t('views.settings.menuAuth.expandAll') }}</v-btn>
+                <v-btn variant="text" size="x-small" color="primary" v-on:click="expandAllNodes">{{
+                  $t('views.settings.menuAuth.expandAll')
+                }}</v-btn>
                 <v-btn
                   variant="text"
                   size="x-small"
                   color="secondary"
                   v-on:click="collapseAllNodes"
-                >{{ $t('views.settings.menuAuth.collapseAll') }}</v-btn>
+                  >{{ $t('views.settings.menuAuth.collapseAll') }}</v-btn
+                >
                 <v-btn
                   variant="tonal"
                   color="secondary"
                   size="small"
                   :disabled="!selectedGroup || menuTreeList.length === 0"
                   v-on:click="onSelectAll"
-                >{{ $t('views.settings.menuAuth.checkAll') }}</v-btn>
+                  >{{ $t('views.settings.menuAuth.checkAll') }}</v-btn
+                >
                 <v-btn
                   variant="outlined"
                   color="secondary"
                   size="small"
                   :disabled="!selectedGroup || menuTreeList.length === 0"
                   v-on:click="onDeselectAll"
-                >{{ $t('views.settings.menuAuth.uncheckAll') }}</v-btn>
+                  >{{ $t('views.settings.menuAuth.uncheckAll') }}</v-btn
+                >
                 <v-btn
                   color="primary"
                   variant="elevated"
@@ -158,8 +176,9 @@
                   class="font-weight-bold"
                   :loading="isSaving"
                   :disabled="!selectedGroup"
-                  v-on:click="handleSaveAuth"
-                >{{ $t('views.settings.menuAuth.saveAuth') }}</v-btn>
+                  v-on:click="onOpenSaveConfirm"
+                  >{{ $t('views.settings.menuAuth.saveAuth') }}</v-btn
+                >
               </div>
             </div>
           </div>
@@ -169,19 +188,32 @@
           <!-- 메뉴 권한 트리 뷰 영역 -->
           <div class="auth-tree-scroll-area flex-grow-1">
             <!-- 미선택 상태 안내 -->
-            <div v-if="!selectedGroup" class="empty-auth-state d-flex flex-column justify-center align-center py-12 text-medium-emphasis">
+            <div
+              v-if="!selectedGroup"
+              class="empty-auth-state d-flex flex-column justify-center align-center py-12 text-medium-emphasis"
+            >
               <v-icon icon="$accountSearch" size="48" color="disabled" class="mb-3" />
-              <div class="text-subtitle-1 font-weight-medium mb-1">사용자 그룹이 선택되지 않았습니다.</div>
-              <div class="text-body-2 text-disabled">좌측 목록에서 권한을 설정할 사용자 그룹을 클릭하세요.</div>
+              <div class="text-subtitle-1 font-weight-medium mb-1">
+                사용자 그룹이 선택되지 않았습니다.
+              </div>
+              <div class="text-body-2 text-disabled">
+                좌측 목록에서 권한을 설정할 사용자 그룹을 클릭하세요.
+              </div>
             </div>
 
             <!-- 로딩 상태 -->
-            <div v-else-if="isAuthLoading || isMenuLoading" class="d-flex justify-center align-center py-12">
+            <div
+              v-else-if="isAuthLoading || isMenuLoading"
+              class="d-flex justify-center align-center py-12"
+            >
               <v-progress-circular indeterminate color="primary" size="36"></v-progress-circular>
             </div>
 
             <!-- 메뉴 데이터 없음 -->
-            <div v-else-if="menuTreeList.length === 0" class="empty-auth-state d-flex flex-column justify-center align-center py-12 text-medium-emphasis">
+            <div
+              v-else-if="menuTreeList.length === 0"
+              class="empty-auth-state d-flex flex-column justify-center align-center py-12 text-medium-emphasis"
+            >
               <v-icon icon="$formatListBulleted" size="40" color="disabled" class="mb-2" />
               <div>{{ $t('views.settings.menuAuth.noMenuData') }}</div>
             </div>
@@ -191,14 +223,20 @@
               <!-- Level 1 Items -->
               <div v-for="node1 in menuTreeList" :key="node1.id" class="tree-branch">
                 <!-- Level 1 Node Row -->
-                <div class="tree-node-row level-1-row" :class="{ 'node-checked': isMenuChecked(node1.id) }">
+                <div
+                  class="tree-node-row level-1-row"
+                  :class="{ 'node-checked': isMenuChecked(node1.id) }"
+                >
                   <button
                     type="button"
                     class="node-toggle-btn"
                     :class="{ 'invisible-btn': !node1.children || node1.children.length === 0 }"
                     v-on:click.stop="toggleExpand(node1.id)"
                   >
-                    <v-icon :icon="isExpanded(node1.id) ? '$chevronDown' : '$chevronRight'" size="18" />
+                    <v-icon
+                      :icon="isExpanded(node1.id) ? '$chevronDown' : '$chevronRight'"
+                      size="18"
+                    />
                   </button>
 
                   <v-checkbox-btn
@@ -209,18 +247,32 @@
                     v-on:update:model-value="onToggleMenuAuth(node1)"
                   />
 
-                  <v-chip size="x-small" color="primary" variant="flat" class="mr-2 font-weight-bold level-badge">
+                  <v-chip
+                    size="x-small"
+                    color="primary"
+                    variant="flat"
+                    class="mr-2 font-weight-bold level-badge"
+                  >
                     L1
                   </v-chip>
 
                   <v-icon
-                    :icon="resolveMenuIcon(node1.iconName, Boolean(node1.children && node1.children.length > 0), isExpanded(node1.id))"
+                    :icon="
+                      resolveMenuIcon(
+                        node1.iconName,
+                        Boolean(node1.children && node1.children.length > 0),
+                        isExpanded(node1.id),
+                      )
+                    "
                     size="18"
                     color="primary"
                     class="mr-2"
                   />
 
-                  <span class="node-title font-weight-bold text-truncate flex-grow-1" v-on:click="onToggleMenuAuth(node1)">
+                  <span
+                    class="node-title font-weight-bold text-truncate flex-grow-1"
+                    v-on:click="onToggleMenuAuth(node1)"
+                  >
                     {{ node1.menuName }}
                   </span>
 
@@ -230,17 +282,26 @@
                 </div>
 
                 <!-- Level 2 Children -->
-                <div v-if="isExpanded(node1.id) && node1.children && node1.children.length > 0" class="tree-sub-container">
+                <div
+                  v-if="isExpanded(node1.id) && node1.children && node1.children.length > 0"
+                  class="tree-sub-container"
+                >
                   <div v-for="node2 in node1.children" :key="node2.id" class="tree-branch">
                     <!-- Level 2 Node Row -->
-                    <div class="tree-node-row level-2-row" :class="{ 'node-checked': isMenuChecked(node2.id) }">
+                    <div
+                      class="tree-node-row level-2-row"
+                      :class="{ 'node-checked': isMenuChecked(node2.id) }"
+                    >
                       <button
                         type="button"
                         class="node-toggle-btn"
                         :class="{ 'invisible-btn': !node2.children || node2.children.length === 0 }"
                         v-on:click.stop="toggleExpand(node2.id)"
                       >
-                        <v-icon :icon="isExpanded(node2.id) ? '$chevronDown' : '$chevronRight'" size="18" />
+                        <v-icon
+                          :icon="isExpanded(node2.id) ? '$chevronDown' : '$chevronRight'"
+                          size="18"
+                        />
                       </button>
 
                       <v-checkbox-btn
@@ -251,18 +312,32 @@
                         v-on:update:model-value="onToggleMenuAuth(node2)"
                       />
 
-                      <v-chip size="x-small" color="info" variant="tonal" class="mr-2 font-weight-bold level-badge">
+                      <v-chip
+                        size="x-small"
+                        color="info"
+                        variant="tonal"
+                        class="mr-2 font-weight-bold level-badge"
+                      >
                         L2
                       </v-chip>
 
                       <v-icon
-                        :icon="resolveMenuIcon(node2.iconName, Boolean(node2.children && node2.children.length > 0), isExpanded(node2.id))"
+                        :icon="
+                          resolveMenuIcon(
+                            node2.iconName,
+                            Boolean(node2.children && node2.children.length > 0),
+                            isExpanded(node2.id),
+                          )
+                        "
                         size="18"
                         color="info"
                         class="mr-2"
                       />
 
-                      <span class="node-title font-weight-medium text-truncate flex-grow-1" v-on:click="onToggleMenuAuth(node2)">
+                      <span
+                        class="node-title font-weight-medium text-truncate flex-grow-1"
+                        v-on:click="onToggleMenuAuth(node2)"
+                      >
                         {{ node2.menuName }}
                       </span>
 
@@ -272,17 +347,28 @@
                     </div>
 
                     <!-- Level 3 Children -->
-                    <div v-if="isExpanded(node2.id) && node2.children && node2.children.length > 0" class="tree-sub-container">
+                    <div
+                      v-if="isExpanded(node2.id) && node2.children && node2.children.length > 0"
+                      class="tree-sub-container"
+                    >
                       <div v-for="node3 in node2.children" :key="node3.id" class="tree-branch">
                         <!-- Level 3 Node Row -->
-                        <div class="tree-node-row level-3-row" :class="{ 'node-checked': isMenuChecked(node3.id) }">
+                        <div
+                          class="tree-node-row level-3-row"
+                          :class="{ 'node-checked': isMenuChecked(node3.id) }"
+                        >
                           <button
                             type="button"
                             class="node-toggle-btn"
-                            :class="{ 'invisible-btn': !node3.children || node3.children.length === 0 }"
+                            :class="{
+                              'invisible-btn': !node3.children || node3.children.length === 0,
+                            }"
                             v-on:click.stop="toggleExpand(node3.id)"
                           >
-                            <v-icon :icon="isExpanded(node3.id) ? '$chevronDown' : '$chevronRight'" size="18" />
+                            <v-icon
+                              :icon="isExpanded(node3.id) ? '$chevronDown' : '$chevronRight'"
+                              size="18"
+                            />
                           </button>
 
                           <v-checkbox-btn
@@ -293,18 +379,32 @@
                             v-on:update:model-value="onToggleMenuAuth(node3)"
                           />
 
-                          <v-chip size="x-small" color="warning" variant="tonal" class="mr-2 font-weight-bold level-badge">
+                          <v-chip
+                            size="x-small"
+                            color="warning"
+                            variant="tonal"
+                            class="mr-2 font-weight-bold level-badge"
+                          >
                             L3
                           </v-chip>
 
                           <v-icon
-                            :icon="resolveMenuIcon(node3.iconName, Boolean(node3.children && node3.children.length > 0), isExpanded(node3.id))"
+                            :icon="
+                              resolveMenuIcon(
+                                node3.iconName,
+                                Boolean(node3.children && node3.children.length > 0),
+                                isExpanded(node3.id),
+                              )
+                            "
                             size="18"
                             color="secondary"
                             class="mr-2"
                           />
 
-                          <span class="node-title font-weight-regular text-truncate flex-grow-1" v-on:click="onToggleMenuAuth(node3)">
+                          <span
+                            class="node-title font-weight-regular text-truncate flex-grow-1"
+                            v-on:click="onToggleMenuAuth(node3)"
+                          >
                             {{ node3.menuName }}
                           </span>
 
@@ -314,10 +414,16 @@
                         </div>
 
                         <!-- Level 4 Children (최하위) -->
-                        <div v-if="isExpanded(node3.id) && node3.children && node3.children.length > 0" class="tree-sub-container">
+                        <div
+                          v-if="isExpanded(node3.id) && node3.children && node3.children.length > 0"
+                          class="tree-sub-container"
+                        >
                           <div v-for="node4 in node3.children" :key="node4.id" class="tree-branch">
                             <!-- Level 4 Node Row -->
-                            <div class="tree-node-row level-4-row" :class="{ 'node-checked': isMenuChecked(node4.id) }">
+                            <div
+                              class="tree-node-row level-4-row"
+                              :class="{ 'node-checked': isMenuChecked(node4.id) }"
+                            >
                               <span class="leaf-spacer"></span>
 
                               <v-checkbox-btn
@@ -328,7 +434,12 @@
                                 v-on:update:model-value="onToggleMenuAuth(node4)"
                               />
 
-                              <v-chip size="x-small" color="grey" variant="flat" class="mr-2 font-weight-bold level-badge">
+                              <v-chip
+                                size="x-small"
+                                color="grey"
+                                variant="flat"
+                                class="mr-2 font-weight-bold level-badge"
+                              >
                                 L4
                               </v-chip>
 
@@ -339,7 +450,10 @@
                                 class="mr-2"
                               />
 
-                              <span class="node-title font-weight-regular text-truncate flex-grow-1" v-on:click="onToggleMenuAuth(node4)">
+                              <span
+                                class="node-title font-weight-regular text-truncate flex-grow-1"
+                                v-on:click="onToggleMenuAuth(node4)"
+                              >
                                 {{ node4.menuName }}
                               </span>
 
@@ -359,6 +473,30 @@
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- 저장 확인 팝업 -->
+    <ConfirmDialog
+      v-model="saveConfirmDialog"
+      :title="$t('views.settings.menuAuth.saveConfirmTitle') || '메뉴 권한 저장'"
+      :message="saveConfirmMessage"
+      confirm-text="저장"
+      confirm-color="primary"
+      icon="$contentSave"
+      v-on:confirm="onConfirmSaveAuth"
+    />
+
+    <!-- 알림 스낵바 -->
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="3000"
+      location="top right"
+    >
+      {{ snackbar.message }}
+      <template v-slot:actions>
+        <v-btn variant="text" size="small" v-on:click="snackbar.show = false">닫기</v-btn>
+      </template>
+    </v-snackbar>
   </v-container>
 </template>
 
@@ -367,8 +505,9 @@ import { useI18n } from 'vue-i18n'
 import { ref, reactive, onMounted } from 'vue'
 import { useApi } from '@/composables/useApi'
 import { fetchUserGroupsApi } from '@/api/userGroup'
-import { fetchMenusApi } from '@/api/menu'
-import { fetchMenuAuthsByGroupApi, saveBatchMenuAuthApi } from '@/api/menuAuth'
+import { fetchMenusApi, fetchMenusByUserGroupIdApi } from '@/api/menu'
+import { saveBatchMenuAuthApi } from '@/api/userGroupMenuAuth'
+import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 import { resolveMenuIcon } from '@/utils/menuIconUtils'
 
 const factoryList = ['INSERT', 'POWDER', 'COMMON']
@@ -384,11 +523,28 @@ const menuTreeList = ref([])
 const checkedMenuIds = ref([])
 const expandedNodeMap = reactive({})
 
+// 저장 확인 다이얼로그 상태
+const saveConfirmDialog = ref(false)
+const saveConfirmMessage = ref('')
+
+// 알림 스낵바 상태
+const snackbar = reactive({
+  show: false,
+  message: '',
+  color: 'success',
+})
+
 // useApi 컴포저블을 활용한 비동기 통신 바인딩
 const { loading: isGroupLoading, execute: executeFetchGroups } = useApi(fetchUserGroupsApi)
 const { loading: isMenuLoading, execute: executeFetchMenus } = useApi(fetchMenusApi)
-const { loading: isAuthLoading, execute: executeFetchAuths } = useApi(fetchMenuAuthsByGroupApi)
+const { loading: isAuthLoading, execute: executeFetchAuths } = useApi(fetchMenusByUserGroupIdApi)
 const { loading: isSaving, execute: executeSaveAuth } = useApi(saveBatchMenuAuthApi)
+
+function showNotification(msg, color) {
+  snackbar.message = msg
+  snackbar.color = color || 'success'
+  snackbar.show = true
+}
 
 /**
  * 1차원 평면 배열을 계층형 트리 구조로 변환하는 함수
@@ -408,9 +564,10 @@ function buildMenuTree(list) {
   for (let i = 0; i < list.length; i = i + 1) {
     const rawItem = list[i]
     if (rawItem) {
+      const nodeId = rawItem.id !== undefined && rawItem.id !== null ? rawItem.id : rawItem.menuId
       const node = {
-        id: rawItem.id || rawItem.menuId,
-        menuId: rawItem.menuId || '',
+        id: nodeId,
+        menuId: rawItem.menuId || nodeId || '',
         menuName: rawItem.menuName || rawItem.name || '',
         factoryName: rawItem.factoryName || 'INSERT',
         parentId: rawItem.parentId || null,
@@ -435,11 +592,12 @@ function buildMenuTree(list) {
   for (let i = 0; i < list.length; i = i + 1) {
     const rawItem = list[i]
     if (rawItem) {
-      const currentId = rawItem.id || rawItem.menuId
+      const currentId =
+        rawItem.id !== undefined && rawItem.id !== null ? rawItem.id : rawItem.menuId
       const node = nodeMap[currentId]
       if (node) {
         const parentId = node.parentId
-        if (parentId && nodeMap[parentId]) {
+        if (parentId && nodeMap[parentId] && String(parentId) !== String(node.id)) {
           nodeMap[parentId].children.push(node)
         } else {
           treeRoots.push(node)
@@ -448,12 +606,13 @@ function buildMenuTree(list) {
     }
   }
 
-  // 3차 정렬: 각 레벨별 displayOrder 기준 오름차순 정렬
+  // 3차 정렬: 각 레벨별 displayOrder 기준 오름차순 정렬 (명시적 for 루프)
   function sortChildren(nodes) {
     for (let i = 0; i < nodes.length - 1; i = i + 1) {
       for (let j = 0; j < nodes.length - 1 - i; j = j + 1) {
         const orderA = nodes[j].displayOrder !== undefined ? Number(nodes[j].displayOrder) : 0
-        const orderB = nodes[j + 1].displayOrder !== undefined ? Number(nodes[j + 1].displayOrder) : 0
+        const orderB =
+          nodes[j + 1].displayOrder !== undefined ? Number(nodes[j + 1].displayOrder) : 0
         if (orderA > orderB) {
           const temp = nodes[j]
           nodes[j] = nodes[j + 1]
@@ -473,7 +632,7 @@ function buildMenuTree(list) {
 }
 
 /**
- * 공장 기준 사용자 그룹 목록 조회
+ * [API 1] 공장별 사용자 그룹 목록 조회
  */
 async function loadUserGroups() {
   try {
@@ -524,7 +683,7 @@ async function loadUserGroups() {
 }
 
 /**
- * 전체 메뉴 목록 조회 및 트리 구성
+ * [API 2] 공장별 전체 메뉴 목록 조회
  */
 async function loadMenus() {
   try {
@@ -566,8 +725,8 @@ async function loadMenus() {
 }
 
 /**
- * 사용자 그룹 선택 시 해당 그룹의 메뉴 권한 조회 및 체크 목록 바인딩
- * @param {Object} group - 선택된 사용자 그룹
+ * [API 3] 선택된 사용자 그룹의 메뉴 권한 목록 조회
+ * @param {Object} group - 선택된 사용자 그룹 객체
  */
 async function selectUserGroup(group) {
   if (!group) {
@@ -577,16 +736,18 @@ async function selectUserGroup(group) {
   }
 
   selectedGroup.value = group
+  // 기존 체크 상태 초기화
+  checkedMenuIds.value = []
 
   try {
     const response = await executeFetchAuths(group.id)
     let authItems = []
 
     if (response) {
-      if (response.data && Array.isArray(response.data)) {
-        authItems = response.data
-      } else if (Array.isArray(response)) {
+      if (Array.isArray(response)) {
         authItems = response
+      } else if (response.data && Array.isArray(response.data)) {
+        authItems = response.data
       } else if (response.content && Array.isArray(response.content)) {
         authItems = response.content
       } else if (response.authList && Array.isArray(response.authList)) {
@@ -598,9 +759,13 @@ async function selectUserGroup(group) {
     for (let i = 0; i < authItems.length; i = i + 1) {
       const item = authItems[i]
       if (item) {
-        // 객체 형태({ menuId: '...' }) 또는 단순 문자열 ID 지원
-        const menuId = item.menuId || item.id || item
-        if (menuId) {
+        const menuId =
+          item.menuId !== undefined && item.menuId !== null
+            ? item.menuId
+            : item.id !== undefined
+              ? item.id
+              : item
+        if (menuId !== null && menuId !== undefined && menuId !== '') {
           ids.push(menuId)
         }
       }
@@ -627,7 +792,7 @@ function onRefreshAll() {
 
 // 트리 노드 펼침/접힘 제어 함수
 function isExpanded(nodeId) {
-  return !!expandedNodeMap[nodeId]
+  return Boolean(expandedNodeMap[nodeId])
 }
 
 function toggleExpand(nodeId) {
@@ -653,10 +818,14 @@ function collapseAllNodes() {
   }
 }
 
-// 체크 여부 판정 함수
+// 체크 여부 판정 함수 (문자열 일치 판정)
 function isMenuChecked(nodeId) {
+  if (nodeId === null || nodeId === undefined) {
+    return false
+  }
+  const targetStr = String(nodeId)
   for (let i = 0; i < checkedMenuIds.value.length; i = i + 1) {
-    if (String(checkedMenuIds.value[i]) === String(nodeId)) {
+    if (String(checkedMenuIds.value[i]) === targetStr) {
       return true
     }
   }
@@ -672,7 +841,10 @@ function collectAllDescendantIds(node, resultList) {
   if (!node) {
     return
   }
-  resultList.push(node.id)
+  const nodeId = node.id !== undefined && node.id !== null ? node.id : node.menuId
+  if (nodeId !== null && nodeId !== undefined) {
+    resultList.push(nodeId)
+  }
   if (node.children && node.children.length > 0) {
     for (let i = 0; i < node.children.length; i = i + 1) {
       collectAllDescendantIds(node.children[i], resultList)
@@ -701,8 +873,9 @@ function onToggleMenuAuth(node) {
     for (let i = 0; i < affectedIds.length; i = i + 1) {
       const idToAdd = affectedIds[i]
       let exists = false
+      const targetStr = String(idToAdd)
       for (let j = 0; j < checkedMenuIds.value.length; j = j + 1) {
-        if (String(checkedMenuIds.value[j]) === String(idToAdd)) {
+        if (String(checkedMenuIds.value[j]) === targetStr) {
           exists = true
           break
         }
@@ -716,9 +889,10 @@ function onToggleMenuAuth(node) {
     const newCheckedList = []
     for (let i = 0; i < checkedMenuIds.value.length; i = i + 1) {
       const currentId = checkedMenuIds.value[i]
+      const currentStr = String(currentId)
       let shouldRemove = false
       for (let j = 0; j < affectedIds.length; j = j + 1) {
-        if (String(affectedIds[j]) === String(currentId)) {
+        if (String(affectedIds[j]) === currentStr) {
           shouldRemove = true
           break
         }
@@ -738,7 +912,11 @@ function onSelectAll() {
   const allIds = []
   function collectTreeIds(nodes) {
     for (let i = 0; i < nodes.length; i = i + 1) {
-      allIds.push(nodes[i].id)
+      const nodeId =
+        nodes[i].id !== undefined && nodes[i].id !== null ? nodes[i].id : nodes[i].menuId
+      if (nodeId !== null && nodeId !== undefined) {
+        allIds.push(nodeId)
+      }
       if (nodes[i].children && nodes[i].children.length > 0) {
         collectTreeIds(nodes[i].children)
       }
@@ -756,11 +934,27 @@ function onDeselectAll() {
 }
 
 /**
- * 메뉴 권한 일괄 저장
+ * 저장 버튼 클릭 시 ConfirmDialog 모달 오픈
  */
-async function handleSaveAuth() {
+function onOpenSaveConfirm() {
   if (!selectedGroup.value) {
-    alert('권한을 설정할 사용자 그룹을 먼저 선택해주세요.')
+    showNotification('권한을 설정할 사용자 그룹을 먼저 선택해주세요.', 'warning')
+    return
+  }
+  saveConfirmMessage.value =
+    '[' +
+    selectedGroup.value.userGroupName +
+    '] 그룹의 메뉴 권한(' +
+    checkedMenuIds.value.length +
+    '개 선택됨)을 저장하시겠습니까?'
+  saveConfirmDialog.value = true
+}
+
+/**
+ * [저장 API] 메뉴 권한 일괄 저장 확정 실행
+ */
+async function onConfirmSaveAuth() {
+  if (!selectedGroup.value) {
     return
   }
 
@@ -776,21 +970,32 @@ async function handleSaveAuth() {
     }
 
     const payload = {
+      factoryName:
+        selectedFactory.value !== '전체'
+          ? selectedFactory.value
+          : selectedGroup.value.factoryName || 'INSERT',
       userGroupId: selectedGroup.value.id,
-      factoryName: selectedFactory.value !== '전체' ? selectedFactory.value : (selectedGroup.value.factoryName || 'INSERT'),
-      authList: authList,
+      eventName: 'UserGroupMenuAuthBatchSaved',
       eventUser: 'SYSTEM',
-      eventComment: 'Menu auth batch updated',
+      eventComment: 'Batch menu auth updated',
+      authList: authList,
     }
 
     await executeSaveAuth(payload)
-    alert('[' + selectedGroup.value.userGroupName + '] 그룹의 메뉴 권한이 성공적으로 저장되었습니다.')
+    showNotification(
+      '[' + selectedGroup.value.userGroupName + '] 그룹의 메뉴 권한이 성공적으로 저장되었습니다.',
+      'success',
+    )
+
+    // 저장 성공 후 해당 그룹의 최신 권한 데이터 재조회
+    await selectUserGroup(selectedGroup.value)
   } catch (error) {
     console.error('Save menu auth failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      t('views.settings.menuAuth.saveFail')
-    alert(errorMsg)
+      t('views.settings.menuAuth.saveFail') ||
+      '메뉴 권한 저장 중 오류가 발생했습니다.'
+    showNotification(errorMsg, 'error')
   }
 }
 

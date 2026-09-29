@@ -25,9 +25,6 @@ export function fetchBankShelvesApi(params) {
     })
 }
 
-// 하위 호환성을 위한 별칭 export
-export const fetchBankShelves = fetchBankShelvesApi
-
 /**
  * 랙 존(Zone) 일괄 변경 저장 API
  * @param {Object} payload
@@ -39,15 +36,14 @@ export const fetchBankShelves = fetchBankShelvesApi
  * @returns {Promise<any>}
  */
 export function saveBankShelvesZoneApi(payload) {
-  return api
-    .post('/v1/wcs/zones/bankShelves/batch-update', payload)
-    .then(function (response) {
-      if (response && response.data) {
-        return response.data
-      }
-      return response
-    })
+  return api.post('/v1/wcs/zones/bankShelves/batch-update', payload).then(function (response) {
+    if (response && response.data) {
+      return response.data
+    }
+    return response
+  })
 }
 
 // 하위 호환성을 위한 별칭 export
+export const fetchBankShelves = fetchBankShelvesApi
 export const saveBankShelvesZone = saveBankShelvesZoneApi

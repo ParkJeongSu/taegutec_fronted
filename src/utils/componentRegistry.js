@@ -138,6 +138,9 @@ export const componentMap = {
   SubTransferRuleView: defineAsyncComponent(function () {
     return import('@/views/Modeling/SubTransferRuleView.vue')
   }),
+  ModelingZoneView: defineAsyncComponent(function () {
+    return import('@/views/Modeling/ModelingZoneView.vue')
+  }),
 
   // 5. SETTINGS (설정)
   UserMgmtView: defineAsyncComponent(function () {

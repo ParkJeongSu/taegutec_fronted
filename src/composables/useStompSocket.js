@@ -1,7 +1,6 @@
 // src/composables/useStompSocket.js
 import { ref } from 'vue'
 import { Client } from '@stomp/stompjs'
-import SockJS from 'sockjs-client'
 
 // 1. 모듈 스코프 전역 상태 (단일 커넥션 및 상태 공유)
 const isConnected = ref(false)
@@ -12,6 +11,23 @@ let stompClient = null
 // 등록된 토픽 및 콜백 배열, STOMP 구독 객체를 관리하는 맵
 // 구조: Map<topicPath, { callbacks: Function[], subscription: Object|null }>
 const subscriptions = new Map()
+
+/**
+ * 브라우저 환경에 맞춘 네이티브 WebSocket URL (ws:// 또는 wss://) 생성
+ * @returns {string}
+ */
+function getBrokerURL() {
+  const envUrl = import.meta.env.VITE_WS_URL
+  if (envUrl && (envUrl.startsWith('ws://') || envUrl.startsWith('wss://'))) {
+    return envUrl
+  }
+
+  const isHttps = window.location.protocol === 'https:'
+  const protocol = isHttps ? 'wss:' : 'ws:'
+  const host = window.location.host
+  const path = envUrl || '/wcs-web/ws-stomp'
+  return protocol + '//' + host + path
+}
 
 /**
  * 개별 토픽에 대한 실제 STOMP subscribe 처리
@@ -77,20 +93,18 @@ function resubscribeAllTopics() {
 }
 
 /**
- * SockJS 기반 STOMP 클라이언트 초기화 및 연결
+ * 브라우저 표준 Native WebSocket 기반 STOMP 클라이언트 초기화 및 연결
  */
 function initStompClient() {
   if (stompClient && stompClient.active) {
     return
   }
 
-  const wsUrl = import.meta.env.VITE_WS_URL || '/wcs-web/ws-stomp'
+  const brokerURL = getBrokerURL()
   connectionStatusText.value = 'WebSocket 연결 시도 중...'
 
   stompClient = new Client({
-    webSocketFactory: function () {
-      return new SockJS(wsUrl)
-    },
+    brokerURL: brokerURL,
     reconnectDelay: 5000,
     heartbeatIncoming: 4000,
     heartbeatOutgoing: 4000,
@@ -98,7 +112,7 @@ function initStompClient() {
     onConnect: function () {
       isConnected.value = true
       connectionStatusText.value = 'WebSocket 실시간 연결됨'
-      console.log('[useStompSocket] STOMP 연결 성공. 등록된 토픽 재구독 시작...')
+      console.log('[useStompSocket] STOMP 네이티브 연결 성공. 등록된 토픽 재구독 시작...')
       resubscribeAllTopics()
     },
 
@@ -107,7 +121,6 @@ function initStompClient() {
       connectionStatusText.value = 'WebSocket 연결 대기'
       console.log('[useStompSocket] STOMP 연결 해제됨')
 
-      // 연결 해제 시 구독 객체 참조 초기화
       const entries = Array.from(subscriptions.entries())
       for (let i = 0; i < entries.length; i++) {
         const subInfo = entries[i][1]
@@ -121,7 +134,7 @@ function initStompClient() {
       console.error(
         '[useStompSocket] STOMP Broker 에러:',
         frame && frame.headers ? frame.headers['message'] : 'No message',
-        frame ? frame.body : ''
+        frame ? frame.body : '',
       )
     },
 
@@ -143,8 +156,8 @@ function initStompClient() {
 
 /**
  * 특정 토픽 구독 등록 (다중 콜백 지원)
- * @param {string} topic - 구독할 STOMP 토픽 경로 (예: '/topic/warehouse/1/crane')
- * @param {Function} callback - 메시지 수신 시 실행될 콜백 함수
+ * @param {string} topic
+ * @param {Function} callback
  */
 function subscribe(topic, callback) {
   if (!topic || typeof topic !== 'string') {
@@ -152,7 +165,6 @@ function subscribe(topic, callback) {
     return
   }
 
-  // 토픽 맵에 등록 또는 콜백 배열에 추가
   let subInfo = subscriptions.get(topic)
   if (!subInfo) {
     subInfo = {
@@ -162,7 +174,6 @@ function subscribe(topic, callback) {
     subscriptions.set(topic, subInfo)
   }
 
-  // 콜백 중복 등록 방지 검사
   if (typeof callback === 'function') {
     let alreadyExists = false
     for (let i = 0; i < subInfo.callbacks.length; i++) {
@@ -176,11 +187,9 @@ function subscribe(topic, callback) {
     }
   }
 
-  // 클라이언트가 초기화되지 않았거나 비활성화되어 있다면 초기화 및 연결 시도
   if (!stompClient || !stompClient.active) {
     initStompClient()
   } else if (stompClient.connected) {
-    // 이미 연결된 상태에서 아직 브로커 구독이 없다면 구독 수행
     if (!subInfo.subscription) {
       subscribeTopicInternal(topic, subInfo)
     }
@@ -189,8 +198,8 @@ function subscribe(topic, callback) {
 
 /**
  * 특정 토픽 또는 콜백 구독 해제
- * @param {string} topic - 구독 해제할 STOMP 토픽 경로
- * @param {Function} [callback] - 특정 콜백 함수 (생략 시 해당 토픽의 모든 콜백 및 구독 해제)
+ * @param {string} topic
+ * @param {Function} [callback]
  */
 function unsubscribe(topic, callback) {
   if (!topic || !subscriptions.has(topic)) {
@@ -202,7 +211,6 @@ function unsubscribe(topic, callback) {
     return
   }
 
-  // 1. 콜백 함수가 인자로 전달된 경우: 해당 콜백만 배열에서 제거
   if (callback && typeof callback === 'function') {
     const remaining = []
     for (let i = 0; i < subInfo.callbacks.length; i++) {
@@ -212,11 +220,9 @@ function unsubscribe(topic, callback) {
     }
     subInfo.callbacks = remaining
   } else {
-    // 콜백 미지정 시 전체 콜백 비우기
     subInfo.callbacks = []
   }
 
-  // 2. 등록된 콜백이 더 이상 없으면 실제 브로커 구독 해제 및 맵 삭제
   if (subInfo.callbacks.length === 0) {
     if (subInfo.subscription) {
       try {
@@ -230,7 +236,10 @@ function unsubscribe(topic, callback) {
     subscriptions.delete(topic)
     console.log('[useStompSocket] 토픽 구독 완전 해제 완료:', topic)
   } else {
-    console.log('[useStompSocket] 특정 콜백 해제 완료 (잔여 콜백: ' + subInfo.callbacks.length + '개):', topic)
+    console.log(
+      '[useStompSocket] 특정 콜백 해제 완료 (잔여 콜백: ' + subInfo.callbacks.length + '개):',
+      topic,
+    )
   }
 }
 
@@ -266,10 +275,6 @@ function disconnectAll() {
   console.log('[useStompSocket] 모든 구독 및 STOMP 연결 해제됨')
 }
 
-/**
- * 범용 STOMP WebSocket Composable
- * @returns {Object} { isConnected, connectionStatusText, initStompClient, subscribe, unsubscribe, disconnectAll }
- */
 export function useStompSocket() {
   return {
     isConnected: isConnected,

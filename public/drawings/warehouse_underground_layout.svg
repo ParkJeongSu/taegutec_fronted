@@ -1,0 +1,162 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" width="100%" height="100%">
+  <defs>
+    <!-- 크레인 캐리지 심볼 -->
+    <g id="crane-carriage-symbol">
+      <rect x="-20" y="-16" width="40" height="32" rx="4" fill="#1565C0" stroke="#0D47A1" stroke-width="2"/>
+      <rect x="-16" y="-12" width="32" height="24" rx="2" fill="#1E88E5"/>
+      <line x1="-16" y1="0" x2="16" y2="0" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="2,2"/>
+      <line x1="0" y1="-12" x2="0" y2="12" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="2,2"/>
+      <circle cx="0" cy="0" r="4" fill="#FFFFFF"/>
+    </g>
+  </defs>
+
+  <style>
+    .bg-grid { fill: #FAFAFA; }
+    .conveyor-track { fill: none; stroke: #455A64; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+    .conveyor-center { fill: none; stroke: #ECEFF1; stroke-width: 1.5; stroke-dasharray: 4,4; }
+    .turntable-node { fill: #FFFFFF; stroke: #263238; stroke-width: 3; }
+    .warehouse-bay-box { fill: #FFFFFF; stroke: #263238; stroke-width: 2.2; }
+    .rack-cross-line { stroke: #37474F; stroke-width: 1.5; }
+    .crane-rail-guide { stroke: #263238; stroke-width: 1.8; stroke-dasharray: 6,4; }
+    .workstation-label-bg { fill: #FFB300; stroke: #E65100; stroke-width: 1.5; stroke-dasharray: 4,2; rx: 3; }
+    .workstation-text { font-family: sans-serif; font-size: 11px; font-weight: bold; fill: #212121; text-anchor: middle; dominant-baseline: central; }
+    .wh-title-text { font-family: sans-serif; font-size: 14px; font-weight: bold; fill: #546E7A; letter-spacing: 2px; }
+    .crane-unit { transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1.0); will-change: transform; }
+  </style>
+
+  <rect width="1600" height="1200" class="bg-grid"/>
+
+  <!-- ================= 1. 컨베이어 간선망 ================= -->
+  <g id="conveyor-network">
+    <path d="M 220,380 L 400,380 L 400,310 L 580,310 L 580,280 L 800,280 L 800,880 L 840,880" class="conveyor-track"/>
+    <path d="M 220,380 L 400,380 L 400,310 L 580,310 L 580,280 L 800,280 L 800,880 L 840,880" class="conveyor-center"/>
+
+    <path d="M 800,160 L 800,120 L 1280,120 L 1280,560 L 1340,560" class="conveyor-track"/>
+    <path d="M 800,160 L 800,120 L 1280,120 L 1280,560 L 1340,560" class="conveyor-center"/>
+
+    <path d="M 800,560 L 1280,560" class="conveyor-track"/>
+    <path d="M 800,560 L 1280,560" class="conveyor-center"/>
+
+    <circle cx="220" cy="380" r="10" class="turntable-node"/>
+    <circle cx="400" cy="380" r="10" class="turntable-node"/>
+    <circle cx="400" cy="310" r="10" class="turntable-node"/>
+    <circle cx="580" cy="310" r="10" class="turntable-node"/>
+    <circle cx="580" cy="280" r="10" class="turntable-node"/>
+    <circle cx="800" cy="280" r="12" class="turntable-node"/>
+    <circle cx="800" cy="160" r="10" class="turntable-node"/>
+    <circle cx="800" cy="560" r="11" class="turntable-node"/>
+    <circle cx="800" cy="880" r="11" class="turntable-node"/>
+    <circle cx="1280" cy="120" r="12" class="turntable-node"/>
+    <circle cx="1280" cy="560" r="12" class="turntable-node"/>
+  </g>
+
+  <!-- ================= 2. 확장된 창고 랙 구역 ================= -->
+
+  <!-- WH 7 (가로형) -->
+  <g id="warehouse-wh7">
+    <rect x="60" y="270" width="280" height="80" class="warehouse-bay-box"/>
+    <line x1="60" y1="310" x2="340" y2="310" class="crane-rail-guide"/>
+    <line x1="60" y1="270" x2="100" y2="350" class="rack-cross-line"/>
+    <line x1="100" y1="270" x2="60" y2="350" class="rack-cross-line"/>
+    <text x="200" y="260" class="wh-title-text">WH 7</text>
+  </g>
+
+  <!-- WH 6 (가로형) -->
+  <g id="warehouse-wh6">
+    <rect x="60" y="420" width="460" height="80" class="warehouse-bay-box"/>
+    <line x1="60" y1="460" x2="520" y2="460" class="crane-rail-guide"/>
+    <line x1="60" y1="420" x2="100" y2="500" class="rack-cross-line"/>
+    <line x1="100" y1="420" x2="60" y2="500" class="rack-cross-line"/>
+    <line x1="480" y1="420" x2="520" y2="500" class="rack-cross-line"/>
+    <line x1="520" y1="420" x2="480" y2="500" class="rack-cross-line"/>
+    <text x="280" y="520" class="wh-title-text">WH 6</text>
+  </g>
+
+  <!-- WH 2.1 (상단 세로형) -->
+  <g id="warehouse-wh2-1">
+    <rect x="880" y="50" width="100" height="420" class="warehouse-bay-box"/>
+    <line x1="930" y1="50" x2="930" y2="470" class="crane-rail-guide"/>
+    <line x1="880" y1="50" x2="980" y2="90" class="rack-cross-line"/>
+    <line x1="980" y1="50" x2="880" y2="90" class="rack-cross-line"/>
+    <line x1="880" y1="430" x2="980" y2="470" class="rack-cross-line"/>
+    <line x1="980" y1="430" x2="880" y2="470" class="rack-cross-line"/>
+    <text x="1005" y="260" class="wh-title-text" transform="rotate(90, 1005, 260)">WH 2.1</text>
+  </g>
+
+  <!-- WH 2.2 (상단 세로형) -->
+  <g id="warehouse-wh2-2">
+    <rect x="1360" y="50" width="100" height="420" class="warehouse-bay-box"/>
+    <line x1="1410" y1="50" x2="1410" y2="470" class="crane-rail-guide"/>
+    <line x1="1360" y1="50" x2="1460" y2="90" class="rack-cross-line"/>
+    <line x1="1460" y1="50" x2="1360" y2="90" class="rack-cross-line"/>
+    <line x1="1360" y1="430" x2="1460" y2="470" class="rack-cross-line"/>
+    <line x1="1460" y1="430" x2="1360" y2="470" class="rack-cross-line"/>
+    <text x="1485" y="260" class="wh-title-text" transform="rotate(90, 1485, 260)">WH 2.2</text>
+  </g>
+
+  <!-- WH 3 (하단 세로형 상) -->
+  <g id="warehouse-wh3">
+    <rect x="840" y="680" width="100" height="200" class="warehouse-bay-box"/>
+    <line x1="890" y1="680" x2="890" y2="880" class="crane-rail-guide"/>
+    <line x1="840" y1="840" x2="940" y2="880" class="rack-cross-line"/>
+    <line x1="940" y1="840" x2="840" y2="880" class="rack-cross-line"/>
+    <text x="965" y="780" class="wh-title-text" transform="rotate(90, 965, 780)">WH 3</text>
+  </g>
+
+  <!-- WH 2 (하단 세로형 하) -->
+  <g id="warehouse-wh2">
+    <rect x="840" y="920" width="100" height="250" class="warehouse-bay-box"/>
+    <line x1="890" y1="920" x2="890" y2="1170" class="crane-rail-guide"/>
+    <line x1="840" y1="920" x2="940" y2="960" class="rack-cross-line"/>
+    <line x1="940" y1="920" x2="840" y2="960" class="rack-cross-line"/>
+    <line x1="840" y1="1130" x2="940" y2="1170" class="rack-cross-line"/>
+    <line x1="940" y1="1130" x2="840" y2="1170" class="rack-cross-line"/>
+    <text x="965" y="1050" class="wh-title-text" transform="rotate(90, 965, 1050)">WH 2</text>
+  </g>
+
+  <!-- WH 1 (하단 세로형 우측) -->
+  <g id="warehouse-wh1">
+    <rect x="1340" y="700" width="100" height="470" class="warehouse-bay-box"/>
+    <line x1="1390" y1="700" x2="1390" y2="1170" class="crane-rail-guide"/>
+    <line x1="1340" y1="700" x2="1440" y2="740" class="rack-cross-line"/>
+    <line x1="1440" y1="700" x2="1340" y2="740" class="rack-cross-line"/>
+    <line x1="1340" y1="1130" x2="1440" y2="1170" class="rack-cross-line"/>
+    <line x1="1440" y1="1130" x2="1340" y2="1170" class="rack-cross-line"/>
+    <text x="1465" y="940" class="wh-title-text" transform="rotate(90, 1465, 940)">WH 1</text>
+  </g>
+
+  <!-- ================= 3. 워크스테이션 뱃지 라벨 ================= -->
+  <rect x="235" y="210" width="56" height="24" class="workstation-label-bg"/>
+  <text x="263" y="222" class="workstation-text">GR373</text>
+  <rect x="90" y="375" width="56" height="24" class="workstation-label-bg"/>
+  <text x="118" y="387" class="workstation-text">GR364</text>
+  <rect x="425" y="375" width="56" height="24" class="workstation-label-bg"/>
+  <text x="453" y="387" class="workstation-text">GR363</text>
+  <rect x="740" y="850" width="56" height="24" class="workstation-label-bg"/>
+  <text x="768" y="862" class="workstation-text">GR332</text>
+  <rect x="1220" y="320" width="58" height="24" class="workstation-label-bg"/>
+  <text x="1249" y="332" class="workstation-text">GR3223</text>
+
+  <!-- ================= 4. 동적 제어 대상 크레인 엘리먼트 ================= -->
+  <g id="crane-unit-wh1" class="crane-unit" transform="translate(1390, 900)">
+    <use href="#crane-carriage-symbol"/>
+  </g>
+  <g id="crane-unit-wh2" class="crane-unit" transform="translate(890, 1040)">
+    <use href="#crane-carriage-symbol"/>
+  </g>
+  <g id="crane-unit-wh3" class="crane-unit" transform="translate(890, 780)">
+    <use href="#crane-carriage-symbol"/>
+  </g>
+  <g id="crane-unit-wh2-1" class="crane-unit" transform="translate(930, 260)">
+    <use href="#crane-carriage-symbol"/>
+  </g>
+  <g id="crane-unit-wh2-2" class="crane-unit" transform="translate(1410, 260)">
+    <use href="#crane-carriage-symbol"/>
+  </g>
+  <g id="crane-unit-wh6" class="crane-unit" transform="translate(290, 460)">
+    <use href="#crane-carriage-symbol"/>
+  </g>
+  <g id="crane-unit-wh7" class="crane-unit" transform="translate(200, 310)">
+    <use href="#crane-carriage-symbol"/>
+  </g>
+</svg>

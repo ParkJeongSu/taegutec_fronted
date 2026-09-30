@@ -5,6 +5,9 @@ export const componentMap = {
   WorkStationView: defineAsyncComponent(function () {
     return import('@/views/Dashboard/WorkStationView.vue')
   }),
+  WarehouseOverviewView: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WarehouseOverviewView.vue')
+  }),
   WorkStation311View: defineAsyncComponent(function () {
     return import('@/views/Dashboard/WorkStation311View.vue')
   }),

@@ -217,9 +217,13 @@ function handleCraneMovement(payload) {
     return
   }
   if (typeof payload.x === 'number' && typeof payload.y === 'number') {
+    let calculated_y = payload.y;
+    if (payload.y > 450) {
+      calculated_y = calculated_y / 2;
+    }
     cranePos.value = {
-      x: payload.x,
-      y: payload.y,
+      x: cranePos.value.x,
+      y: calculated_y,
     }
   }
 }

@@ -83,6 +83,7 @@
     "OPERATION": "운영 모니터링",
     "WORK_STATION": "워크스테이션",
     "WAREHOUSE": "창고 모니터링",
+    "WAREHOUSE_OVERVIEW": "전체 창고 모니터링",
     "WAREHOUSE_ROOT": "창고",
     "WAREHOUSE_1": "창고1",
     "WORK_STATION_1": "workstation1",

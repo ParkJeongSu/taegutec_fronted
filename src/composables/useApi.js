@@ -14,15 +14,15 @@ export function useApi(apiFunc, initialData = null) {
 
   /**
    * API 실행 함수
-   * @param {any} params - API 전달 파라미터
+   * @param {any} args - API 전달 파라미터
    * @returns {Promise<any>}
    */
-  async function execute(params) {
+  async function execute(...args) {
     loading.value = true
     error.value = null
 
     try {
-      const response = await apiFunc(params)
+      const response = await apiFunc(...args)
 
       // Axios의 원본 HTTP Response 객체인 경우에만 1회 unwrap (status와 config 존재 여부로 판별)
       if (response && response.status !== undefined && response.config !== undefined) {

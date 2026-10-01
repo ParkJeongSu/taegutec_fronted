@@ -53,6 +53,7 @@
             :rules="isCreateMode ? [validateRequired, validatePassword] : []"
             :append-inner-icon="showPassword ? '$eyeOff' : '$eye'"
             v-on:click:append-inner="togglePasswordVisibility"
+            autocomplete="new-password"
           ></v-text-field>
         </v-col>
 
@@ -93,6 +94,7 @@
             variant="outlined"
             density="compact"
             placeholder="example@taegutec.co.kr"
+            autocomplete="email"
           ></v-text-field>
         </v-col>
 
@@ -113,7 +115,9 @@
 
     <!-- 하단 액션 버튼 영역 -->
     <v-card-actions class="pa-4 action-buttons-container">
-      <v-btn variant="outlined" color="secondary" v-on:click="onClose"> {{ $t('common.cancel') }} </v-btn>
+      <v-btn variant="outlined" color="secondary" v-on:click="onClose">
+        {{ $t('common.cancel') }}
+      </v-btn>
 
       <v-spacer></v-spacer>
 
@@ -125,7 +129,8 @@
         :loading="isDeleting"
         class="mr-2"
         v-on:click="onOpenDeleteDialog"
-      >{{ $t('common.delete') }}</v-btn>
+        >{{ $t('common.delete') }}</v-btn
+      >
 
       <!-- 저장 / 수정 실행 버튼 -->
       <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave">
@@ -304,9 +309,9 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      currentId.value = isCreateMode.value ? null : (newVal.id || null)
-      formData.userId = isCreateMode.value ? '' : (newVal.userId || newVal.USER_ID || '')
-      formData.userName = isCreateMode.value ? '' : (newVal.userName || newVal.USER_NAME || '')
+      currentId.value = isCreateMode.value ? null : newVal.id || null
+      formData.userId = isCreateMode.value ? '' : newVal.userId || newVal.USER_ID || ''
+      formData.userName = isCreateMode.value ? '' : newVal.userName || newVal.USER_NAME || ''
       formData.password = ''
       formData.factoryName = newVal.factoryName || newVal.FACTORY_NAME || newVal.plant || 'INSERT'
       formData.departmentId = newVal.departmentId || newVal.DEPARTMENT_ID || newVal.deptCode || ''
@@ -417,8 +422,7 @@ async function onHandleSave() {
   } catch (error) {
     console.error('Save user failed:', error)
     const errorMsg =
-      (error.response && error.response.data && error.response.data.message) ||
-      t('common.saveFail')
+      (error.response && error.response.data && error.response.data.message) || t('common.saveFail')
     alert(errorMsg)
   }
 }

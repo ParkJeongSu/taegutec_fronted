@@ -1,5 +1,5 @@
 // src/api/user.js
-import axios from 'axios'
+import axios from '@/api/index'
 
 /**
  * 사용자 목록 조회 (검색 및 페이징)
@@ -7,7 +7,7 @@ import axios from 'axios'
  * @returns {Promise<Object>} API 응답 데이터
  */
 export async function fetchUsersApi(params) {
-  const response = await axios.get('/wcs-web/api/v1/mng/user', { params: params })
+  const response = await axios.get('/v1/mng/user', { params: params })
   return response.data
 }
 
@@ -17,7 +17,7 @@ export async function fetchUsersApi(params) {
  * @returns {Promise<Object>} API 응답 데이터
  */
 export async function createUserApi(userData) {
-  const response = await axios.post('/wcs-web/api/v1/mng/user', userData)
+  const response = await axios.post('/v1/mng/user', userData)
   return response.data
 }
 
@@ -37,7 +37,7 @@ export async function updateUserApi(id, payload) {
     data = id
   }
 
-  const url = '/wcs-web/api/users/' + encodeURIComponent(targetId)
+  const url = '/v1/mng/user/' + encodeURIComponent(targetId)
   const response = await axios.put(url, data)
   return response.data
 }
@@ -49,7 +49,7 @@ export async function updateUserApi(id, payload) {
  */
 export async function deleteUserApi(id) {
   const targetId = typeof id === 'object' && id !== null ? id.id || id.userId : id
-  const url = '/wcs-web/api/users/' + encodeURIComponent(targetId)
+  const url = '/v1/mng/user/' + encodeURIComponent(targetId)
   const response = await axios.delete(url)
   return response.data
 }

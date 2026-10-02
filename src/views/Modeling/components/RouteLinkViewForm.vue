@@ -26,128 +26,128 @@
             variant="outlined"
             density="compact"
             :rules="[validateRequiredNumber]"
-            placeholder="예: 1"
+            placeholder="예: 1000"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
         </v-col>
 
-        <!-- 링크 명칭 -->
+        <!-- 시작 노드 ID (fromNodeId) -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model="formData.linkName"
-            label="링크 명칭 (LINK_NAME)"
+            v-model="formData.fromNodeId"
+            label="시작 노드 (FROM_NODE_ID)"
             variant="outlined"
             density="compact"
-            placeholder="예: LINK-01-05"
+            :rules="[validateRequired]"
+            placeholder="예: WH03_OUT_03"
+            required
           ></v-text-field>
         </v-col>
 
-        <!-- 링크 방향성 -->
+        <!-- 도착 노드 ID (toNodeId) -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.toNodeId"
+            label="도착 노드 (TO_NODE_ID)"
+            variant="outlined"
+            density="compact"
+            :rules="[validateRequired]"
+            placeholder="예: CNV02_IN_15"
+            required
+          ></v-text-field>
+        </v-col>
+
+        <!-- 링크 타입 (routeLinkType) -->
         <v-col cols="12" sm="6">
           <v-select
-            v-model="formData.direction"
-            :items="directionOptions"
-            label="링크 방향성 (DIRECTION)"
+            v-model="formData.routeLinkType"
+            :items="routeLinkTypeOptions"
+            label="링크 타입 (ROUTE_LINK_TYPE)"
             variant="outlined"
             density="compact"
           ></v-select>
         </v-col>
 
-        <!-- 시작 노드 ID / 명 -->
+        <!-- 공정 유형 (processType) -->
         <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.fromNode"
-            :label="$t('table.fromNode')"
+          <v-select
+            v-model="formData.processType"
+            :items="processTypeOptions"
+            label="공정 유형 (PROCESS_TYPE)"
             variant="outlined"
             density="compact"
-            :rules="[validateRequired]"
-            placeholder="예: 101 또는 NODE-01"
-            required
-          ></v-text-field>
+          ></v-select>
         </v-col>
 
-        <!-- 도착 노드 ID / 명 -->
+        <!-- 구간 길이 (length, m) -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model="formData.toNode"
-            :label="$t('table.toNode')"
-            variant="outlined"
-            density="compact"
-            :rules="[validateRequired]"
-            placeholder="예: 105 또는 NODE-05"
-            required
-          ></v-text-field>
-        </v-col>
-
-        <!-- 구간 거리 (m) -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model.number="formData.distance"
+            v-model.number="formData.length"
             type="number"
-            label="구간 거리 m (DISTANCE)"
+            label="구간 길이 m (LENGTH)"
             variant="outlined"
             density="compact"
             :rules="[validateRequiredNumber]"
-            placeholder="예: 18.5"
+            placeholder="예: 1"
             required
           ></v-text-field>
         </v-col>
 
-        <!-- 제한 속도 (m/s) -->
+        <!-- 우선순위 (priority) -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model.number="formData.speedLimit"
+            v-model.number="formData.priority"
             type="number"
-            label="제한 속도 m/s (SPEED_LIMIT)"
+            label="우선순위 (PRIORITY)"
             variant="outlined"
             density="compact"
-            placeholder="예: 2.0"
+            placeholder="예: 0"
           ></v-text-field>
         </v-col>
 
-        <!-- 링크 타입 -->
-        <v-col cols="12" sm="6">
+        <!-- 통과 여부 (passYn) -->
+        <v-col cols="12" sm="4">
           <v-select
-            v-model="formData.linkType"
-            :items="linkTypeOptions"
-            label="링크 타입 (LINK_TYPE)"
+            v-model="formData.passYn"
+            :items="ynOptions"
+            label="통과 여부 (PASS_YN)"
             variant="outlined"
             density="compact"
           ></v-select>
         </v-col>
 
-        <!-- 링크 상태 -->
-        <v-col cols="12" sm="6">
+        <!-- 가용 상태 (usableYn) -->
+        <v-col cols="12" sm="4">
           <v-select
-            v-model="formData.linkStatus"
-            :items="linkStatusOptions"
-            label="링크 상태 (LINK_STATUS)"
+            v-model="formData.usableYn"
+            :items="ynOptions"
+            label="가용 상태 (USABLE_YN)"
             variant="outlined"
             density="compact"
           ></v-select>
         </v-col>
 
-        <!-- 사용 여부 -->
-        <v-col cols="12" sm="6">
+        <!-- 사용 여부 (useYn) -->
+        <v-col cols="12" sm="4">
           <v-select
-            v-model="formData.useState"
-            :items="useStateOptions"
-            :label="$t('views.modeling.routeLink.formUseState')"
+            v-model="formData.useYn"
+            :items="useYnOptions"
+            :label="$t('table.useYn')"
             variant="outlined"
             density="compact"
           ></v-select>
         </v-col>
 
-        <!-- 비고 / 설명 -->
+        <!-- 링크 설명 (description) -->
         <v-col cols="12">
           <v-textarea
-            v-model="formData.eventComment"
-            :label="$t('common.comment')"
+            v-model="formData.description"
+            label="링크 설명 (DESCRIPTION)"
             variant="outlined"
             density="compact"
             rows="3"
-            placeholder="비고 또는 특이사항 입력"
+            placeholder="예: WH03 출고 -> CNV02 투입 경로 설명"
           ></v-textarea>
         </v-col>
       </v-row>
@@ -190,7 +190,17 @@
     <!-- 삭제 확인 모달 -->
     <ConfirmDialog
       v-model="deleteConfirmDialog"
-      :message="'[' + formData.factoryName + ' / ' + formData.routeLinkId + ' (' + (formData.fromNode + ' -> ' + formData.toNode) + ')] 라우트 링크를 삭제하시겠습니까?'"
+      :message="
+        '[' +
+        formData.factoryName +
+        ' / ' +
+        formData.routeLinkId +
+        ' (' +
+        formData.fromNodeId +
+        ' -> ' +
+        formData.toNodeId +
+        ')] 라우트 링크를 삭제하시겠습니까?'
+      "
       v-on:confirm="onConfirmDelete"
     />
   </div>
@@ -220,30 +230,19 @@ const panelStore = usePanelStore()
 const formRef = ref(null)
 const deleteConfirmDialog = ref(false)
 
-const factoryOptions = ['INSERT', 'POWDER', 'COMMON']
-const directionOptions = [
-  'ONE_WAY',
-  'BI_DIRECTIONAL',
-  'REVERSE',
+const factoryOptions = ['insert', 'powder', 'common']
+const routeLinkTypeOptions = ['INTER', 'INTRA', 'CONVEYOR', 'PATH', 'TRACK']
+const processTypeOptions = ['ALL', 'INBOUND', 'OUTBOUND']
+const ynOptions = [
+  { title: 'Y (가능/가용)', value: 'Y' },
+  { title: 'N (차단/불가)', value: 'N' },
 ]
-const linkTypeOptions = [
-  'CONVEYOR',
-  'TRACK',
-  'PATH',
-  'AIR',
-  'NORMAL',
-]
-const linkStatusOptions = [
-  'AVAILABLE',
-  'BLOCKED',
-  'MAINTENANCE',
-]
-const useStateOptions = [
-  { title: t('common.useStatusActive'), value: 'USE' },
-  { title: t('common.useStatusInactive'), value: 'UNUSE' },
+const useYnOptions = [
+  { title: t('common.use'), value: 'Y' },
+  { title: t('common.unuse'), value: 'N' },
 ]
 
-// useApi를 통한 CUD API 바인딩
+// useApi를 통한 CUD API 바인딩 (단일 params 객체 수신 형태 유지)
 const { loading: isCreating, execute: executeCreate } = useApi(createWcsRouteLinkApi)
 
 const { loading: isUpdating, execute: executeUpdate } = useApi(function (params) {
@@ -263,33 +262,33 @@ const isCreateMode = computed(function () {
 })
 
 const formData = reactive({
-  factoryName: 'INSERT',
+  factoryName: 'insert',
   routeLinkId: null,
-  linkName: '',
-  fromNode: '',
-  toNode: '',
-  distance: 10.0,
-  speedLimit: 2.0,
-  direction: 'ONE_WAY',
-  linkType: 'CONVEYOR',
-  linkStatus: 'AVAILABLE',
-  useState: 'USE',
-  eventComment: '',
+  fromNodeId: '',
+  toNodeId: '',
+  routeLinkType: 'INTER',
+  processType: 'ALL',
+  length: 1,
+  priority: 0,
+  passYn: 'Y',
+  usableYn: 'Y',
+  useYn: 'Y',
+  description: '',
 })
 
 function resetForm() {
-  formData.factoryName = 'INSERT'
+  formData.factoryName = 'insert'
   formData.routeLinkId = null
-  formData.linkName = ''
-  formData.fromNode = ''
-  formData.toNode = ''
-  formData.distance = 10.0
-  formData.speedLimit = 2.0
-  formData.direction = 'ONE_WAY'
-  formData.linkType = 'CONVEYOR'
-  formData.linkStatus = 'AVAILABLE'
-  formData.useState = 'USE'
-  formData.eventComment = ''
+  formData.fromNodeId = ''
+  formData.toNodeId = ''
+  formData.routeLinkType = 'INTER'
+  formData.processType = 'ALL'
+  formData.length = 1
+  formData.priority = 0
+  formData.passYn = 'Y'
+  formData.usableYn = 'Y'
+  formData.useYn = 'Y'
+  formData.description = ''
 }
 
 watch(
@@ -298,18 +297,27 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.factoryName = newVal.factoryName || 'INSERT'
-      formData.routeLinkId = isCreateMode.value ? null : (newVal.routeLinkId != null ? Number(newVal.routeLinkId) : (newVal.linkId != null ? Number(newVal.linkId) : null))
-      formData.linkName = newVal.linkName || newVal.name || ''
-      formData.fromNode = newVal.fromNode != null ? String(newVal.fromNode) : (newVal.fromNodeId != null ? String(newVal.fromNodeId) : '')
-      formData.toNode = newVal.toNode != null ? String(newVal.toNode) : (newVal.toNodeId != null ? String(newVal.toNodeId) : '')
-      formData.distance = newVal.distance != null ? Number(newVal.distance) : 10.0
-      formData.speedLimit = newVal.speedLimit != null ? Number(newVal.speedLimit) : (newVal.maxSpeed != null ? Number(newVal.maxSpeed) : 2.0)
-      formData.direction = newVal.direction || newVal.directionType || 'ONE_WAY'
-      formData.linkType = newVal.linkType || 'CONVEYOR'
-      formData.linkStatus = newVal.linkStatus || 'AVAILABLE'
-      formData.useState = newVal.useState || (newVal.useYn === 'N' ? 'UNUSE' : 'USE')
-      formData.eventComment = newVal.eventComment || ''
+      formData.factoryName = newVal.factoryName || 'insert'
+      formData.routeLinkId = isCreateMode.value
+        ? null
+        : newVal.routeLinkId != null
+          ? Number(newVal.routeLinkId)
+          : null
+      formData.fromNodeId = newVal.fromNodeId || newVal.fromNode || ''
+      formData.toNodeId = newVal.toNodeId || newVal.toNode || ''
+      formData.routeLinkType = newVal.routeLinkType || newVal.linkType || 'INTER'
+      formData.processType = newVal.processType || 'ALL'
+      formData.length =
+        newVal.length != null
+          ? Number(newVal.length)
+          : newVal.distance != null
+            ? Number(newVal.distance)
+            : 1
+      formData.priority = newVal.priority != null ? Number(newVal.priority) : 0
+      formData.passYn = newVal.passYn || 'Y'
+      formData.usableYn = newVal.usableYn || 'Y'
+      formData.useYn = newVal.useYn || (newVal.useState === 'UNUSE' ? 'N' : 'Y')
+      formData.description = newVal.description || newVal.eventComment || ''
     } else {
       resetForm()
     }
@@ -325,7 +333,12 @@ function validateRequired(value) {
 }
 
 function validateRequiredNumber(value) {
-  if (value !== null && value !== undefined && String(value).trim() !== '' && !isNaN(Number(value))) {
+  if (
+    value !== null &&
+    value !== undefined &&
+    String(value).trim() !== '' &&
+    !isNaN(Number(value))
+  ) {
     return true
   }
   return '숫자를 입력해주세요.'
@@ -353,25 +366,22 @@ async function onHandleSave() {
     const payload = {
       factoryName: formData.factoryName,
       routeLinkId: Number(formData.routeLinkId),
-      linkName: formData.linkName || undefined,
-      fromNode: formData.fromNode,
-      toNode: formData.toNode,
-      fromNodeId: formData.fromNode,
-      toNodeId: formData.toNode,
-      distance: Number(formData.distance) || 0,
-      speedLimit: Number(formData.speedLimit) || 0,
-      direction: formData.direction,
-      linkType: formData.linkType,
-      linkStatus: formData.linkStatus,
-      useState: formData.useState,
-      eventComment: formData.eventComment || undefined,
+      fromNodeId: formData.fromNodeId,
+      toNodeId: formData.toNodeId,
+      routeLinkType: formData.routeLinkType,
+      processType: formData.processType,
+      length: Number(formData.length) || 1,
+      priority: Number(formData.priority) || 0,
+      passYn: formData.passYn,
+      usableYn: formData.usableYn,
+      useYn: formData.useYn,
+      description: formData.description || undefined,
     }
 
     if (isCreateMode.value) {
       await executeCreate(payload)
       alert(t('common.saveSuccess'))
     } else {
-      // 복합키(factoryName + routeLinkId) 기준 수정 요청
       await executeUpdate({
         factoryName: formData.factoryName,
         routeLinkId: formData.routeLinkId,
@@ -395,7 +405,6 @@ async function onHandleSave() {
 
 async function onConfirmDelete() {
   try {
-    // 복합키(factoryName + routeLinkId) 기준 삭제 요청
     await executeDelete({
       factoryName: formData.factoryName,
       routeLinkId: formData.routeLinkId,
@@ -420,7 +429,6 @@ async function onConfirmDelete() {
 .form-container {
   height: 100%;
 }
-
 .action-buttons-container {
   background-color: #fafafa;
 }

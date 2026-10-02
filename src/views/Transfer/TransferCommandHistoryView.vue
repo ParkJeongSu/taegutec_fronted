@@ -1,27 +1,19 @@
 <template>
   <v-container fluid class="pa-4 view-page-container">
     <v-card class="elevation-1 rounded-lg pa-4">
-      <!-- 상단 헤더 및 액션 툴바 -->
+      <!-- 상단 헤더 및 액션 툴바 (신규 등록 버튼 제거) -->
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$history" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.transfer.commandHistory.title') }}</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.transfer.commandHistory.title')
+          }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.transfer.commandHistory.breadcrumb') }}
           </v-chip>
         </div>
 
         <div class="d-flex align-center action-button-group">
-          <v-btn
-            color="primary"
-            variant="flat"
-            size="small"
-            prepend-icon="$plus"
-            class="font-weight-bold mr-2"
-            v-on:click="onAddTransferCommand"
-          >
-            {{ $t('common.create') }}
-          </v-btn>
           <v-btn
             color="secondary"
             variant="tonal"
@@ -189,6 +181,11 @@
         v-on:update:options="onUpdateOptions"
         v-on:click:row="onRowClick"
       >
+        <!-- 이벤트 키 -->
+        <template #[`item.eventTimeKey`]="{ item }">
+          <span class="font-weight-medium text-caption">{{ item.eventTimeKey }}</span>
+        </template>
+
         <!-- 이벤트 일시 포맷팅 -->
         <template #[`item.eventTime`]="{ item }">
           <span class="font-weight-medium text-caption">{{ formatDateTime(item.eventTime) }}</span>
@@ -291,19 +288,18 @@
 
 <script setup>
 import { useI18n } from 'vue-i18n'
-import { ref, reactive, computed, markRaw, onMounted } from 'vue'
+import { reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
-import TransferCommandHistoryViewForm from './components/TransferCommandHistoryViewForm.vue'
+import TransferCommandHistoryDetailView from './components/TransferCommandHistoryDetailView.vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useDataTable } from '@/composables/useDataTable'
 import { fetchTransferCommandHistoriesApi } from '@/api/wcsTransferCommand'
 import { formatDateTime } from '@/utils/dateUtils'
 
 const panelStore = usePanelStore()
-
-// 검색 파라미터 상태
 const { t } = useI18n()
 
+// 검색 파라미터 상태
 const searchParams = reactive({
   startDate: '',
   endDate: '',
@@ -338,38 +334,60 @@ const orderTypeFilterOptions = [
 
 // 테이블 컬럼 정의
 const headers = [
-  { title: t('table.eventTimeKey'), key: 'eventTimeKey', align: 'start', width: '160px', sortable: true },
-  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px', sortable: true },
+  {
+    title: t('table.eventTimeKey'),
+    key: 'eventTimeKey',
+    align: 'start',
+    width: '150px',
+    sortable: true,
+  },
+  {
+    title: t('table.eventTime'),
+    key: 'eventTime',
+    align: 'center',
+    width: '160px',
+    sortable: true,
+  },
   { title: t('table.eventName'), key: 'eventName', align: 'center', width: '130px' },
-  { title: t('table.transferCommandName'), key: 'transferCommandName', align: 'start', width: '150px' },
-  { title: t('table.carrierName'), key: 'carrierName', align: 'start', width: '110px' },
+  {
+    title: t('table.transferCommandName'),
+    key: 'transferCommandName',
+    align: 'start',
+    width: '160px',
+  },
+  { title: t('table.carrierName'), key: 'carrierName', align: 'start', width: '120px' },
   { title: t('common.commandStatus'), key: 'commandStatus', align: 'center', width: '110px' },
   { title: t('table.orderNo'), key: 'orderType', align: 'center', width: '110px' },
-  { title: t('table.currentEquipmentName'), key: 'currentEquipmentName', align: 'start', width: '110px' },
+  {
+    title: t('table.currentEquipmentName'),
+    key: 'currentEquipmentName',
+    align: 'start',
+    width: '110px',
+  },
   { title: t('table.source'), key: 'source', align: 'start', width: '100px' },
   { title: t('table.target'), key: 'target', align: 'start', width: '100px' },
-  { title: t('table.targetEquipmentName'), key: 'targetEquipmentName', align: 'start', width: '110px' },
+  {
+    title: t('table.targetEquipmentName'),
+    key: 'targetEquipmentName',
+    align: 'start',
+    width: '110px',
+  },
   { title: t('table.subCommandJobNo'), key: 'subCommandJobNo', align: 'center', width: '90px' },
   { title: t('table.subCommandStatus'), key: 'subCommandStatus', align: 'center', width: '100px' },
   { title: t('table.jobStartTime'), key: 'jobStartTime', align: 'center', width: '160px' },
   { title: t('table.jobCompletedTime'), key: 'jobCompletedTime', align: 'center', width: '160px' },
   { title: t('table.createTime'), key: 'createTime', align: 'center', width: '160px' },
   { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '90px' },
-  { title: t('table.eventComment'), key: 'eventComment', align: 'start', width: '150px' },
+  { title: t('table.eventComment'), key: 'eventComment', align: 'start', width: '160px' },
 ]
 
-// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
-const { items, totalItems, loading, options, loadData, updateOptions } =
-  useDataTable(fetchTransferCommandHistoriesApi)
+// 1. 역할 분리: 목록 조회 영역은 useDataTable 컴포저블 전담
+const { items, totalItems, loading, options, loadData, updateOptions } = useDataTable(
+  fetchTransferCommandHistoriesApi,
+)
 
-// 상세 보기 다이얼로그 상태
-const isDetailDialogOpen = ref(false)
-const selectedDetailItem = ref(null)
-
-// 백엔드 스키마 명세에 맞추어 파라미터를 정제하는 함수
 function getSanitizedParams() {
   const params = {}
-
   if (searchParams.transferCommandName && searchParams.transferCommandName.trim() !== '') {
     params.transferCommandName = searchParams.transferCommandName.trim()
   }
@@ -394,7 +412,6 @@ function getSanitizedParams() {
   if (searchParams.endDate) {
     params.endDate = searchParams.endDate + 'T23:59:59'
   }
-
   return params
 }
 
@@ -407,7 +424,7 @@ const displayItems = computed(function () {
     const raw = list[i]
     if (raw) {
       result.push({
-        eventTimeKey: raw.eventTimeKey || '',
+        eventTimeKey: raw.eventTimeKey || String(i + 1),
         transferCommandName: raw.transferCommandName || '',
         carrierName: raw.carrierName || '',
         commandStatus: raw.commandStatus || '',
@@ -416,14 +433,14 @@ const displayItems = computed(function () {
         source: raw.source || '',
         target: raw.target || '',
         targetEquipmentName: raw.targetEquipmentName || '',
-        subCommandJobNo: raw.subCommandJobNo,
+        subCommandJobNo: raw.subCommandJobNo != null ? raw.subCommandJobNo : '-',
         subCommandStatus: raw.subCommandStatus || '',
         jobStartTime: raw.jobStartTime || null,
         jobCompletedTime: raw.jobCompletedTime || null,
         createTime: raw.createTime || null,
         eventName: raw.eventName || '',
         eventTime: raw.eventTime || null,
-        eventUser: raw.eventUser || '',
+        eventUser: raw.eventUser || '-',
         eventComment: raw.eventComment || '',
       })
     }
@@ -434,19 +451,11 @@ const displayItems = computed(function () {
 
 function getCommandStatusColor(status) {
   if (!status) return 'grey'
-  const s = status.toUpperCase()
-  if (s === 'COMPLETED' || s === 'SUCCESS') {
-    return 'success'
-  }
-  if (s === 'EXECUTING' || s === 'ASSIGNED' || s === 'PROCESSING') {
-    return 'info'
-  }
-  if (s === 'REQUESTED' || s === 'INIT' || s === 'WAITING') {
-    return 'warning'
-  }
-  if (s === 'ABORTED' || s === 'FAILED' || s === 'ERROR' || s === 'CANCEL') {
-    return 'error'
-  }
+  const s = String(status).toUpperCase()
+  if (s === 'COMPLETED' || s === 'SUCCESS') return 'success'
+  if (s === 'EXECUTING' || s === 'ASSIGNED' || s === 'PROCESSING') return 'info'
+  if (s === 'REQUESTED' || s === 'INIT' || s === 'WAITING') return 'warning'
+  if (s === 'ABORTED' || s === 'FAILED' || s === 'ERROR' || s === 'CANCEL') return 'error'
   return 'grey'
 }
 
@@ -472,25 +481,14 @@ function onUpdateOptions(newOptions) {
   updateOptions(newOptions, getSanitizedParams())
 }
 
-// [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
-function onAddTransferCommand() {
-  panelStore.openPanel(markRaw(TransferCommandHistoryViewForm), {
-    mode: 'CREATE',
-    data: null,
-    title: t('views.transfer.commandHistory.title') + ' ' + t('common.create'),
-    onSuccess: handleSearch,
-  })
-}
-
-// 행(Row) 클릭 시 수정/상세 모드로 우측 슬라이드 패널 오픈
+// 행(Row) 클릭 시 읽기 전용 상세 보기 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   if (itemData) {
-    panelStore.openPanel(markRaw(TransferCommandHistoryViewForm), {
-      mode: 'UPDATE',
+    panelStore.openPanel(markRaw(TransferCommandHistoryDetailView), {
+      mode: 'VIEW',
       data: itemData,
-      title: t('views.transfer.commandHistory.detailTitle'),
-      onSuccess: handleSearch,
+      title: t('views.transfer.commandHistory.detailTitle') || '반송 명령 이력 상세 정보',
     })
   }
 }
@@ -505,7 +503,7 @@ function handleExport() {
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    `${t('table.eventTimeKey')},${t('table.eventTime')},${t('table.eventName')},${t('table.transferCommandName')},${t('table.carrierId')},${t('common.commandStatus')},${t('table.orderNo')},${t('table.currentEquipmentName')},${t('table.source')},${t('table.target')},${t('table.targetEquipmentName')},${t('table.subCommandJobNo')},${t('table.subCommandStatus')},${t('table.jobStartTime')},${t('table.jobCompletedTime')},${t('table.createTime')},${t('table.eventUser')},${t('table.eventComment')}\n`
+    '이벤트키,이벤트일시,이벤트명,반송명령ID,캐리어ID,명령상태,오더유형,현재설비,출발지,도착지,도착설비,서브작업번호,서브상태,시작일시,완료일시,생성일시,작업자,비고\n'
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]
@@ -535,7 +533,10 @@ function handleExport() {
   const encodedUri = encodeURI(csvContent)
   const link = document.createElement('a')
   link.setAttribute('href', encodedUri)
-  link.setAttribute('download', 'TransferCommandHistory_' + new Date().toISOString().slice(0, 10) + '.csv')
+  link.setAttribute(
+    'download',
+    'TransferCommandHistory_' + new Date().toISOString().slice(0, 10) + '.csv',
+  )
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -561,26 +562,9 @@ onMounted(function () {
 
 .comment-text-cell {
   display: block;
-  max-width: 200px;
+  max-width: 160px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.bg-primary-lighten {
-  background-color: rgba(var(--v-theme-primary), 0.08);
-}
-
-.detail-label {
-  font-size: 0.75rem;
-  color: rgba(0, 0, 0, 0.6);
-  margin-bottom: 2px;
-}
-
-.detail-value {
-  font-size: 0.875rem;
-  color: rgba(0, 0, 0, 0.87);
-  margin-bottom: 8px;
-  word-break: break-all;
 }
 </style>

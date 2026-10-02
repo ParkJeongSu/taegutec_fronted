@@ -17,7 +17,7 @@
             variant="flat"
             size="small"
             prepend-icon="$refresh"
-            :loading="loading"
+            :loading="loadingShelves || loadingZones"
             v-on:click="handleSearch"
           >
             {{ $t('zone.refresh') }}
@@ -36,10 +36,10 @@
 
       <v-divider class="mb-4"></v-divider>
 
-      <!-- 검색 필터 폼 (v-row density="compact" align-center) -->
+      <!-- 검색 필터 폼 -->
       <div class="search-filter-bar pa-3 rounded bg-grey-lighten-4">
         <v-row density="compact" class="align-center">
-          <!-- 1. 스토커 / 창고 선택 (cols 12 sm 4 md 3) -->
+          <!-- 1. 스토커 / 창고 선택 -->
           <v-col cols="12" sm="4" md="3">
             <v-select
               v-model="selectedStocker"
@@ -51,10 +51,12 @@
             ></v-select>
           </v-col>
 
-          <!-- 2. Bank 선택 (cols 12 sm 5 md 6) - 한 줄에 온전히 표시 -->
+          <!-- 2. Bank 선택 -->
           <v-col cols="12" sm="5" md="6">
             <div class="d-flex align-center">
-              <span class="text-caption font-weight-bold text-medium-emphasis mr-2">{{ $t('zone.bank') }}:</span>
+              <span class="text-caption font-weight-bold text-medium-emphasis mr-2">
+                {{ $t('zone.bank') }}:
+              </span>
               <v-btn-toggle
                 v-model="selectedBankIndex"
                 mandatory
@@ -76,7 +78,7 @@
             </div>
           </v-col>
 
-          <!-- 3. 조회 버튼 (cols 12 sm 3 md 3) -->
+          <!-- 3. 조회 버튼 -->
           <v-col cols="12" sm="3" md="3" class="d-flex justify-end">
             <v-btn
               color="primary"
@@ -84,7 +86,7 @@
               size="default"
               prepend-icon="$magnify"
               class="w-100 font-weight-bold"
-              :loading="loading"
+              :loading="loadingShelves || loadingZones"
               v-on:click="handleSearch"
             >
               {{ $t('zone.search') }}
@@ -99,7 +101,9 @@
       <v-col cols="6" sm="3">
         <v-card class="elevation-1 pa-3 stat-card">
           <div class="text-caption text-medium-emphasis">{{ $t('zone.totalCells') }}</div>
-          <div class="text-h6 font-weight-bold text-primary">{{ totalCellCount.toLocaleString() }} {{ $t('views.transfer.zone.cellUnit') }}</div>
+          <div class="text-h6 font-weight-bold text-primary">
+            {{ totalCellCount.toLocaleString() }} {{ $t('views.transfer.zone.cellUnit') }}
+          </div>
         </v-card>
       </v-col>
       <v-col cols="6" sm="3">
@@ -117,14 +121,18 @@
         <v-card class="elevation-1 pa-3 stat-card">
           <div class="text-caption text-medium-emphasis">{{ $t('zone.emptyCells') }}</div>
           <div class="text-h6 font-weight-bold text-grey-darken-1">
-            {{ (totalCellCount - occupiedCellCount).toLocaleString() }} {{ $t('views.transfer.zone.cellUnit') }}
+            {{ (totalCellCount - occupiedCellCount).toLocaleString() }}
+            {{ $t('views.transfer.zone.cellUnit') }}
           </div>
         </v-card>
       </v-col>
       <v-col cols="6" sm="3">
         <v-card class="elevation-1 pa-3 stat-card">
           <div class="text-caption text-medium-emphasis">{{ $t('zone.modifiedCells') }}</div>
-          <div class="text-h6 font-weight-bold" :class="modifiedCount > 0 ? 'text-warning' : 'text-grey'">
+          <div
+            class="text-h6 font-weight-bold"
+            :class="modifiedCount > 0 ? 'text-warning' : 'text-grey'"
+          >
             {{ $t('views.transfer.zone.modifiedCellsUnit', { count: modifiedCount }) }}
           </div>
         </v-card>
@@ -154,28 +162,13 @@
 
           <v-divider vertical class="mx-2 my-1"></v-divider>
 
-          <v-btn
-            size="small"
-            variant="tonal"
-            color="primary"
-            v-on:click="selectAllCells"
-          >
+          <v-btn size="small" variant="tonal" color="primary" v-on:click="selectAllCells">
             {{ $t('zone.selectAll') }}
           </v-btn>
-          <v-btn
-            size="small"
-            variant="outlined"
-            color="grey-darken-2"
-            v-on:click="clearSelection"
-          >
+          <v-btn size="small" variant="outlined" color="grey-darken-2" v-on:click="clearSelection">
             {{ $t('zone.clearSelect') }}
           </v-btn>
-          <v-btn
-            size="small"
-            variant="tonal"
-            color="info"
-            v-on:click="invertSelection"
-          >
+          <v-btn size="small" variant="tonal" color="info" v-on:click="invertSelection">
             {{ $t('zone.invertSelect') }}
           </v-btn>
         </div>
@@ -194,7 +187,7 @@
           <div class="target-zone-select-wrap">
             <v-select
               v-model="targetZone"
-              :items="zoneKeyList"
+              :items="availableZoneNames"
               :label="$t('zone.targetZone')"
               variant="outlined"
               density="compact"
@@ -206,7 +199,7 @@
             color="primary"
             variant="flat"
             size="small"
-            :disabled="selectedCellCount === 0"
+            :disabled="selectedCellCount === 0 || !targetZone"
             v-on:click="applyZoneBatch"
           >
             {{ $t('zone.applyZone') }}
@@ -225,21 +218,22 @@
         </div>
       </div>
 
-      <!-- 하단: Zone 범례 (Legend) -->
+      <!-- 하단: Zone 범례 (DB 동적 연동) -->
       <v-divider class="my-3"></v-divider>
       <div class="d-flex flex-wrap align-center gap-2">
-        <span class="text-caption font-weight-bold text-medium-emphasis mr-1">{{ $t('zone.legend') }}:</span>
+        <span class="text-caption font-weight-bold text-medium-emphasis mr-1">
+          {{ $t('zone.legend') }}:
+        </span>
         <div
-          v-for="zKey in zoneKeyList"
+          v-for="zKey in availableZoneNames"
           :key="zKey"
           class="legend-item-chip"
           v-on:click="selectByZone(zKey)"
         >
-          <span
-            class="legend-color-box"
-            :class="'zone-bg-' + zKey.toLowerCase()"
-          ></span>
-          <span class="legend-text font-weight-medium">{{ zKey }} ({{ zoneStats[zKey] || 0 }})</span>
+          <span class="legend-color-box" :style="{ backgroundColor: getZoneColor(zKey) }"></span>
+          <span class="legend-text font-weight-medium">
+            {{ zKey }} ({{ zoneStats[zKey] || 0 }})
+          </span>
         </div>
 
         <div class="legend-item-chip ml-2">
@@ -254,14 +248,13 @@
       <div class="d-flex align-center justify-space-between mb-3">
         <div class="d-flex align-center gap-2">
           <span class="text-subtitle-1 font-weight-bold">
-            {{ currentSearchInfo.stocker }} - {{ currentSearchInfo.bankLabel }} (Row 1~92 x Stage 1~25)
+            {{ currentSearchInfo.stocker }} - {{ currentSearchInfo.bankLabel }} (Row 1~92 x Stage
+            1~25)
           </span>
-          <span class="text-caption text-medium-emphasis">
-            [{{ $t('zone.guideText') }}]
-          </span>
+          <span class="text-caption text-medium-emphasis"> [{{ $t('zone.guideText') }}] </span>
         </div>
 
-        <!-- 줌/스케일 컨트롤 -->
+        <!-- 줌 컨트롤 -->
         <div class="d-flex align-center gap-2">
           <span class="text-caption text-medium-emphasis">{{ $t('zone.zoom') }}:</span>
           <v-btn-toggle
@@ -299,25 +292,38 @@
           ref="tooltipRef"
         >
           <div class="tooltip-header font-weight-bold text-primary mb-1">
-            Shelf: {{ hoveredShelf.shelfCode }}
+            Shelf: {{ hoveredShelf.shelfName }}
           </div>
           <div class="tooltip-row">
             <span class="tooltip-label">{{ $t('views.transfer.zone.posTooltip') }}</span>
-            <span class="tooltip-val font-weight-bold">{{ $t('views.transfer.zone.rowStageTooltip', { row: hoveredShelf.row, stage: hoveredShelf.stage }) }}</span>
+            <span class="tooltip-val font-weight-bold">
+              {{
+                $t('views.transfer.zone.rowStageTooltip', {
+                  row: hoveredShelf.row,
+                  stage: hoveredShelf.stage,
+                })
+              }}
+            </span>
           </div>
           <div class="tooltip-row">
             <span class="tooltip-label">{{ $t('views.transfer.zone.zoneTooltip') }}</span>
-            <span class="tooltip-val font-weight-bold" :class="'zone-text-' + (hoveredShelf.zoneName || 'empty').toLowerCase()">
+            <span
+              class="tooltip-val font-weight-bold"
+              :style="{ color: getZoneColor(hoveredShelf.zoneName) }"
+            >
               {{ hoveredShelf.zoneName || 'EMPTY' }}
             </span>
           </div>
           <div class="tooltip-row">
             <span class="tooltip-label">{{ $t('views.transfer.zone.carrierTooltip') }}</span>
             <span class="tooltip-val font-weight-bold text-info">
-              {{ hoveredShelf.carrierId || $t('views.transfer.zone.none') }}
+              {{ hoveredShelf.carrierName || $t('views.transfer.zone.none') }}
             </span>
           </div>
-          <div v-if="hoveredShelf.isModified" class="tooltip-row mt-1 text-warning font-weight-bold">
+          <div
+            v-if="hoveredShelf.isModified"
+            class="tooltip-row mt-1 text-warning font-weight-bold"
+          >
             {{ $t('views.transfer.zone.pendingMod') }}
           </div>
         </div>
@@ -333,7 +339,9 @@
     >
       {{ snackbar.message }}
       <template #actions>
-        <v-btn variant="text" size="small" v-on:click="snackbar.show = false">{{ $t('common.close') }}</v-btn>
+        <v-btn variant="text" size="small" v-on:click="snackbar.show = false">
+          {{ $t('common.close') }}
+        </v-btn>
       </template>
     </v-snackbar>
   </v-container>
@@ -343,34 +351,21 @@
 import { ref, reactive, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
-import { useApi } from '@/composables/useApi'
-import { fetchBankShelvesApi, saveBankShelvesZoneApi } from '@/api/zone'
+import { useDataTable } from '@/composables/useDataTable'
+import { fetchWcsZonesApi } from '@/api/wcsZone'
+import { fetchWcsShelvesApi, saveBatchShelfApi } from '@/api/wcsShelf'
 
 const { t } = useI18n()
 const authStore = useAuthStore()
 
-// 상수 정의
+// 랙 규격 상수
 const MAX_ROW = 92
 const MAX_STAGE = 25
 const TOTAL_CELLS = MAX_ROW * MAX_STAGE // 2,300
 
-// Zone 정의 및 색상 맵
-const ZONE_MAP = {
-  R1A: { name: 'R1A', color: '#4CAF50', border: '#388E3C', text: '#FFFFFF' },
-  R1B: { name: 'R1B', color: '#2E7D32', border: '#1B5E20', text: '#FFFFFF' },
-  S1A: { name: 'S1A', color: '#2196F3', border: '#1976D2', text: '#FFFFFF' },
-  S1B: { name: 'S1B', color: '#1565C0', border: '#0D47A1', text: '#FFFFFF' },
-  S2A: { name: 'S2A', color: '#9C27B0', border: '#7B1FA2', text: '#FFFFFF' },
-  S2B: { name: 'S2B', color: '#673AB7', border: '#512DA8', text: '#FFFFFF' },
-  BUFFER: { name: 'BUFFER', color: '#FB8C00', border: '#EF6C00', text: '#FFFFFF' },
-  EMPTY: { name: 'EMPTY', color: '#CFD8DC', border: '#B0BEC5', text: '#37474F' },
-}
-
-const zoneKeyList = ['R1A', 'R1B', 'S1A', 'S1B', 'S2A', 'S2B', 'BUFFER', 'EMPTY']
-
-// 상태 변수
+// 스토커 및 Bank 옵션
 const selectedStocker = ref('WH1')
-const stockerOptions = ['WH1', 'WH2', 'WH3', 'WH4', 'WH5', 'WH6', 'WH7']
+const stockerOptions = ['WH1', 'WH2', 'WH3', 'WH4', 'WH5', 'WH6', 'WH7', 'STK01', 'STK02', 'STK03']
 
 const bankOptions = [
   { label: 'Bank 1', col: 1, bin: 1 },
@@ -380,22 +375,85 @@ const bankOptions = [
 ]
 const selectedBankIndex = ref(0)
 
-// 조회 버튼 클릭 시점 상태 확정(Commit) 변수
 const currentSearchInfo = ref({
   stocker: 'WH1',
   bankLabel: 'Bank 1',
 })
 
 const toolMode = ref('select') // 'select' | 'deselect'
-const targetZone = ref('R1A')
-const zoomLevel = ref('fit') // 'fit' | '100' | '125' | '150'
-
+const targetZone = ref('')
+const zoomLevel = ref('fit')
 const isSaving = ref(false)
 
-// 범용 API 호출 컴포저블 적용
-const { data: shelvesData, loading, execute: fetchShelves } = useApi(fetchBankShelvesApi, [])
+// 1. WCS Zone 및 Shelf 데이터 조회를 위한 useDataTable 전담 연동
+const {
+  items: zoneRawItems,
+  loading: loadingZones,
+  loadData: loadZoneData,
+} = useDataTable(fetchWcsZonesApi)
 
-// 스낵바 상태
+const {
+  items: shelfRawItems,
+  loading: loadingShelves,
+  loadData: loadShelfData,
+} = useDataTable(fetchWcsShelvesApi)
+
+// 동적 로드된 Zone 메타데이터 맵: { [zoneName]: { color, border } }
+const dynamicZoneMap = ref({
+  EMPTY: { color: '#CFD8DC', border: '#B0BEC5' },
+})
+
+const availableZoneNames = computed(function () {
+  const keys = Object.keys(dynamicZoneMap.value)
+  return keys.length > 0 ? keys : ['EMPTY']
+})
+
+function getZoneColor(zoneName) {
+  const z = zoneName || 'EMPTY'
+  if (dynamicZoneMap.value[z] && dynamicZoneMap.value[z].color) {
+    return dynamicZoneMap.value[z].color
+  }
+  return '#CFD8DC'
+}
+
+function getZoneBorder(zoneName) {
+  const z = zoneName || 'EMPTY'
+  if (dynamicZoneMap.value[z] && dynamicZoneMap.value[z].border) {
+    return dynamicZoneMap.value[z].border
+  }
+  return '#B0BEC5'
+}
+
+// 캔버스 및 래퍼 엘리먼트 참조
+const canvasRef = ref(null)
+const canvasWrapperRef = ref(null)
+const tooltipRef = ref(null)
+
+// 랙 데이터 구조
+let shelfMatrix = []
+const shelfList = ref([])
+
+const hoveredShelf = ref(null)
+const tooltipPos = reactive({ x: 0, y: 0 })
+
+const dragInfo = reactive({
+  isDragging: false,
+  startX: 0,
+  startY: 0,
+  currentX: 0,
+  currentY: 0,
+})
+
+const renderMetrics = reactive({
+  headerLeftWidth: 42,
+  headerTopHeight: 28,
+  headerBottomHeight: 28,
+  cellWidth: 16,
+  cellHeight: 18,
+  totalCanvasWidth: 1550,
+  totalCanvasHeight: 520,
+})
+
 const snackbar = reactive({
   show: false,
   message: '',
@@ -409,115 +467,14 @@ function showMessage(msg, color) {
   snackbar.show = true
 }
 
-// 캔버스 및 래퍼 참조
-const canvasRef = ref(null)
-const canvasWrapperRef = ref(null)
-const tooltipRef = ref(null)
-
-// 랙 데이터 구조: shelfMatrix[row][stage] (1-indexed)
-// 각 shelf 객체: { shelfCode, row, stage, zoneName, carrierId, isSelected, isModified, originalZone }
-let shelfMatrix = []
-const shelfList = ref([])
-
-// 호버 상태
-const hoveredShelf = ref(null)
-const tooltipPos = reactive({ x: 0, y: 0 })
-
-// 드래그 선택 상태
-const dragInfo = reactive({
-  isDragging: false,
-  startX: 0,
-  startY: 0,
-  currentX: 0,
-  currentY: 0,
-})
-
-// 캔버스 렌더링 치수 계산 변수
-const renderMetrics = reactive({
-  headerLeftWidth: 42,
-  headerTopHeight: 28,
-  headerBottomHeight: 28,
-  cellWidth: 16,
-  cellHeight: 18,
-  totalCanvasWidth: 1550,
-  totalCanvasHeight: 520,
-})
-
-// 계산된 통계 지표
-const totalCellCount = computed(function () {
-  return TOTAL_CELLS
-})
-
-const occupiedCellCount = computed(function () {
-  let count = 0
-  const list = shelfList.value
-  const len = list.length
-  for (let i = 0; i < len; i++) {
-    if (list[i].carrierId) {
-      count++
-    }
-  }
-  return count
-})
-
-const occupancyRate = computed(function () {
-  if (totalCellCount.value === 0) {
-    return '0.0'
-  }
-  return ((occupiedCellCount.value / totalCellCount.value) * 100).toFixed(1)
-})
-
-const selectedCellCount = computed(function () {
-  let count = 0
-  const list = shelfList.value
-  const len = list.length
-  for (let i = 0; i < len; i++) {
-    if (list[i].isSelected) {
-      count++
-    }
-  }
-  return count
-})
-
-const modifiedCount = computed(function () {
-  let count = 0
-  const list = shelfList.value
-  const len = list.length
-  for (let i = 0; i < len; i++) {
-    if (list[i].isModified) {
-      count++
-    }
-  }
-  return count
-})
-
-const zoneStats = computed(function () {
-  const stats = {}
-  for (let k = 0; k < zoneKeyList.length; k++) {
-    stats[zoneKeyList[k]] = 0
-  }
-  const list = shelfList.value
-  const len = list.length
-  for (let i = 0; i < len; i++) {
-    const z = list[i].zoneName || 'EMPTY'
-    if (stats[z] !== undefined) {
-      stats[z]++
-    } else {
-      stats[z] = 1
-    }
-  }
-  return stats
-})
-
-// 공장명 조회 헬퍼
 function getFactoryName() {
   if (authStore && authStore.currentUser && authStore.currentUser.factoryName) {
     return authStore.currentUser.factoryName
   }
-  return import.meta.env.VITE_PLANT_TYPE || 'INSERT'
+  return import.meta.env.VITE_PLANT_TYPE || 'insert'
 }
 
-// 초기 빈 매트릭스 생성
+// 빈 2,300개 셀 기본 구조 초기화
 function initializeEmptyMatrix() {
   shelfMatrix = []
   const list = []
@@ -530,129 +487,163 @@ function initializeEmptyMatrix() {
       const colStr = String(bank.col).padStart(2, '0')
       const rowStr = String(r).padStart(3, '0')
       const stgStr = String(s).padStart(2, '0')
-      const shelfCode = colStr + rowStr + stgStr
+      const shelfName = colStr + rowStr + stgStr
 
-      const shelfObj = {
-        shelfCode: shelfCode,
+      const cell = {
+        shelfName: shelfName,
         row: r,
         stage: s,
         zoneName: 'EMPTY',
-        carrierId: null,
+        carrierName: null,
         isSelected: false,
         isModified: false,
         originalZone: 'EMPTY',
       }
-      shelfMatrix[r][s] = shelfObj
-      list.push(shelfObj)
+      shelfMatrix[r][s] = cell
+      list.push(cell)
     }
   }
   shelfList.value = list
 }
 
-// Mock 데이터 생성기 (백엔드 미구동 또는 테스트 시 현실적인 2,300개 셀 데이터 구성)
-function generateRealisticMockData() {
-  const bank = bankOptions[selectedBankIndex.value]
-  const list = []
-  shelfMatrix = []
+// 통계 지표 계산
+const totalCellCount = computed(function () {
+  return TOTAL_CELLS
+})
 
-  for (let r = 0; r <= MAX_ROW; r++) {
-    shelfMatrix[r] = []
-  }
-
-  for (let r = 1; r <= MAX_ROW; r++) {
-    for (let s = 1; s <= MAX_STAGE; s++) {
-      const colStr = String(bank.col).padStart(2, '0')
-      const rowStr = String(r).padStart(3, '0')
-      const stgStr = String(s).padStart(2, '0')
-      const shelfCode = colStr + rowStr + stgStr
-
-      let defaultZone
-      if (r >= 1 && r <= 20) {
-        defaultZone = s <= 12 ? 'R1A' : 'R1B'
-      } else if (r >= 21 && r <= 50) {
-        defaultZone = s <= 12 ? 'S1A' : 'S1B'
-      } else if (r >= 51 && r <= 75) {
-        defaultZone = s <= 12 ? 'S2A' : 'S2B'
-      } else if (r >= 76 && r <= 88) {
-        defaultZone = 'BUFFER'
-      } else {
-        defaultZone = 'EMPTY'
-      }
-
-      let carrierId = null
-      const seed = (r * 37 + s * 19 + bank.col * 11 + bank.bin * 7) % 100
-      if (seed > 45 && defaultZone !== 'EMPTY') {
-        const trayNum = String((r * 25 + s) * 3 + bank.bin).padStart(6, '0')
-        carrierId = 'TRAY_' + trayNum
-      }
-
-      const shelfObj = {
-        shelfCode: shelfCode,
-        row: r,
-        stage: s,
-        zoneName: defaultZone,
-        carrierId: carrierId,
-        isSelected: false,
-        isModified: false,
-        originalZone: defaultZone,
-      }
-
-      shelfMatrix[r][s] = shelfObj
-      list.push(shelfObj)
+const occupiedCellCount = computed(function () {
+  let count = 0
+  const list = shelfList.value
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].carrierName) {
+      count++
     }
   }
+  return count
+})
 
-  shelfList.value = list
+const occupancyRate = computed(function () {
+  if (totalCellCount.value === 0) return '0.0'
+  return ((occupiedCellCount.value / totalCellCount.value) * 100).toFixed(1)
+})
+
+const selectedCellCount = computed(function () {
+  let count = 0
+  const list = shelfList.value
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].isSelected) {
+      count++
+    }
+  }
+  return count
+})
+
+const modifiedCount = computed(function () {
+  let count = 0
+  const list = shelfList.value
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].isModified) {
+      count++
+    }
+  }
+  return count
+})
+
+const zoneStats = computed(function () {
+  const stats = {}
+  const names = availableZoneNames.value
+  for (let k = 0; k < names.length; k++) {
+    stats[names[k]] = 0
+  }
+
+  const list = shelfList.value
+  for (let i = 0; i < list.length; i++) {
+    const z = list[i].zoneName || 'EMPTY'
+    if (stats[z] !== undefined) {
+      stats[z]++
+    } else {
+      stats[z] = 1
+    }
+  }
+  return stats
+})
+
+// 2. Zone 목록 로드 (WCS Zone API)
+async function fetchZoneList() {
+  try {
+    await loadZoneData({
+      factoryName: getFactoryName(),
+      size: 100,
+    })
+
+    const newMap = {
+      EMPTY: { color: '#CFD8DC', border: '#B0BEC5' },
+    }
+
+    const zones = zoneRawItems.value || []
+    for (let i = 0; i < zones.length; i++) {
+      const z = zones[i]
+      if (z && z.zoneName) {
+        const rawColor = z.zoneColor || '#32ccbc'
+        // 8자리 헥스 색상 투명도 처리 보정
+        const color = rawColor.length === 9 ? rawColor.substring(0, 7) : rawColor
+        newMap[z.zoneName] = {
+          color: color,
+          border: color,
+        }
+      }
+    }
+
+    dynamicZoneMap.value = newMap
+    if (!targetZone.value && zones.length > 0) {
+      targetZone.value = zones[0].zoneName
+    }
+  } catch (err) {
+    console.error('Zone list fetch error:', err)
+  }
 }
 
-// 랙 데이터 조회 함수 (조회 버튼 클릭 시 실행)
+// 3. 셸프 목록 로드 및 매핑 (WCS Shelf API)
 async function handleSearch() {
   hoveredShelf.value = null
   const bank = bankOptions[selectedBankIndex.value]
 
-  // 1. 조회 시점 상태 확정(Commit)
   currentSearchInfo.value = {
     stocker: selectedStocker.value,
     bankLabel: bank.label,
   }
 
-  // 2. API 파라미터 조립
-  const params = {
-    factoryName: getFactoryName(),
-    stockerName: selectedStocker.value,
-    col: bank.col,
-    bin: bank.bin,
-  }
+  initializeEmptyMatrix()
 
   try {
-    await fetchShelves(params)
-    const resData = shelvesData.value
+    // Bank 전체 조회를 위해 최대치(2500개) 설정
+    await loadShelfData({
+      factoryName: getFactoryName(),
+      stockerName: selectedStocker.value,
+      bin: bank.bin,
+      size: 2500,
+    })
 
-    if (resData && Array.isArray(resData) && resData.length > 0) {
-      initializeEmptyMatrix()
-      for (let i = 0; i < resData.length; i++) {
-        const item = resData[i]
-        const r = item.row
-        const s = item.stage
-        if (r >= 1 && r <= MAX_ROW && s >= 1 && s <= MAX_STAGE) {
-          const current = shelfMatrix[r][s]
-          if (current) {
-            current.shelfCode = item.shelfCode || current.shelfCode
-            current.zoneName = item.zoneName || 'EMPTY'
-            current.originalZone = current.zoneName
-            current.carrierId = item.carrierId || null
-            current.isModified = false
-            current.isSelected = false
-          }
+    const fetchedList = shelfRawItems.value || []
+    for (let i = 0; i < fetchedList.length; i++) {
+      const item = fetchedList[i]
+      const r = item.row
+      const s = item.stage
+      if (r >= 1 && r <= MAX_ROW && s >= 1 && s <= MAX_STAGE) {
+        const cell = shelfMatrix[r][s]
+        if (cell) {
+          cell.shelfName = item.shelfName || cell.shelfName
+          cell.zoneName = item.zoneName || 'EMPTY'
+          cell.originalZone = cell.zoneName
+          cell.carrierName = item.carrierName || null
+          cell.isModified = false
+          cell.isSelected = false
         }
       }
-      showMessage(t('zone.cellsLoaded', { count: resData.length }))
-    } else {
-      generateRealisticMockData()
-      showMessage(t('views.transfer.zone.fallbackLoadedInfo'), 'info')
     }
-  } catch {
-    generateRealisticMockData()
+    showMessage(t('zone.cellsLoaded', { count: fetchedList.length }))
+  } catch (err) {
+    console.error('Shelf search failed:', err)
     showMessage(t('views.transfer.zone.fallbackLoadedWarn'), 'warning')
   } finally {
     nextTick(function () {
@@ -662,7 +653,7 @@ async function handleSearch() {
   }
 }
 
-// 캔버스 레이아웃 크기 및 셀 치수 계산
+// 캔버스 렌더링 치수 계산
 function calculateCanvasLayout() {
   if (!canvasWrapperRef.value || !canvasRef.value) return
 
@@ -692,7 +683,8 @@ function calculateCanvasLayout() {
   renderMetrics.cellHeight = cellH
 
   const totalW = renderMetrics.headerLeftWidth + MAX_ROW * cellW + 30
-  const totalH = renderMetrics.headerTopHeight + MAX_STAGE * cellH + renderMetrics.headerBottomHeight + 10
+  const totalH =
+    renderMetrics.headerTopHeight + MAX_STAGE * cellH + renderMetrics.headerBottomHeight + 10
 
   renderMetrics.totalCanvasWidth = totalW
   renderMetrics.totalCanvasHeight = totalH
@@ -716,7 +708,7 @@ function onZoomChange() {
   })
 }
 
-// 캔버스 전체 다시 그리기 (고성능 Canvas 2D)
+// 캔버스 2D 렌더링
 function drawCanvas() {
   const canvas = canvasRef.value
   if (!canvas) return
@@ -730,18 +722,17 @@ function drawCanvas() {
   const headerL = renderMetrics.headerLeftWidth
   const headerT = renderMetrics.headerTopHeight
 
-  // 1. 캔버스 배경 클리어
   ctx.clearRect(0, 0, w, h)
   ctx.fillStyle = '#FAFAFA'
   ctx.fillRect(0, 0, w, h)
 
-  // 2. 헤더 및 그리드 가이드 배경
+  // 헤더 영역 배경
   ctx.fillStyle = '#ECEFF1'
   ctx.fillRect(0, 0, headerL, h)
   ctx.fillRect(0, 0, w, headerT)
   ctx.fillRect(0, headerT + MAX_STAGE * cellH, w, renderMetrics.headerBottomHeight)
 
-  // 3. Stage 헤더 텍스트 렌더링 (Y축: 바닥단 1이 맨 아래, 25가 맨 위)
+  // Stage 단 번호 라벨 (1~25단, 아래에서 위로)
   ctx.font = '11px sans-serif'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
@@ -758,11 +749,10 @@ function drawCanvas() {
       ctx.fillStyle = '#546E7A'
       ctx.font = '10px sans-serif'
     }
-
     ctx.fillText(String(s) + 'F', headerL / 2, centerY)
   }
 
-  // 4. Row 헤더 텍스트 렌더링 (X축: 1 ~ 92)
+  // Row 열 번호 라벨 (1~92열)
   for (let r = 1; r <= MAX_ROW; r++) {
     const cellX = headerL + (r - 1) * cellW
     const centerX = cellX + cellW / 2
@@ -771,17 +761,25 @@ function drawCanvas() {
       ctx.fillStyle = '#1E88E5'
       ctx.font = 'bold 10px sans-serif'
       ctx.fillText(String(r), centerX, headerT / 2)
-      ctx.fillText(String(r), centerX, headerT + MAX_STAGE * cellH + renderMetrics.headerBottomHeight / 2)
+      ctx.fillText(
+        String(r),
+        centerX,
+        headerT + MAX_STAGE * cellH + renderMetrics.headerBottomHeight / 2,
+      )
     } else if (r % 5 === 0) {
       ctx.fillStyle = '#78909C'
       ctx.font = '9px sans-serif'
       ctx.fillText(String(r), centerX, headerT / 2)
-      ctx.fillText(String(r), centerX, headerT + MAX_STAGE * cellH + renderMetrics.headerBottomHeight / 2)
+      ctx.fillText(
+        String(r),
+        centerX,
+        headerT + MAX_STAGE * cellH + renderMetrics.headerBottomHeight / 2,
+      )
     }
   }
 
-  // 5. 랙 셀 렌더링 (2,300개 순회)
-  const selectedCellsToHighlight = []
+  // 셀 렌더링
+  const selectedCells = []
 
   for (let r = 1; r <= MAX_ROW; r++) {
     const cellX = headerL + (r - 1) * cellW
@@ -791,20 +789,17 @@ function drawCanvas() {
       const cellY = headerT + yIndex * cellH
 
       const shelf = shelfMatrix[r] ? shelfMatrix[r][s] : null
-      const zone = (shelf && shelf.zoneName) ? shelf.zoneName : 'EMPTY'
-      const zoneConf = ZONE_MAP[zone] || ZONE_MAP['EMPTY']
+      const zone = shelf && shelf.zoneName ? shelf.zoneName : 'EMPTY'
 
-      // 셀 배경 채우기
-      ctx.fillStyle = zoneConf.color
+      ctx.fillStyle = getZoneColor(zone)
       ctx.fillRect(cellX + 1, cellY + 1, cellW - 2, cellH - 2)
 
-      // 셀 기본 테두리
-      ctx.strokeStyle = zoneConf.border
+      ctx.strokeStyle = getZoneBorder(zone)
       ctx.lineWidth = 1
       ctx.strokeRect(cellX + 0.5, cellY + 0.5, cellW - 1, cellH - 1)
 
-      // Carrier 적재 표시 (중앙 트레이 박스)
-      if (shelf && shelf.carrierId) {
+      // 캐리어 적재 표시
+      if (shelf && shelf.carrierName) {
         const markerW = Math.max(4, Math.floor(cellW * 0.45))
         const markerH = Math.max(4, Math.floor(cellH * 0.45))
         const mx = cellX + (cellW - markerW) / 2
@@ -817,7 +812,7 @@ function drawCanvas() {
         ctx.strokeRect(mx + 0.5, my + 0.5, markerW - 1, markerH - 1)
       }
 
-      // 변경 대기 상태 표시 (좌상단 삼각형 마커)
+      // 변경 대기 상태 (노란색 모서리 마커)
       if (shelf && shelf.isModified) {
         ctx.fillStyle = '#FFD600'
         ctx.beginPath()
@@ -828,18 +823,15 @@ function drawCanvas() {
         ctx.fill()
       }
 
-      // 선택된 셀은 2차 패스에서 강조 렌더링
       if (shelf && shelf.isSelected) {
-        selectedCellsToHighlight.push({ x: cellX, y: cellY, w: cellW, h: cellH })
+        selectedCells.push({ x: cellX, y: cellY, w: cellW, h: cellH })
       }
     }
   }
 
-  // 6. 선택된 셀 하이라이트 오버레이 렌더링
-  const selLen = selectedCellsToHighlight.length
-  for (let i = 0; i < selLen; i++) {
-    const item = selectedCellsToHighlight[i]
-
+  // 선택된 셀 강조 테두리
+  for (let i = 0; i < selectedCells.length; i++) {
+    const item = selectedCells[i]
     ctx.fillStyle = 'rgba(255, 235, 59, 0.45)'
     ctx.fillRect(item.x + 1, item.y + 1, item.w - 2, item.h - 2)
 
@@ -848,7 +840,7 @@ function drawCanvas() {
     ctx.strokeRect(item.x + 1, item.y + 1, item.w - 2, item.h - 2)
   }
 
-  // 7. 마우스 드래그 중인 경우 반투명 선택 박스 (Marquee Box) 렌더링
+  // 마우스 드래그 영역 상자 (Marquee)
   if (dragInfo.isDragging) {
     const boxX = Math.min(dragInfo.startX, dragInfo.currentX)
     const boxY = Math.min(dragInfo.startY, dragInfo.currentY)
@@ -871,7 +863,6 @@ function drawCanvas() {
   }
 }
 
-// 캔버스 좌표 -> (row, stage) 변환 함수
 function getCellFromCanvasCoords(x, y) {
   const headerL = renderMetrics.headerLeftWidth
   const headerT = renderMetrics.headerTopHeight
@@ -895,7 +886,6 @@ function getCellFromCanvasCoords(x, y) {
   return null
 }
 
-// 사각형 영역(픽셀) 내에 속한 (row, stage) 범위 계산 함수
 function getCellRangeFromPixelRect(px1, py1, px2, py2) {
   const minX = Math.min(px1, px2)
   const maxX = Math.max(px1, px2)
@@ -924,7 +914,6 @@ function getCellRangeFromPixelRect(px1, py1, px2, py2) {
   }
 }
 
-// 마우스 이벤트 핸들러
 function handleMouseDown(event) {
   if (event.button !== 0) return
   const canvas = canvasRef.value
@@ -957,7 +946,12 @@ function handleMouseMove(event) {
   if (hovered) {
     tooltipPos.x = mouseX + 15
     tooltipPos.y = mouseY + 15
-    updateTooltipPosition()
+    nextTick(function () {
+      if (tooltipRef.value) {
+        tooltipRef.value.style.left = tooltipPos.x + 'px'
+        tooltipRef.value.style.top = tooltipPos.y + 'px'
+      }
+    })
   }
 
   if (dragInfo.isDragging) {
@@ -965,15 +959,6 @@ function handleMouseMove(event) {
     dragInfo.currentY = mouseY
     drawCanvas()
   }
-}
-
-function updateTooltipPosition() {
-  nextTick(function () {
-    const el = tooltipRef.value
-    if (!el) return
-    el.style.left = tooltipPos.x + 'px'
-    el.style.top = tooltipPos.y + 'px'
-  })
 }
 
 function handleMouseUp(event) {
@@ -1023,43 +1008,35 @@ function handleMouseLeave() {
   }
 }
 
-// 편의 조작 기능: 전체 선택
 function selectAllCells() {
   const list = shelfList.value
-  const len = list.length
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < list.length; i++) {
     list[i].isSelected = true
   }
   drawCanvas()
-  showMessage(t('views.transfer.zone.selectedAllMsg', { count: len }))
+  showMessage(t('views.transfer.zone.selectedAllMsg', { count: list.length }))
 }
 
-// 편의 조작 기능: 선택 해제
 function clearSelection() {
   const list = shelfList.value
-  const len = list.length
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < list.length; i++) {
     list[i].isSelected = false
   }
   drawCanvas()
 }
 
-// 편의 조작 기능: 선택 반전
 function invertSelection() {
   const list = shelfList.value
-  const len = list.length
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < list.length; i++) {
     list[i].isSelected = !list[i].isSelected
   }
   drawCanvas()
 }
 
-// 특정 Zone 셀만 선택
 function selectByZone(zoneKey) {
   const list = shelfList.value
-  const len = list.length
   let count = 0
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < list.length; i++) {
     if (list[i].zoneName === zoneKey) {
       list[i].isSelected = true
       count++
@@ -1068,10 +1045,9 @@ function selectByZone(zoneKey) {
     }
   }
   drawCanvas()
-  showMessage(t('views.transfer.zone.selectedZoneMsg', { zone: zoneKey, count }))
+  showMessage(t('views.transfer.zone.selectedZoneMsg', { zone: zoneKey, count: count }))
 }
 
-// Zone 일괄 적용
 function applyZoneBatch() {
   const selectedZone = targetZone.value
   if (!selectedZone) {
@@ -1080,10 +1056,9 @@ function applyZoneBatch() {
   }
 
   const list = shelfList.value
-  const len = list.length
   let appliedCount = 0
 
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < list.length; i++) {
     const shelf = list[i]
     if (shelf.isSelected) {
       if (shelf.zoneName !== selectedZone) {
@@ -1098,21 +1073,19 @@ function applyZoneBatch() {
   showMessage(t('zone.applySuccess', { count: appliedCount, zone: selectedZone }))
 }
 
-// 저장 API 호출
-function saveChanges() {
+// 4. WCS Shelf Batch Save API 연동
+async function saveChanges() {
   const modifiedList = []
   const list = shelfList.value
-  const len = list.length
 
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < list.length; i++) {
     const s = list[i]
     if (s.isModified) {
       modifiedList.push({
-        shelfCode: s.shelfCode,
-        row: s.row,
-        stage: s.stage,
-        zoneName: s.zoneName,
-        carrierId: s.carrierId,
+        factoryName: getFactoryName(),
+        shelfName: s.shelfName,
+        stockerName: selectedStocker.value,
+        targetZone: s.zoneName,
       })
     }
   }
@@ -1123,54 +1096,74 @@ function saveChanges() {
   }
 
   isSaving.value = true
-  const bank = bankOptions[selectedBankIndex.value]
-  const payload = {
-    factoryName: getFactoryName(),
-    stockerName: selectedStocker.value,
-    col: bank.col,
-    bin: bank.bin,
-    shelves: modifiedList,
+
+  // 변경 대상 Zone별로 그룹화하여 일괄 저장 요청 수행
+  const groupedByZone = {}
+  for (let i = 0; i < modifiedList.length; i++) {
+    const item = modifiedList[i]
+    const z = item.targetZone
+    if (!groupedByZone[z]) {
+      groupedByZone[z] = []
+    }
+    groupedByZone[z].push({
+      factoryName: item.factoryName,
+      shelfName: item.shelfName,
+      stockerName: item.stockerName,
+    })
   }
 
-  saveBankShelvesZoneApi(payload)
-    .then(function () {
-      for (let i = 0; i < len; i++) {
-        const s = list[i]
-        if (s.isModified) {
-          s.originalZone = s.zoneName
-          s.isModified = false
-        }
+  try {
+    const zoneKeys = Object.keys(groupedByZone)
+    for (let k = 0; k < zoneKeys.length; k++) {
+      const zName = zoneKeys[k]
+      const payload = {
+        factoryName: getFactoryName(),
+        zoneName: zName,
+        eventName: 'ShelfZoneBatchSaved',
+        eventUser: authStore.currentUser ? authStore.currentUser.userId : 'aim',
+        eventComment: 'Zone batch changed via Transfer UI',
+        shelfList: groupedByZone[zName],
       }
-      drawCanvas()
-      showMessage(t('zone.saveSuccess'))
-    })
-    .catch(function () {
-      for (let i = 0; i < len; i++) {
-        const s = list[i]
-        if (s.isModified) {
-          s.originalZone = s.zoneName
-          s.isModified = false
-        }
+      await saveBatchShelfApi(payload)
+    }
+
+    // 성공 시 변경 플래그 리셋
+    for (let i = 0; i < list.length; i++) {
+      const s = list[i]
+      if (s.isModified) {
+        s.originalZone = s.zoneName
+        s.isModified = false
       }
-      drawCanvas()
-      showMessage(t('views.transfer.zone.mockSaveSuccess', { count: modifiedList.length }), 'success')
-    })
-    .finally(function () {
-      isSaving.value = false
-    })
+    }
+
+    drawCanvas()
+    showMessage(t('zone.saveSuccess'))
+  } catch (err) {
+    console.error('Batch save failed:', err)
+    const errorMsg =
+      (err.response && err.response.data && err.response.data.message) ||
+      '셸프 존 일괄 저장 처리 중 오류가 발생했습니다.'
+    showMessage(errorMsg, 'error')
+  } finally {
+    isSaving.value = false
+  }
 }
 
-// 엑셀/데이터 내보내기
 function handleExport() {
-  alert(t('views.transfer.zone.exportZoneAlert', { stocker: currentSearchInfo.value.stocker, bank: currentSearchInfo.value.bankLabel }))
+  alert(
+    t('views.transfer.zone.exportZoneAlert', {
+      stocker: currentSearchInfo.value.stocker,
+      bank: currentSearchInfo.value.bankLabel,
+    }),
+  )
 }
 
-// 창 크기 조절 시 리사이즈 감지
 let resizeObserver = null
 
-onMounted(function () {
+onMounted(async function () {
   initializeEmptyMatrix()
-  handleSearch()
+  await fetchZoneList()
+  await handleSearch()
 
   if (canvasWrapperRef.value && typeof ResizeObserver !== 'undefined') {
     resizeObserver = new ResizeObserver(function () {
@@ -1214,8 +1207,8 @@ onUnmounted(function () {
 }
 
 .stat-card {
-  border-left: 4px solid #1E88E5;
-  background-color: #FFFFFF;
+  border-left: 4px solid #1e88e5;
+  background-color: #ffffff;
 }
 
 .target-zone-select-wrap {
@@ -1228,7 +1221,7 @@ onUnmounted(function () {
   align-items: center;
   padding: 4px 8px;
   border-radius: 6px;
-  background-color: #F5F5F5;
+  background-color: #f5f5f5;
   cursor: pointer;
   user-select: none;
   transition: background-color 0.2s;
@@ -1236,7 +1229,7 @@ onUnmounted(function () {
 }
 
 .legend-item-chip:hover {
-  background-color: #E0E0E0;
+  background-color: #e0e0e0;
 }
 
 .legend-color-box {
@@ -1251,48 +1244,29 @@ onUnmounted(function () {
   width: 12px;
   height: 12px;
   border-radius: 2px;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
   border: 2px solid #263238;
   margin-right: 6px;
 }
 
 .legend-text {
   font-size: 11px;
-  color: #37474F;
+  color: #37474f;
 }
-
-/* Zone 배경 및 텍스트 유틸리티 */
-.zone-bg-r1a { background-color: #4CAF50; }
-.zone-bg-r1b { background-color: #2E7D32; }
-.zone-bg-s1a { background-color: #2196F3; }
-.zone-bg-s1b { background-color: #1565C0; }
-.zone-bg-s2a { background-color: #9C27B0; }
-.zone-bg-s2b { background-color: #673AB7; }
-.zone-bg-buffer { background-color: #FB8C00; }
-.zone-bg-empty { background-color: #CFD8DC; }
-
-.zone-text-r1a { color: #2E7D32; }
-.zone-text-r1b { color: #1B5E20; }
-.zone-text-s1a { color: #1976D2; }
-.zone-text-s1b { color: #0D47A1; }
-.zone-text-s2a { color: #7B1FA2; }
-.zone-text-s2b { color: #512DA8; }
-.zone-text-buffer { color: #E65100; }
-.zone-text-empty { color: #78909C; }
 
 /* 캔버스 뷰포트 */
 .shelf-canvas-card {
   position: relative;
-  background-color: #FFFFFF;
+  background-color: #ffffff;
 }
 
 .canvas-scroll-wrapper {
   position: relative;
   width: 100%;
   overflow: auto;
-  border: 1px solid #CFD8DC;
+  border: 1px solid #cfd8dc;
   border-radius: 6px;
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   min-height: 480px;
 }
 
@@ -1307,7 +1281,7 @@ onUnmounted(function () {
   pointer-events: none;
   z-index: 100;
   background-color: rgba(33, 33, 33, 0.94);
-  color: #FFFFFF;
+  color: #ffffff;
   border-radius: 6px;
   padding: 8px 12px;
   font-size: 12px;
@@ -1335,11 +1309,11 @@ onUnmounted(function () {
 }
 
 .tooltip-label {
-  color: #B0BEC5;
+  color: #b0bec5;
   font-size: 11px;
 }
 
 .tooltip-val {
-  color: #FFFFFF;
+  color: #ffffff;
 }
 </style>

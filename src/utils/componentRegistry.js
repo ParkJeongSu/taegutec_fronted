@@ -164,6 +164,9 @@ export const componentMap = {
   PasswordPolicyView: defineAsyncComponent(function () {
     return import('@/views/Settings/PasswordPolicyView.vue')
   }),
+  UserGroupUserView: defineAsyncComponent(function () {
+    return import('@/views/Settings/UserGroupUserView.vue')
+  }),
 
   // 기존 화면 (하위 호환 유지)
   ProcessStatusView: defineAsyncComponent(function () {

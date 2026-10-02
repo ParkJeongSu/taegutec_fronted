@@ -25,7 +25,7 @@
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            placeholder="예: STK-01, AGV-01, CV-01"
+            placeholder="예: WH1, STK01"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
@@ -39,7 +39,7 @@
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            placeholder="예: CRANE-1, CONV-01, MOD-01"
+            placeholder="예: CR01, CONV01"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
@@ -54,79 +54,70 @@
             variant="outlined"
             density="compact"
             :rules="[validateRequiredNumber]"
-            placeholder="예: 1, 101"
+            placeholder="예: 1000"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
         </v-col>
 
-        <!-- 우선순위 -->
+        <!-- 모듈 타입 (moduleType) -->
+        <v-col cols="12" sm="6">
+          <v-combobox
+            v-model="formData.moduleType"
+            :items="moduleTypeOptions"
+            label="모듈 타입 (MODULE_TYPE)"
+            variant="outlined"
+            density="compact"
+            clearable
+            placeholder="선택 또는 직접 입력 (예: CRANE, CONVEYOR)"
+          ></v-combobox>
+        </v-col>
+
+        <!-- 캐리어 수량 (carrierCount) -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model.number="formData.priority"
+            v-model.number="formData.carrierCount"
             type="number"
-            :label="$t('views.modeling.subTransferRule.formPriority')"
+            label="캐리어 수량 (CARRIER_COUNT)"
             variant="outlined"
             density="compact"
-            :rules="[validateRequiredNumber]"
-            placeholder="예: 1, 2"
-            required
+            placeholder="예: 0"
           ></v-text-field>
         </v-col>
 
-        <!-- 세부 규칙 명칭 -->
+        <!-- NG 상태 (ngStatus) -->
+        <v-col cols="12" sm="6">
+          <v-combobox
+            v-model="formData.ngStatus"
+            :items="ngStatusOptions"
+            label="불량 상태 (NG_STATUS)"
+            variant="outlined"
+            density="compact"
+            clearable
+            placeholder="선택 또는 직접 입력 (예: NORMAL, NG)"
+          ></v-combobox>
+        </v-col>
+
+        <!-- 설명 (description) -->
         <v-col cols="12" sm="6">
           <v-text-field
-            v-model="formData.ruleName"
-            label="세부 규칙 명칭 (RULE_NAME)"
+            v-model="formData.description"
+            label="설명 (DESCRIPTION)"
             variant="outlined"
             density="compact"
-            placeholder="예: 최단경로 우선 배차 규칙"
+            placeholder="세부 반송 룰 설명 입력"
           ></v-text-field>
         </v-col>
 
-        <!-- 규칙 유형 -->
-        <v-col cols="12" sm="6">
-          <v-select
-            v-model="formData.ruleType"
-            :items="ruleTypeOptions"
-            label="규칙 유형 (RULE_TYPE)"
-            variant="outlined"
-            density="compact"
-          ></v-select>
-        </v-col>
-
-        <!-- 동작 유형 (Action Type) -->
-        <v-col cols="12" sm="6">
-          <v-select
-            v-model="formData.actionType"
-            :items="actionTypeOptions"
-            label="동작 유형 (ACTION_TYPE)"
-            variant="outlined"
-            density="compact"
-          ></v-select>
-        </v-col>
-
-        <!-- 사용 여부 -->
-        <v-col cols="12" sm="6">
-          <v-select
-            v-model="formData.useState"
-            :items="useStateOptions"
-            :label="$t('views.modeling.subTransferRule.formUseState')"
-            variant="outlined"
-            density="compact"
-          ></v-select>
-        </v-col>
-
-        <!-- 비고 / 설명 -->
+        <!-- 비고 / 사유 (lastEventComment) -->
         <v-col cols="12">
           <v-textarea
-            v-model="formData.eventComment"
-            :label="$t('common.comment')"
+            v-model="formData.lastEventComment"
+            label="비고 / 사유 (LAST_EVENT_COMMENT)"
             variant="outlined"
             density="compact"
             rows="3"
-            placeholder="하위 반송 규칙 설정 사유 및 특이사항 입력"
+            placeholder="세부 반송 룰 설정 사유 및 특이사항 입력"
           ></v-textarea>
         </v-col>
       </v-row>
@@ -169,7 +160,17 @@
     <!-- 삭제 확인 모달 -->
     <ConfirmDialog
       v-model="deleteConfirmDialog"
-      :message="'[' + formData.factoryName + ' / ' + formData.equipmentName + ' / ' + formData.moduleName + ' / 링크: ' + formData.routeLinkId + '] 하위 반송 규칙을 삭제하시겠습니까?'"
+      :message="
+        '[' +
+        formData.factoryName +
+        ' / ' +
+        formData.equipmentName +
+        ' / ' +
+        formData.moduleName +
+        ' / 링크 #' +
+        formData.routeLinkId +
+        '] 세부 반송 룰을 삭제하시겠습니까?'
+      "
       v-on:confirm="onConfirmDelete"
     />
   </div>
@@ -199,28 +200,11 @@ const panelStore = usePanelStore()
 const formRef = ref(null)
 const deleteConfirmDialog = ref(false)
 
-const factoryOptions = ['INSERT', 'POWDER', 'COMMON']
-const ruleTypeOptions = [
-  'DIRECT',
-  'SHORTEST_PATH',
-  'CONGESTION_BYPASS',
-  'INTERLOCK',
-  'SPEED_LIMIT',
-  'MANUAL',
-]
-const actionTypeOptions = [
-  'TRANSFER',
-  'WAIT',
-  'STOP',
-  'BYPASS',
-  'ROTATE',
-]
-const useStateOptions = [
-  { title: t('common.useStatusActive'), value: 'USE' },
-  { title: t('common.useStatusInactive'), value: 'UNUSE' },
-]
+const factoryOptions = ['insert', 'powder', 'common']
+const moduleTypeOptions = ['CRANE', 'CONVEYOR', 'PORT', 'VEHICLE', 'STATION']
+const ngStatusOptions = ['NORMAL', 'NG', 'GOOD', 'FAULT', 'REJECT']
 
-// useApi를 통한 CUD API 바인딩
+// useApi를 통한 CUD API 바인딩 (단일 params 객체 처리 규격 준수)
 const { loading: isCreating, execute: executeCreate } = useApi(createWcsSubTransferRuleApi)
 
 const { loading: isUpdating, execute: executeUpdate } = useApi(function (params) {
@@ -251,29 +235,27 @@ const isCreateMode = computed(function () {
 })
 
 const formData = reactive({
-  factoryName: 'INSERT',
+  factoryName: 'insert',
   equipmentName: '',
   moduleName: '',
   routeLinkId: null,
-  priority: 1,
-  ruleName: '',
-  ruleType: 'DIRECT',
-  actionType: 'TRANSFER',
-  useState: 'USE',
-  eventComment: '',
+  carrierCount: 0,
+  description: '',
+  moduleType: 'CRANE',
+  ngStatus: 'NORMAL',
+  lastEventComment: '',
 })
 
 function resetForm() {
-  formData.factoryName = 'INSERT'
+  formData.factoryName = 'insert'
   formData.equipmentName = ''
   formData.moduleName = ''
   formData.routeLinkId = null
-  formData.priority = 1
-  formData.ruleName = ''
-  formData.ruleType = 'DIRECT'
-  formData.actionType = 'TRANSFER'
-  formData.useState = 'USE'
-  formData.eventComment = ''
+  formData.carrierCount = 0
+  formData.description = ''
+  formData.moduleType = 'CRANE'
+  formData.ngStatus = 'NORMAL'
+  formData.lastEventComment = ''
 }
 
 watch(
@@ -282,16 +264,19 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.factoryName = newVal.factoryName || 'INSERT'
-      formData.equipmentName = isCreateMode.value ? '' : (newVal.equipmentName || '')
-      formData.moduleName = isCreateMode.value ? '' : (newVal.moduleName || '')
-      formData.routeLinkId = isCreateMode.value ? null : (newVal.routeLinkId != null ? Number(newVal.routeLinkId) : null)
-      formData.priority = newVal.priority != null ? Number(newVal.priority) : 1
-      formData.ruleName = newVal.ruleName || newVal.subRuleName || ''
-      formData.ruleType = newVal.ruleType || newVal.subRuleType || newVal.algorithm || 'DIRECT'
-      formData.actionType = newVal.actionType || newVal.action || 'TRANSFER'
-      formData.useState = newVal.useState || (newVal.activeYn === 'N' || newVal.useYn === 'N' ? 'UNUSE' : 'USE')
-      formData.eventComment = newVal.eventComment || ''
+      formData.factoryName = newVal.factoryName || 'insert'
+      formData.equipmentName = isCreateMode.value ? '' : newVal.equipmentName || ''
+      formData.moduleName = isCreateMode.value ? '' : newVal.moduleName || ''
+      formData.routeLinkId = isCreateMode.value
+        ? null
+        : newVal.routeLinkId != null
+          ? Number(newVal.routeLinkId)
+          : null
+      formData.carrierCount = newVal.carrierCount != null ? Number(newVal.carrierCount) : 0
+      formData.description = newVal.description || ''
+      formData.moduleType = newVal.moduleType || 'CRANE'
+      formData.ngStatus = newVal.ngStatus || 'NORMAL'
+      formData.lastEventComment = newVal.lastEventComment || newVal.eventComment || ''
     } else {
       resetForm()
     }
@@ -307,7 +292,12 @@ function validateRequired(value) {
 }
 
 function validateRequiredNumber(value) {
-  if (value !== null && value !== undefined && String(value).trim() !== '' && !isNaN(Number(value))) {
+  if (
+    value !== null &&
+    value !== undefined &&
+    String(value).trim() !== '' &&
+    !isNaN(Number(value))
+  ) {
     return true
   }
   return '숫자를 입력해주세요.'
@@ -337,19 +327,16 @@ async function onHandleSave() {
       equipmentName: formData.equipmentName.trim(),
       moduleName: formData.moduleName.trim(),
       routeLinkId: Number(formData.routeLinkId),
-      priority: Number(formData.priority) || 1,
-      ruleName: formData.ruleName ? formData.ruleName.trim() : undefined,
-      subRuleName: formData.ruleName ? formData.ruleName.trim() : undefined,
-      ruleType: formData.ruleType,
-      subRuleType: formData.ruleType,
-      actionType: formData.actionType,
-      useState: formData.useState,
-      eventComment: formData.eventComment || undefined,
+      carrierCount: Number(formData.carrierCount) || 0,
+      description: formData.description || undefined,
+      moduleType: formData.moduleType || undefined,
+      ngStatus: formData.ngStatus || undefined,
+      lastEventComment: formData.lastEventComment || undefined,
     }
 
     if (isCreateMode.value) {
       await executeCreate(payload)
-      alert('신규 하위 반송 규칙이 등록되었습니다.')
+      alert(t('common.saveSuccess'))
     } else {
       // 4개 복합키(factoryName + equipmentName + moduleName + routeLinkId) 기준 수정 요청
       await executeUpdate({
@@ -359,7 +346,7 @@ async function onHandleSave() {
         routeLinkId: formData.routeLinkId,
         payload: payload,
       })
-      alert('하위 반송 규칙 정보가 수정되었습니다.')
+      alert(t('common.saveSuccess'))
     }
 
     if (typeof panelStore.onSuccess === 'function') {
@@ -370,21 +357,21 @@ async function onHandleSave() {
     console.error('Save sub transfer rule failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '하위 반송 규칙 저장 중 오류가 발생했습니다.'
+      '세부 반송 룰 저장 중 오류가 발생했습니다.'
     alert(errorMsg)
   }
 }
 
 async function onConfirmDelete() {
   try {
-    // 4개 복합키(factoryName + equipmentName + moduleName + routeLinkId) 기준 삭제 요청
+    // 4개 복합키 기준 삭제 요청
     await executeDelete({
       factoryName: formData.factoryName,
       equipmentName: formData.equipmentName,
       moduleName: formData.moduleName,
       routeLinkId: formData.routeLinkId,
     })
-    alert('하위 반송 규칙이 삭제되었습니다.')
+    alert(t('common.deleteSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {
       panelStore.onSuccess()
@@ -394,7 +381,7 @@ async function onConfirmDelete() {
     console.error('Delete sub transfer rule failed:', error)
     const errorMsg =
       (error.response && error.response.data && error.response.data.message) ||
-      '하위 반송 규칙 삭제 처리 중 오류가 발생했습니다.'
+      t('common.deleteFail')
     alert(errorMsg)
   }
 }

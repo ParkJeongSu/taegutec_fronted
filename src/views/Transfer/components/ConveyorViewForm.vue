@@ -25,32 +25,32 @@
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            :placeholder="$t('views.transfer.conveyor.placeholderGroupEx')"
+            placeholder="예: 311, 312"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
         </v-col>
 
         <!-- 컨베이어 명 (PK 3) -->
-        <v-col cols="12">
+        <v-col cols="12" sm="6">
           <v-text-field
             v-model="formData.conveyorName"
             :label="$t('views.transfer.conveyor.formName')"
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            :placeholder="$t('views.transfer.conveyor.placeholderNameEx')"
+            placeholder="예: 31103, 31112"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
         </v-col>
 
-        <!-- 컨베이어 번호 (PK 4) -->
-        <v-col cols="12" sm="6">
+        <!-- 컨베이어 라인 번호 (PK 4) -->
+        <v-col cols="12" sm="3">
           <v-text-field
             v-model.number="formData.conveyorNumber"
             type="number"
-            :label="$t('table.conveyorNo')"
+            label="라인 No (CONVEYOR_NUMBER)"
             variant="outlined"
             density="compact"
             :rules="[validateRequiredNumber]"
@@ -61,11 +61,11 @@
         </v-col>
 
         <!-- 로컬 번호 (PK 5) -->
-        <v-col cols="12" sm="6">
+        <v-col cols="12" sm="3">
           <v-text-field
             v-model.number="formData.localNo"
             type="number"
-            :label="$t('table.conveyorNo')"
+            label="로컬 No (LOCAL_NO)"
             variant="outlined"
             density="compact"
             :rules="[validateRequiredNumber]"
@@ -75,70 +75,106 @@
           ></v-text-field>
         </v-col>
 
-        <!-- 시작 노드 -->
+        <!-- 컨베이어 타입 (conveyorType) -->
         <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.fromNode"
-            :label="$t('table.fromNode')"
+          <v-combobox
+            v-model="formData.conveyorType"
+            :items="conveyorTypeOptions"
+            label="컨베이어 타입 (CONVEYOR_TYPE)"
             variant="outlined"
             density="compact"
-            placeholder="NODE-01"
-          ></v-text-field>
+            clearable
+            placeholder="예: WORKSTATIONCV"
+          ></v-combobox>
         </v-col>
 
-        <!-- 도착 노드 -->
+        <!-- 운전 상태 (status) -->
         <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.toNode"
-            :label="$t('table.toNode')"
+          <v-combobox
+            v-model="formData.status"
+            :items="statusOptions"
+            :label="$t('table.status') + ' (STATUS)'"
             variant="outlined"
             density="compact"
-            placeholder="NODE-05"
-          ></v-text-field>
+          ></v-combobox>
         </v-col>
 
-        <!-- 운전 상태 -->
+        <!-- 반송 방향 (direction) -->
         <v-col cols="12" sm="6">
           <v-select
-            v-model="formData.conveyorStatus"
-            :items="conveyorStatusOptions"
-            :label="$t('table.status')"
+            v-model="formData.direction"
+            :items="directionOptions"
+            label="반송 방향 (DIRECTION)"
             variant="outlined"
             density="compact"
           ></v-select>
         </v-col>
 
-        <!-- 사용 여부 -->
+        <!-- 캐리어 유무 (carrierExist) -->
         <v-col cols="12" sm="6">
           <v-select
-            v-model="formData.useState"
-            :items="useStateOptions"
-            :label="$t('views.transfer.conveyor.formUseState')"
+            v-model="formData.carrierExist"
+            :items="carrierExistOptions"
+            label="캐리어 적재 상태 (CARRIER_EXIST)"
             variant="outlined"
             density="compact"
           ></v-select>
         </v-col>
 
-        <!-- 현재 캐리어 ID -->
-        <v-col cols="12">
+        <!-- 현재 적재 캐리어 ID (carrierName) -->
+        <v-col cols="12" sm="6">
           <v-text-field
-            v-model="formData.currentCarrier"
-            :label="$t('table.carrierId')"
+            v-model="formData.carrierName"
+            :label="$t('table.carrierId') + ' (CARRIER_NAME)'"
             variant="outlined"
             density="compact"
-            placeholder="CARRIER-012"
+            placeholder="예: CR0012, TRAY01"
           ></v-text-field>
         </v-col>
 
-        <!-- 비고 / 설명 -->
+        <!-- 구역명 (areaName) -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.areaName"
+            label="구역 명칭 (AREA_NAME)"
+            variant="outlined"
+            density="compact"
+            placeholder="예: Area01"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 서버명 (serverName) -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.serverName"
+            label="서버 명칭 (SERVER_NAME)"
+            variant="outlined"
+            density="compact"
+            placeholder="예: insertCCS"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 그룹 번호 (conveyorGroupNumber) -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model.number="formData.conveyorGroupNumber"
+            type="number"
+            label="그룹 번호 (GROUP_NUMBER)"
+            variant="outlined"
+            density="compact"
+            placeholder="1"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 비고 / 사유 (lastEventComment) -->
         <v-col cols="12">
           <v-textarea
-            v-model="formData.eventComment"
+            v-model="formData.lastEventComment"
             :label="$t('common.comment')"
             variant="outlined"
             density="compact"
             rows="3"
-            :placeholder="$t('common.comment')"
+            placeholder="컨베이어 정보 변경 사유 및 비고 입력"
           ></v-textarea>
         </v-col>
       </v-row>
@@ -160,7 +196,7 @@
         color="error"
         variant="outlined"
         :loading="isDeleting"
-        class="mr-2"
+        class="mr-2 font-weight-medium"
         v-on:click="onOpenDeleteDialog"
       >
         {{ $t('common.delete') }}
@@ -171,6 +207,7 @@
         color="primary"
         variant="elevated"
         :loading="isSaving"
+        class="font-weight-medium"
         v-on:click="onHandleSave"
       >
         {{ isCreateMode ? $t('common.save') : $t('common.edit') }}
@@ -180,7 +217,7 @@
     <!-- 삭제 확인 모달 -->
     <ConfirmDialog
       v-model="deleteConfirmDialog"
-      :message="$t('common.deleteConfirmMsg', { count: 1 })"
+      :message="'[' + getConveyorDisplayTitle() + '] 컨베이어 설비를 삭제하시겠습니까?'"
       v-on:confirm="onConfirmDelete"
     />
   </div>
@@ -191,11 +228,7 @@ import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useApi } from '@/composables/useApi'
-import {
-  createWcsConveyorApi,
-  updateWcsConveyorApi,
-  deleteWcsConveyorApi,
-} from '@/api/wcsConveyor'
+import { createWcsConveyorApi, updateWcsConveyorApi, deleteWcsConveyorApi } from '@/api/wcsConveyor'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const { t } = useI18n()
@@ -210,17 +243,37 @@ const panelStore = usePanelStore()
 const formRef = ref(null)
 const deleteConfirmDialog = ref(false)
 
-const factoryOptions = ['INSERT', 'POWDER', 'COMMON']
-const conveyorStatusOptions = ['RUN', 'STOP', 'ALARM', 'IDLE', 'ERROR']
-const useStateOptions = [
-  { title: t('common.useStatusActive'), value: 'USE' },
-  { title: t('common.useStatusInactive'), value: 'UNUSE' },
-]
+const factoryOptions = ['insert', 'powder', 'common']
+const conveyorTypeOptions = ['WORKSTATIONCV', 'MAIN_CV', 'TRANSFER_CV', 'BUFFER_CV']
+const statusOptions = ['Idle', 'Run', 'Stop', 'Alarm', 'Error']
+const directionOptions = ['Inbound', 'Outbound', 'Both']
+const carrierExistOptions = ['Empty', 'Exist']
 
-// useApi를 통한 API 바인딩
+// useApi를 통한 CUD API 바인딩 (단일 params 객체 처리 규격 준수)
 const { loading: isCreating, execute: executeCreate } = useApi(createWcsConveyorApi)
-const { loading: isUpdating, execute: executeUpdate } = useApi(updateWcsConveyorApi)
-const { loading: isDeleting, execute: executeDelete } = useApi(deleteWcsConveyorApi)
+
+const { loading: isUpdating, execute: executeUpdate } = useApi(function (params) {
+  return updateWcsConveyorApi(
+    params.factoryName,
+    params.conveyorGroup,
+    params.conveyorName,
+    params.conveyorNumber,
+    params.localNo,
+    params.payload,
+  )
+})
+
+const { loading: isDeleting, execute: executeDelete } = useApi(function (params) {
+  return deleteWcsConveyorApi(
+    params.factoryName,
+    params.conveyorGroup,
+    params.conveyorName,
+    params.conveyorNumber,
+    params.localNo,
+    params.eventUser,
+    params.eventComment,
+  )
+})
 
 const isSaving = computed(function () {
   return isCreating.value || isUpdating.value
@@ -231,31 +284,37 @@ const isCreateMode = computed(function () {
 })
 
 const formData = reactive({
-  factoryName: 'INSERT',
+  factoryName: 'insert',
   conveyorGroup: '',
   conveyorName: '',
   conveyorNumber: 1,
   localNo: 1,
-  fromNode: '',
-  toNode: '',
-  conveyorStatus: 'RUN',
-  currentCarrier: '',
-  useState: 'USE',
-  eventComment: '',
+  conveyorType: 'WORKSTATIONCV',
+  status: 'Idle',
+  direction: 'Inbound',
+  carrierExist: 'Empty',
+  carrierName: '',
+  areaName: 'Area01',
+  serverName: 'insertCCS',
+  conveyorGroupNumber: 1,
+  lastEventComment: '',
 })
 
 function resetForm() {
-  formData.factoryName = 'INSERT'
+  formData.factoryName = 'insert'
   formData.conveyorGroup = ''
   formData.conveyorName = ''
   formData.conveyorNumber = 1
   formData.localNo = 1
-  formData.fromNode = ''
-  formData.toNode = ''
-  formData.conveyorStatus = 'RUN'
-  formData.currentCarrier = ''
-  formData.useState = 'USE'
-  formData.eventComment = ''
+  formData.conveyorType = 'WORKSTATIONCV'
+  formData.status = 'Idle'
+  formData.direction = 'Inbound'
+  formData.carrierExist = 'Empty'
+  formData.carrierName = ''
+  formData.areaName = 'Area01'
+  formData.serverName = 'insertCCS'
+  formData.conveyorGroupNumber = 1
+  formData.lastEventComment = ''
 }
 
 watch(
@@ -264,17 +323,21 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.factoryName = newVal.factoryName || 'INSERT'
+      formData.factoryName = newVal.factoryName || 'insert'
       formData.conveyorGroup = newVal.conveyorGroup || ''
-      formData.conveyorName = isCreateMode.value ? '' : (newVal.conveyorName || newVal.lineName || newVal.cvId || '')
+      formData.conveyorName = isCreateMode.value ? '' : newVal.conveyorName || ''
       formData.conveyorNumber = newVal.conveyorNumber != null ? Number(newVal.conveyorNumber) : 1
       formData.localNo = newVal.localNo != null ? Number(newVal.localNo) : 1
-      formData.fromNode = newVal.fromNode || ''
-      formData.toNode = newVal.toNode || ''
-      formData.conveyorStatus = newVal.conveyorStatus || newVal.status || 'RUN'
-      formData.currentCarrier = newVal.currentCarrier || ''
-      formData.useState = newVal.useState || (newVal.useYn === 'N' ? 'UNUSE' : 'USE')
-      formData.eventComment = newVal.eventComment || ''
+      formData.conveyorType = newVal.conveyorType || 'WORKSTATIONCV'
+      formData.status = newVal.status || 'Idle'
+      formData.direction = newVal.direction || 'Inbound'
+      formData.carrierExist = newVal.carrierExist || 'Empty'
+      formData.carrierName = newVal.carrierName || ''
+      formData.areaName = newVal.areaName || 'Area01'
+      formData.serverName = newVal.serverName || 'insertCCS'
+      formData.conveyorGroupNumber =
+        newVal.conveyorGroupNumber != null ? Number(newVal.conveyorGroupNumber) : 1
+      formData.lastEventComment = newVal.lastEventComment || newVal.eventComment || ''
     } else {
       resetForm()
     }
@@ -303,7 +366,7 @@ function getConveyorDisplayTitle() {
     formData.conveyorGroup +
     ' / ' +
     formData.conveyorName +
-    ' (' +
+    ' (No.' +
     formData.conveyorNumber +
     '-' +
     formData.localNo +
@@ -332,16 +395,19 @@ async function onHandleSave() {
   try {
     const payload = {
       factoryName: formData.factoryName,
-      conveyorGroup: formData.conveyorGroup,
-      conveyorName: formData.conveyorName,
+      conveyorGroup: formData.conveyorGroup.trim(),
+      conveyorName: formData.conveyorName.trim(),
       conveyorNumber: Number(formData.conveyorNumber),
       localNo: Number(formData.localNo),
-      fromNode: formData.fromNode || undefined,
-      toNode: formData.toNode || undefined,
-      conveyorStatus: formData.conveyorStatus,
-      currentCarrier: formData.currentCarrier || undefined,
-      useState: formData.useState,
-      eventComment: formData.eventComment || undefined,
+      conveyorType: formData.conveyorType || undefined,
+      status: formData.status,
+      direction: formData.direction || undefined,
+      carrierExist: formData.carrierExist || 'Empty',
+      carrierName: formData.carrierName || undefined,
+      areaName: formData.areaName || undefined,
+      serverName: formData.serverName || undefined,
+      conveyorGroupNumber: Number(formData.conveyorGroupNumber) || 1,
+      lastEventComment: formData.lastEventComment || undefined,
     }
 
     if (isCreateMode.value) {
@@ -349,14 +415,14 @@ async function onHandleSave() {
       alert(t('common.saveSuccess'))
     } else {
       // 5개 복합키 기준으로 수정 요청
-      await executeUpdate(
-        formData.factoryName,
-        formData.conveyorGroup,
-        formData.conveyorName,
-        formData.conveyorNumber,
-        formData.localNo,
-        payload,
-      )
+      await executeUpdate({
+        factoryName: formData.factoryName,
+        conveyorGroup: formData.conveyorGroup,
+        conveyorName: formData.conveyorName,
+        conveyorNumber: formData.conveyorNumber,
+        localNo: formData.localNo,
+        payload: payload,
+      })
       alert(t('common.saveSuccess'))
     }
 
@@ -367,8 +433,7 @@ async function onHandleSave() {
   } catch (error) {
     console.error('Save conveyor failed:', error)
     const errorMsg =
-      (error.response && error.response.data && error.response.data.message) ||
-      t('common.saveFail')
+      (error.response && error.response.data && error.response.data.message) || t('common.saveFail')
     alert(errorMsg)
   }
 }
@@ -376,13 +441,15 @@ async function onHandleSave() {
 async function onConfirmDelete() {
   try {
     // 5개 복합키 기준으로 삭제 요청
-    await executeDelete(
-      formData.factoryName,
-      formData.conveyorGroup,
-      formData.conveyorName,
-      formData.conveyorNumber,
-      formData.localNo,
-    )
+    await executeDelete({
+      factoryName: formData.factoryName,
+      conveyorGroup: formData.conveyorGroup,
+      conveyorName: formData.conveyorName,
+      conveyorNumber: formData.conveyorNumber,
+      localNo: formData.localNo,
+      eventUser: 'aim',
+      eventComment: 'Conveyor deleted',
+    })
     alert(t('common.deleteSuccess'))
 
     if (typeof panelStore.onSuccess === 'function') {

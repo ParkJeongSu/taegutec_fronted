@@ -5,7 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$mapMarkerPath" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.modeling.routeNode.title') }}</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.modeling.routeNode.title')
+          }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.modeling.routeNode.breadcrumb') }}
           </v-chip>
@@ -63,12 +65,12 @@
             ></v-select>
           </v-col>
 
-          <!-- 노드 ID -->
+          <!-- 라우트 노드 ID (PK) -->
           <v-col cols="12" sm="6" md="2">
             <v-text-field
               v-model="searchParams.routeNodeId"
-              :label="$t('table.nodeId')"
-              placeholder="101"
+              label="라우트 노드 ID"
+              placeholder="예: 1000"
               variant="outlined"
               density="compact"
               hide-details
@@ -77,12 +79,12 @@
             ></v-text-field>
           </v-col>
 
-          <!-- 노드 명칭 -->
-          <v-col cols="12" sm="6" md="3">
+          <!-- 노드 코드 (nodeId) -->
+          <v-col cols="12" sm="6" md="2">
             <v-text-field
-              v-model="searchParams.nodeName"
-              :label="$t('table.nodeName')"
-              placeholder="NODE-01"
+              v-model="searchParams.nodeId"
+              label="노드 코드"
+              placeholder="예: WH01_IN_OUT_01"
               variant="outlined"
               density="compact"
               hide-details
@@ -91,12 +93,24 @@
             ></v-text-field>
           </v-col>
 
-          <!-- 노드 유형 -->
+          <!-- 노드 유형 (routeNodeType) -->
           <v-col cols="12" sm="6" md="2">
             <v-select
-              v-model="searchParams.nodeType"
-              :items="nodeTypeFilterOptions"
-              :label="$t('table.nodeType')"
+              v-model="searchParams.routeNodeType"
+              :items="routeNodeTypeFilterOptions"
+              label="노드 유형"
+              variant="outlined"
+              density="compact"
+              hide-details
+            ></v-select>
+          </v-col>
+
+          <!-- 리라우트 유형 (rerouteType) -->
+          <v-col cols="12" sm="6" md="2">
+            <v-select
+              v-model="searchParams.rerouteType"
+              :items="rerouteTypeFilterOptions"
+              label="리라우트 유형"
               variant="outlined"
               density="compact"
               hide-details
@@ -106,8 +120,8 @@
           <!-- 사용 여부 -->
           <v-col cols="12" sm="6" md="1">
             <v-select
-              v-model="searchParams.useState"
-              :items="useStateFilterOptions"
+              v-model="searchParams.useYn"
+              :items="useYnFilterOptions"
               :label="$t('table.useYn')"
               variant="outlined"
               density="compact"
@@ -116,7 +130,7 @@
           </v-col>
 
           <!-- 검색 및 초기화 버튼 -->
-          <v-col cols="12" sm="6" md="2" class="d-flex align-center">
+          <v-col cols="12" sm="6" md="1" class="d-flex align-center">
             <v-btn
               color="primary"
               variant="flat"
@@ -138,7 +152,7 @@
         </v-row>
       </div>
 
-      <!-- 중앙 데이터 테이블 (useDataTable 컴포저블 전담 연동) -->
+      <!-- 중앙 데이터 테이블 -->
       <BaseDataTable
         :headers="headers"
         :items="displayItems"
@@ -149,54 +163,66 @@
         v-on:update:options="onUpdateOptions"
         v-on:click:row="onRowClick"
       >
-        <!-- 노드 ID 하이라이트 -->
+        <!-- 라우트 노드 ID 하이라이트 -->
         <template #[`item.routeNodeId`]="{ item }">
           <span class="font-weight-bold text-primary">{{ item.routeNodeId }}</span>
         </template>
 
-        <!-- 노드 명칭 렌더링 -->
-        <template #[`item.nodeName`]="{ item }">
-          <span class="font-weight-bold">{{ item.nodeName }}</span>
+        <!-- 노드 코드 / 명칭 -->
+        <template #[`item.nodeId`]="{ item }">
+          <span class="font-weight-bold">{{ item.nodeId }}</span>
         </template>
 
         <!-- 노드 유형 칩 -->
-        <template #[`item.nodeType`]="{ item }">
+        <template #[`item.routeNodeType`]="{ item }">
           <v-chip
-            :color="getNodeTypeColor(item.nodeType)"
+            :color="getRouteNodeTypeColor(item.routeNodeType)"
             size="x-small"
             variant="tonal"
             class="font-weight-bold"
           >
-            {{ item.nodeType || '-' }}
+            {{ item.routeNodeType || '-' }}
           </v-chip>
         </template>
 
-        <!-- 좌표 렌더링 -->
-        <template #[`item.coord`]="{ item }">
-          <span class="text-caption font-weight-medium">{{ item.coord }}</span>
+        <!-- 리라우트 유형 칩 -->
+        <template #[`item.rerouteType`]="{ item }">
+          <v-chip
+            :color="getRerouteTypeColor(item.rerouteType)"
+            size="x-small"
+            variant="flat"
+            class="font-weight-medium"
+          >
+            {{ item.rerouteType || '-' }}
+          </v-chip>
+        </template>
+
+        <!-- 베이 / 유닛 / 설비 ID -->
+        <template #[`item.bayId`]="{ item }">
+          <span class="font-weight-medium text-blue-grey-darken-1">{{ item.bayId || '-' }}</span>
         </template>
 
         <!-- 사용 여부 칩 -->
-        <template #[`item.useState`]="{ item }">
+        <template #[`item.useYn`]="{ item }">
           <v-chip
-            :color="getUseStateColor(item.useState)"
+            :color="item.useYn === 'Y' ? 'success' : 'grey'"
             size="x-small"
             variant="flat"
             class="font-weight-bold"
           >
-            {{ getUseStateText(item.useState) }}
+            {{ item.useYn === 'Y' ? $t('common.use') : $t('common.unuse') }}
           </v-chip>
         </template>
 
         <!-- 수정 일시 포맷팅 -->
-        <template #[`item.eventTime`]="{ item }">
-          <span class="text-caption">{{ formatDateTime(item.eventTime) }}</span>
+        <template #[`item.lastEventTime`]="{ item }">
+          <span class="text-caption">{{ formatDateTime(item.lastEventTime) }}</span>
         </template>
 
-        <!-- 비고 말줄임 -->
-        <template #[`item.eventComment`]="{ item }">
-          <span :title="item.eventComment" class="comment-text-cell">
-            {{ item.eventComment || '-' }}
+        <!-- 비고 / 설명 말줄임 -->
+        <template #[`item.description`]="{ item }">
+          <span :title="item.description" class="comment-text-cell">
+            {{ item.description || '-' }}
           </span>
         </template>
 
@@ -223,49 +249,52 @@ import { fetchWcsRouteNodesApi } from '@/api/wcsRouteNode'
 import { formatDateTime } from '@/utils/dateUtils'
 
 const panelStore = usePanelStore()
-
-// 검색 파라미터 상태
 const { t } = useI18n()
 
+// 검색 파라미터 상태
 const searchParams = reactive({
   factoryName: '전체',
   routeNodeId: '',
-  nodeName: '',
-  nodeType: '전체',
-  useState: '전체',
+  nodeId: '',
+  routeNodeType: '전체',
+  rerouteType: '전체',
+  useYn: '전체',
 })
 
-const factoryFilterOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
-const nodeTypeFilterOptions = [
+const factoryFilterOptions = ['전체', 'insert', 'powder', 'common']
+const routeNodeTypeFilterOptions = [
   '전체',
+  'INOUT_PORT',
+  'IN_PORT',
+  'OUT_PORT',
   'STATION',
   'BRANCH',
   'MERGE',
-  'BUFFER',
-  'CROSS',
-  'NORMAL',
-  'DIVERSION',
 ]
-const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
+const rerouteTypeFilterOptions = ['전체', 'ON_ARRIVAL', 'NONE', 'DYNAMIC']
+const useYnFilterOptions = ['전체', 'Y', 'N']
 
-// 테이블 컬럼 정의
+// 백엔드 WcsRouteNodeResponse에 일치하도록 헤더 재정의
 const headers = [
-  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
-  { title: t('table.nodeId'), key: 'routeNodeId', align: 'center', width: '100px', sortable: true },
-  { title: t('table.nodeName'), key: 'nodeName', align: 'start', width: '160px' },
-  { title: t('table.nodeType'), key: 'nodeType', align: 'center', width: '120px' },
-  { title: 'Coord (X,Y,Z)', key: 'coord', align: 'center', width: '160px' },
-  { title: 'Max Wait', key: 'maxWait', align: 'end', width: '110px' },
-  { title: 'Links', key: 'linkCount', align: 'end', width: '110px' },
-  { title: t('table.zone'), key: 'zoneName', align: 'center', width: '110px' },
-  { title: t('table.stockerName'), key: 'stockerName', align: 'center', width: '100px' },
-  { title: t('table.useState'), key: 'useState', align: 'center', width: '100px' },
-  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '100px' },
-  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
-  { title: t('table.eventComment'), key: 'eventComment', align: 'start', width: '150px' },
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '90px' },
+  { title: '라우트 노드 ID', key: 'routeNodeId', align: 'center', width: '110px', sortable: true },
+  { title: '노드 코드', key: 'nodeId', align: 'start', width: '160px' },
+  { title: '노드 명칭', key: 'nodeName', align: 'start', width: '180px' },
+  { title: '노드 유형', key: 'routeNodeType', align: 'center', width: '130px' },
+  { title: '리라우트 유형', key: 'rerouteType', align: 'center', width: '130px' },
+  { title: '베이 ID', key: 'bayId', align: 'center', width: '100px' },
+  { title: '유닛 ID', key: 'unitId', align: 'center', width: '100px' },
+  { title: '설비 ID', key: 'equipmentId', align: 'center', width: '100px' },
+  { title: '크레인 ID', key: 'craneId', align: 'center', width: '100px' },
+  { title: '제어기 타입', key: 'controllerType', align: 'center', width: '100px' },
+  { title: '순번', key: 'nodeSeq', align: 'end', width: '80px' },
+  { title: t('table.useState'), key: 'useYn', align: 'center', width: '90px' },
+  { title: '설명', key: 'description', align: 'start', width: '160px' },
+  { title: t('table.eventUser'), key: 'lastEventUser', align: 'center', width: '100px' },
+  { title: t('table.eventTime'), key: 'lastEventTime', align: 'center', width: '160px' },
 ]
 
-// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
+// 목록 조회는 useDataTable 전담
 const { items, totalItems, loading, options, loadData, updateOptions } =
   useDataTable(fetchWcsRouteNodesApi)
 
@@ -275,21 +304,24 @@ function getSanitizedParams() {
     params.factoryName = searchParams.factoryName
   }
   if (searchParams.routeNodeId && searchParams.routeNodeId.trim() !== '') {
-    params.routeNodeId = searchParams.routeNodeId.trim()
+    params.routeNodeId = Number(searchParams.routeNodeId.trim())
   }
-  if (searchParams.nodeName && searchParams.nodeName.trim() !== '') {
-    params.nodeName = searchParams.nodeName.trim()
+  if (searchParams.nodeId && searchParams.nodeId.trim() !== '') {
+    params.nodeId = searchParams.nodeId.trim()
   }
-  if (searchParams.nodeType && searchParams.nodeType !== '전체') {
-    params.nodeType = searchParams.nodeType
+  if (searchParams.routeNodeType && searchParams.routeNodeType !== '전체') {
+    params.routeNodeType = searchParams.routeNodeType
   }
-  if (searchParams.useState && searchParams.useState !== '전체') {
-    params.useState = searchParams.useState
+  if (searchParams.rerouteType && searchParams.rerouteType !== '전체') {
+    params.rerouteType = searchParams.rerouteType
+  }
+  if (searchParams.useYn && searchParams.useYn !== '전체') {
+    params.useYn = searchParams.useYn
   }
   return params
 }
 
-// 데이터 정규화 및 바인딩 리스트 계산 (2개 복합키 compositeKey 결합)
+// 응답 DTO 필드 정규화
 const displayItems = computed(function () {
   const list = items.value || []
   const result = []
@@ -297,31 +329,29 @@ const displayItems = computed(function () {
   for (let i = 0; i < list.length; i++) {
     const raw = list[i]
     if (raw) {
-      const fn = raw.factoryName || 'INSERT'
-      const rId = raw.routeNodeId != null ? raw.routeNodeId : (raw.nodeId != null ? raw.nodeId : (i + 1))
-      const x = raw.xCoord != null ? raw.xCoord : (raw.positionX != null ? raw.positionX : (raw.x != null ? raw.x : 0))
-      const y = raw.yCoord != null ? raw.yCoord : (raw.positionY != null ? raw.positionY : (raw.y != null ? raw.y : 0))
-      const z = raw.zCoord != null ? raw.zCoord : (raw.positionZ != null ? raw.positionZ : (raw.z != null ? raw.z : 0))
+      const fn = raw.factoryName || 'insert'
+      const rId = raw.routeNodeId != null ? raw.routeNodeId : i + 1
 
       result.push({
         ...raw,
         compositeKey: fn + '_' + rId,
         factoryName: fn,
         routeNodeId: rId,
-        nodeName: raw.nodeName || raw.name || ('NODE-' + rId),
-        nodeType: raw.nodeType || raw.type || 'STATION',
-        xCoord: x,
-        yCoord: y,
-        zCoord: z,
-        coord: '(' + x + ', ' + y + ', ' + z + ')',
-        maxWait: raw.maxWait != null ? raw.maxWait : 1,
-        linkCount: raw.linkCount != null ? raw.linkCount : 1,
-        zoneName: raw.zoneName || '-',
-        stockerName: raw.stockerName || '-',
-        useState: raw.useState || (raw.useYn === 'N' ? 'UNUSE' : 'USE'),
-        eventUser: raw.eventUser || raw.lastEventUser || '-',
-        eventTime: raw.eventTime || raw.lastEventTime || null,
-        eventComment: raw.eventComment || raw.lastEventComment || '',
+        nodeId: raw.nodeId || '-',
+        nodeName: raw.nodeName || '-',
+        routeNodeType: raw.routeNodeType || '-',
+        rerouteType: raw.rerouteType || '-',
+        bayId: raw.bayId || '-',
+        unitId: raw.unitId || '-',
+        equipmentId: raw.equipmentId || '-',
+        craneId: raw.craneId || '-',
+        controllerType: raw.controllerType || '-',
+        nodeSeq: raw.nodeSeq != null ? raw.nodeSeq : 1,
+        useYn: raw.useYn || 'Y',
+        description: raw.description || '-',
+        lastEventUser: raw.lastEventUser || raw.eventUser || '-',
+        lastEventTime: raw.lastEventTime || raw.eventTime || null,
+        lastEventComment: raw.lastEventComment || raw.eventComment || '',
       })
     }
   }
@@ -329,35 +359,24 @@ const displayItems = computed(function () {
   return result
 })
 
-function getNodeTypeColor(nodeType) {
-  if (!nodeType) return 'grey'
-  const t = String(nodeType).toUpperCase()
-  if (t === 'STATION') return 'primary'
-  if (t === 'BRANCH') return 'indigo'
-  if (t === 'MERGE') return 'teal'
-  if (t === 'BUFFER') return 'orange'
-  if (t === 'CROSS') return 'purple'
+function getRouteNodeTypeColor(type) {
+  if (!type) return 'grey'
+  const t = String(type).toUpperCase()
+  if (t === 'INOUT_PORT') return 'primary'
+  if (t === 'IN_PORT') return 'info'
+  if (t === 'OUT_PORT') return 'teal'
+  if (t === 'STATION') return 'indigo'
+  if (t === 'BRANCH') return 'orange'
   return 'blue-grey'
 }
 
-function getUseStateColor(state) {
-  if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return 'success'
-  }
-  if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return 'grey'
-  }
-  return 'default'
-}
-
-function getUseStateText(state) {
-  if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return t('common.use')
-  }
-  if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return t('common.unuse')
-  }
-  return state || '-'
+function getRerouteTypeColor(type) {
+  if (!type) return 'grey'
+  const t = String(type).toUpperCase()
+  if (t === 'ON_ARRIVAL') return 'teal'
+  if (t === 'DYNAMIC') return 'purple'
+  if (t === 'NONE') return 'grey'
+  return 'blue-grey'
 }
 
 function handleSearch() {
@@ -368,9 +387,10 @@ function handleSearch() {
 function handleReset() {
   searchParams.factoryName = '전체'
   searchParams.routeNodeId = ''
-  searchParams.nodeName = ''
-  searchParams.nodeType = '전체'
-  searchParams.useState = '전체'
+  searchParams.nodeId = ''
+  searchParams.routeNodeType = '전체'
+  searchParams.rerouteType = '전체'
+  searchParams.useYn = '전체'
   options.page = 0
   loadData(getSanitizedParams())
 }
@@ -379,7 +399,6 @@ function onUpdateOptions(newOptions) {
   updateOptions(newOptions, getSanitizedParams())
 }
 
-// [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
 function onAddNode() {
   panelStore.openPanel(markRaw(RouteNodeViewForm), {
     mode: 'CREATE',
@@ -391,9 +410,8 @@ function onAddNode() {
   })
 }
 
-// 행(Row) 클릭 시 수정 모드로 우측 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   panelStore.openPanel(markRaw(RouteNodeViewForm), {
     mode: 'UPDATE',
     data: itemData,
@@ -414,26 +432,27 @@ function handleExport() {
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    `${t('table.factoryName')},${t('table.nodeId')},${t('table.nodeName')},${t('table.nodeType')},X,Y,Z,MaxWait,Links,${t('table.zone')},${t('table.stockerName')},${t('table.useState')},${t('table.eventUser')},${t('table.eventTime')},${t('table.eventComment')}\n`
+    '소속공장,라우트노드ID,노드코드,노드명칭,노드유형,리라우트유형,베이ID,유닛ID,설비ID,크레인ID,제어기타입,순번,사용여부,설명,수정자,수정일시\n'
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]
     const row = [
       item.factoryName || '',
       item.routeNodeId != null ? item.routeNodeId : '',
+      item.nodeId || '',
       item.nodeName || '',
-      item.nodeType || '',
-      item.xCoord != null ? item.xCoord : 0,
-      item.yCoord != null ? item.yCoord : 0,
-      item.zCoord != null ? item.zCoord : 0,
-      item.maxWait != null ? item.maxWait : 0,
-      item.linkCount != null ? item.linkCount : 0,
-      item.zoneName || '',
-      item.stockerName || '',
-      getUseStateText(item.useState),
-      item.eventUser || '',
-      formatDateTime(item.eventTime),
-      '"' + (item.eventComment ? item.eventComment.replace(/"/g, '""') : '') + '"',
+      item.routeNodeType || '',
+      item.rerouteType || '',
+      item.bayId || '',
+      item.unitId || '',
+      item.equipmentId || '',
+      item.craneId || '',
+      item.controllerType || '',
+      item.nodeSeq != null ? item.nodeSeq : 1,
+      item.useYn || 'Y',
+      '"' + (item.description ? item.description.replace(/"/g, '""') : '') + '"',
+      item.lastEventUser || '',
+      formatDateTime(item.lastEventTime),
     ]
     csvContent = csvContent + row.join(',') + '\n'
   }
@@ -456,18 +475,15 @@ onMounted(function () {
 .view-page-container {
   max-width: 100%;
 }
-
 .search-filter-panel {
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
-
 .action-button-group {
   gap: 8px;
 }
-
 .comment-text-cell {
   display: block;
-  max-width: 150px;
+  max-width: 160px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

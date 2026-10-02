@@ -5,7 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$transitTransfer" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.modeling.routeLink.title') }}</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.modeling.routeLink.title')
+          }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.modeling.routeLink.breadcrumb') }}
           </v-chip>
@@ -63,12 +65,12 @@
             ></v-select>
           </v-col>
 
-          <!-- 링크 ID -->
+          <!-- 링크 ID (routeLinkId) -->
           <v-col cols="12" sm="6" md="2">
             <v-text-field
               v-model="searchParams.routeLinkId"
               label="링크 ID"
-              placeholder="예: 1"
+              placeholder="예: 1000"
               variant="outlined"
               density="compact"
               hide-details
@@ -77,12 +79,12 @@
             ></v-text-field>
           </v-col>
 
-          <!-- 시작 노드 -->
+          <!-- 시작 노드 (fromNodeId) -->
           <v-col cols="12" sm="6" md="2">
             <v-text-field
-              v-model="searchParams.fromNode"
+              v-model="searchParams.fromNodeId"
               label="시작 노드"
-              placeholder="예: 101, NODE-01"
+              placeholder="예: WH03_OUT_03"
               variant="outlined"
               density="compact"
               hide-details
@@ -91,12 +93,12 @@
             ></v-text-field>
           </v-col>
 
-          <!-- 도착 노드 -->
+          <!-- 도착 노드 (toNodeId) -->
           <v-col cols="12" sm="6" md="2">
             <v-text-field
-              v-model="searchParams.toNode"
+              v-model="searchParams.toNodeId"
               label="도착 노드"
-              placeholder="예: 105, NODE-05"
+              placeholder="예: CNV02_IN_15"
               variant="outlined"
               density="compact"
               hide-details
@@ -105,23 +107,23 @@
             ></v-text-field>
           </v-col>
 
-          <!-- 방향성 -->
+          <!-- 링크 타입 (routeLinkType) -->
           <v-col cols="12" sm="6" md="2">
             <v-select
-              v-model="searchParams.direction"
-              :items="directionFilterOptions"
-              label="링크 방향"
+              v-model="searchParams.routeLinkType"
+              :items="routeLinkTypeFilterOptions"
+              label="링크 타입"
               variant="outlined"
               density="compact"
               hide-details
             ></v-select>
           </v-col>
 
-          <!-- 사용 여부 -->
+          <!-- 사용 여부 (useYn) -->
           <v-col cols="12" sm="6" md="1">
             <v-select
-              v-model="searchParams.useState"
-              :items="useStateFilterOptions"
+              v-model="searchParams.useYn"
+              :items="useYnFilterOptions"
               :label="$t('table.useYn')"
               variant="outlined"
               density="compact"
@@ -152,7 +154,7 @@
         </v-row>
       </div>
 
-      <!-- 중앙 데이터 테이블 (useDataTable 컴포저블 전담 연동) -->
+      <!-- 중앙 데이터 테이블 -->
       <BaseDataTable
         :headers="headers"
         :items="displayItems"
@@ -169,65 +171,84 @@
         </template>
 
         <!-- 시작 / 도착 노드 -->
-        <template #[`item.fromNode`]="{ item }">
-          <span class="font-weight-medium">{{ item.fromNode }}</span>
+        <template #[`item.fromNodeId`]="{ item }">
+          <span class="font-weight-medium">{{ item.fromNodeId }}</span>
         </template>
 
-        <template #[`item.toNode`]="{ item }">
-          <span class="font-weight-medium">{{ item.toNode }}</span>
+        <template #[`item.toNodeId`]="{ item }">
+          <span class="font-weight-medium">{{ item.toNodeId }}</span>
         </template>
 
-        <!-- 거리 포맷팅 -->
-        <template #[`item.distance`]="{ item }">
-          <span class="font-weight-medium">{{ formatNumber(item.distance) }} m</span>
+        <!-- 링크 타입 칩 -->
+        <template #[`item.routeLinkType`]="{ item }">
+          <v-chip size="x-small" variant="tonal" color="primary" class="font-weight-bold">
+            {{ item.routeLinkType || '-' }}
+          </v-chip>
         </template>
 
-        <!-- 제한 속도 포맷팅 -->
-        <template #[`item.speedLimit`]="{ item }">
-          <span>{{ formatNumber(item.speedLimit) }} m/s</span>
+        <!-- 길이 포맷팅 -->
+        <template #[`item.length`]="{ item }">
+          <span>{{ formatNumber(item.length) }} m</span>
         </template>
 
-        <!-- 방향성 칩 -->
-        <template #[`item.direction`]="{ item }">
+        <!-- 우선순위 -->
+        <template #[`item.priority`]="{ item }">
           <v-chip
-            :color="getDirectionColor(item.direction)"
             size="x-small"
-            variant="tonal"
+            variant="flat"
+            color="blue-grey-lighten-4"
             class="font-weight-bold"
           >
-            {{ item.direction || '-' }}
+            {{ item.priority != null ? item.priority : 0 }}
           </v-chip>
         </template>
 
-        <!-- 링크 타입 -->
-        <template #[`item.linkType`]="{ item }">
-          <v-chip size="x-small" variant="flat" color="blue-grey" class="font-weight-medium">
-            {{ item.linkType || 'CONVEYOR' }}
-          </v-chip>
-        </template>
-
-        <!-- 사용 여부 칩 -->
-        <template #[`item.useState`]="{ item }">
+        <!-- 통과 여부 칩 -->
+        <template #[`item.passYn`]="{ item }">
           <v-chip
-            :color="getUseStateColor(item.useState)"
+            :color="item.passYn === 'Y' ? 'teal' : 'grey'"
             size="x-small"
             variant="flat"
             class="font-weight-bold"
           >
-            {{ getUseStateText(item.useState) }}
+            {{ item.passYn === 'Y' ? '통과' : '차단' }}
           </v-chip>
         </template>
 
-        <!-- 수정 일시 포맷팅 -->
-        <template #[`item.eventTime`]="{ item }">
-          <span class="text-caption">{{ formatDateTime(item.eventTime) }}</span>
+        <!-- 가용 여부 칩 -->
+        <template #[`item.usableYn`]="{ item }">
+          <v-chip
+            :color="item.usableYn === 'Y' ? 'indigo' : 'grey'"
+            size="x-small"
+            variant="flat"
+            class="font-weight-bold"
+          >
+            {{ item.usableYn === 'Y' ? '가용' : '불가' }}
+          </v-chip>
         </template>
 
-        <!-- 비고 말줄임 -->
-        <template #[`item.eventComment`]="{ item }">
-          <span :title="item.eventComment" class="comment-text-cell">
-            {{ item.eventComment || '-' }}
+        <!-- 사용 여부 칩 -->
+        <template #[`item.useYn`]="{ item }">
+          <v-chip
+            :color="item.useYn === 'Y' ? 'success' : 'grey'"
+            size="x-small"
+            variant="flat"
+            class="font-weight-bold"
+          >
+            {{ item.useYn === 'Y' ? $t('common.use') : $t('common.unuse') }}
+          </v-chip>
+        </template>
+
+        <!-- 설명 말줄임 -->
+        <template #[`item.description`]="{ item }">
+          <span :title="item.description" class="comment-text-cell">
+            {{ item.description || '-' }}
           </span>
+        </template>
+
+        <!-- 수정 일시 포맷팅 -->
+        <template #[`item.lastEventTime`]="{ item }">
+          <span class="text-caption">{{ formatDateTime(item.lastEventTime) }}</span>
         </template>
 
         <!-- 데이터 없음 슬롯 -->
@@ -253,41 +274,41 @@ import { fetchWcsRouteLinksApi } from '@/api/wcsRouteLink'
 import { formatDateTime } from '@/utils/dateUtils'
 
 const panelStore = usePanelStore()
-
-// 검색 파라미터 상태
 const { t } = useI18n()
 
+// 검색 파라미터 상태
 const searchParams = reactive({
   factoryName: '전체',
   routeLinkId: '',
-  fromNode: '',
-  toNode: '',
-  direction: '전체',
-  useState: '전체',
+  fromNodeId: '',
+  toNodeId: '',
+  routeLinkType: '전체',
+  useYn: '전체',
 })
 
-const factoryFilterOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
-const directionFilterOptions = ['전체', 'ONE_WAY', 'BI_DIRECTIONAL', 'REVERSE']
-const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
+const factoryFilterOptions = ['전체', 'insert', 'powder', 'common']
+const routeLinkTypeFilterOptions = ['전체', 'INTER', 'INTRA', 'CONVEYOR', 'PATH', 'TRACK']
+const useYnFilterOptions = ['전체', 'Y', 'N']
 
-// 테이블 컬럼 정의
+// 백엔드 WcsRouteLinkResponse 기준 정렬 컬럼 정의
 const headers = [
-  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '90px' },
   { title: '링크 ID', key: 'routeLinkId', align: 'center', width: '100px', sortable: true },
-  { title: '링크 명칭', key: 'linkName', align: 'start', width: '150px' },
-  { title: t('table.fromNode'), key: 'fromNode', align: 'start', width: '120px' },
-  { title: t('table.toNode'), key: 'toNode', align: 'start', width: '120px' },
-  { title: '거리 (m)', key: 'distance', align: 'end', width: '110px' },
-  { title: '제한 속도 (m/s)', key: 'speedLimit', align: 'end', width: '120px' },
-  { title: '방향성', key: 'direction', align: 'center', width: '120px' },
-  { title: '링크 타입', key: 'linkType', align: 'center', width: '110px' },
-  { title: t('table.useState'), key: 'useState', align: 'center', width: '100px' },
-  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '100px' },
-  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
-  { title: t('table.eventComment'), key: 'eventComment', align: 'start', width: '150px' },
+  { title: '시작 노드', key: 'fromNodeId', align: 'start', width: '150px' },
+  { title: '도착 노드', key: 'toNodeId', align: 'start', width: '150px' },
+  { title: '링크 타입', key: 'routeLinkType', align: 'center', width: '110px' },
+  { title: '길이 (m)', key: 'length', align: 'end', width: '90px' },
+  { title: '우선순위', key: 'priority', align: 'center', width: '90px' },
+  { title: '공정 유형', key: 'processType', align: 'center', width: '100px' },
+  { title: '통과 가능', key: 'passYn', align: 'center', width: '90px' },
+  { title: '가용 상태', key: 'usableYn', align: 'center', width: '90px' },
+  { title: t('table.useState'), key: 'useYn', align: 'center', width: '90px' },
+  { title: '설명', key: 'description', align: 'start', width: '200px' },
+  { title: t('table.eventUser'), key: 'lastEventUser', align: 'center', width: '100px' },
+  { title: t('table.eventTime'), key: 'lastEventTime', align: 'center', width: '160px' },
 ]
 
-// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
+// 1. 목록 조회는 useDataTable 전담
 const { items, totalItems, loading, options, loadData, updateOptions } =
   useDataTable(fetchWcsRouteLinksApi)
 
@@ -297,24 +318,24 @@ function getSanitizedParams() {
     params.factoryName = searchParams.factoryName
   }
   if (searchParams.routeLinkId && searchParams.routeLinkId.trim() !== '') {
-    params.routeLinkId = searchParams.routeLinkId.trim()
+    params.routeLinkId = Number(searchParams.routeLinkId.trim())
   }
-  if (searchParams.fromNode && searchParams.fromNode.trim() !== '') {
-    params.fromNode = searchParams.fromNode.trim()
+  if (searchParams.fromNodeId && searchParams.fromNodeId.trim() !== '') {
+    params.fromNodeId = searchParams.fromNodeId.trim()
   }
-  if (searchParams.toNode && searchParams.toNode.trim() !== '') {
-    params.toNode = searchParams.toNode.trim()
+  if (searchParams.toNodeId && searchParams.toNodeId.trim() !== '') {
+    params.toNodeId = searchParams.toNodeId.trim()
   }
-  if (searchParams.direction && searchParams.direction !== '전체') {
-    params.direction = searchParams.direction
+  if (searchParams.routeLinkType && searchParams.routeLinkType !== '전체') {
+    params.routeLinkType = searchParams.routeLinkType
   }
-  if (searchParams.useState && searchParams.useState !== '전체') {
-    params.useState = searchParams.useState
+  if (searchParams.useYn && searchParams.useYn !== '전체') {
+    params.useYn = searchParams.useYn
   }
   return params
 }
 
-// 데이터 정규화 및 바인딩 리스트 계산 (2개 복합키 compositeKey 결합)
+// 응답 DTO 필드 정규화
 const displayItems = computed(function () {
   const list = items.value || []
   const result = []
@@ -322,62 +343,33 @@ const displayItems = computed(function () {
   for (let i = 0; i < list.length; i++) {
     const raw = list[i]
     if (raw) {
-      const fn = raw.factoryName || 'INSERT'
-      const rId = raw.routeLinkId != null ? raw.routeLinkId : (raw.linkId != null ? raw.linkId : (i + 1))
-      const fnNode = raw.fromNode != null ? raw.fromNode : (raw.fromNodeId != null ? raw.fromNodeId : '')
-      const toNode = raw.toNode != null ? raw.toNode : (raw.toNodeId != null ? raw.toNodeId : '')
+      const fn = raw.factoryName || 'insert'
+      const rId = raw.routeLinkId != null ? raw.routeLinkId : i + 1
 
       result.push({
         ...raw,
         compositeKey: fn + '_' + rId,
         factoryName: fn,
         routeLinkId: rId,
-        linkName: raw.linkName || raw.name || ('LINK-' + fnNode + '-' + toNode),
-        fromNode: fnNode,
-        toNode: toNode,
-        distance: raw.distance != null ? raw.distance : 0,
-        speedLimit: raw.speedLimit != null ? raw.speedLimit : (raw.maxSpeed != null ? raw.maxSpeed : 0),
-        direction: raw.direction || raw.directionType || 'ONE_WAY',
-        linkType: raw.linkType || 'CONVEYOR',
-        useState: raw.useState || (raw.useYn === 'N' ? 'UNUSE' : 'USE'),
-        eventUser: raw.eventUser || raw.lastEventUser || '-',
-        eventTime: raw.eventTime || raw.lastEventTime || null,
-        eventComment: raw.eventComment || raw.lastEventComment || '',
+        fromNodeId: raw.fromNodeId || '-',
+        toNodeId: raw.toNodeId || '-',
+        routeLinkType: raw.routeLinkType || 'INTER',
+        length: raw.length != null ? raw.length : 1,
+        priority: raw.priority != null ? raw.priority : 0,
+        processType: raw.processType || 'ALL',
+        passYn: raw.passYn || 'Y',
+        usableYn: raw.usableYn || 'Y',
+        useYn: raw.useYn || 'Y',
+        description: raw.description || '-',
+        lastEventUser: raw.lastEventUser || raw.eventUser || '-',
+        lastEventTime: raw.lastEventTime || raw.eventTime || null,
+        lastEventComment: raw.lastEventComment || raw.eventComment || '',
       })
     }
   }
 
   return result
 })
-
-function getDirectionColor(direction) {
-  if (!direction) return 'grey'
-  const d = String(direction).toUpperCase()
-  if (d === 'ONE_WAY') return 'primary'
-  if (d === 'BI_DIRECTIONAL') return 'teal'
-  if (d === 'REVERSE') return 'orange'
-  return 'blue-grey'
-}
-
-function getUseStateColor(state) {
-  if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return 'success'
-  }
-  if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return 'grey'
-  }
-  return 'default'
-}
-
-function getUseStateText(state) {
-  if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return t('common.use')
-  }
-  if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return t('common.unuse')
-  }
-  return state || '-'
-}
 
 function formatNumber(value) {
   if (value === null || value === undefined || value === '') return '0'
@@ -393,10 +385,10 @@ function handleSearch() {
 function handleReset() {
   searchParams.factoryName = '전체'
   searchParams.routeLinkId = ''
-  searchParams.fromNode = ''
-  searchParams.toNode = ''
-  searchParams.direction = '전체'
-  searchParams.useState = '전체'
+  searchParams.fromNodeId = ''
+  searchParams.toNodeId = ''
+  searchParams.routeLinkType = '전체'
+  searchParams.useYn = '전체'
   options.page = 0
   loadData(getSanitizedParams())
 }
@@ -405,7 +397,6 @@ function onUpdateOptions(newOptions) {
   updateOptions(newOptions, getSanitizedParams())
 }
 
-// [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
 function onAddLink() {
   panelStore.openPanel(markRaw(RouteLinkViewForm), {
     mode: 'CREATE',
@@ -417,9 +408,8 @@ function onAddLink() {
   })
 }
 
-// 행(Row) 클릭 시 수정 모드로 우측 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   panelStore.openPanel(markRaw(RouteLinkViewForm), {
     mode: 'UPDATE',
     data: itemData,
@@ -440,24 +430,25 @@ function handleExport() {
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    '소속공장,링크ID,링크명칭,시작노드,도착노드,거리(m),제한속도(m/s),방향성,링크타입,사용여부,수정자,수정일시,비고\n'
+    '소속공장,링크ID,시작노드,도착노드,링크타입,길이(m),우선순위,공정유형,통과여부,가용여부,사용여부,설명,수정자,수정일시\n'
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]
     const row = [
       item.factoryName || '',
       item.routeLinkId != null ? item.routeLinkId : '',
-      item.linkName || '',
-      item.fromNode || '',
-      item.toNode || '',
-      item.distance != null ? item.distance : 0,
-      item.speedLimit != null ? item.speedLimit : 0,
-      item.direction || '',
-      item.linkType || '',
-      getUseStateText(item.useState),
-      item.eventUser || '',
-      formatDateTime(item.eventTime),
-      '"' + (item.eventComment ? item.eventComment.replace(/"/g, '""') : '') + '"',
+      item.fromNodeId || '',
+      item.toNodeId || '',
+      item.routeLinkType || '',
+      item.length != null ? item.length : 0,
+      item.priority != null ? item.priority : 0,
+      item.processType || '',
+      item.passYn || '',
+      item.usableYn || '',
+      item.useYn || 'Y',
+      '"' + (item.description ? item.description.replace(/"/g, '""') : '') + '"',
+      item.lastEventUser || '',
+      formatDateTime(item.lastEventTime),
     ]
     csvContent = csvContent + row.join(',') + '\n'
   }
@@ -480,18 +471,15 @@ onMounted(function () {
 .view-page-container {
   max-width: 100%;
 }
-
 .search-filter-panel {
   border: 1px solid rgba(0, 0, 0, 0.05);
 }
-
 .action-button-group {
   gap: 8px;
 }
-
 .comment-text-cell {
   display: block;
-  max-width: 150px;
+  max-width: 180px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

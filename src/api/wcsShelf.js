@@ -69,3 +69,12 @@ export function deleteWcsShelfApi(factoryName, stockerName, shelfName, params) {
     encodeURIComponent(shelfName)
   return axiosInstance.delete(path, { params: params })
 }
+
+/**
+ * Shelf 일괄 저장
+ * @param {Object} payload - { factoryName, zoneName, eventName, eventUser, eventComment, shelfList: [{ factoryName, shelfName, stockerName }] }
+ * @returns {Promise<Object>} API 응답 데이터
+ */
+export function saveBatchShelfApi(payload) {
+  return axiosInstance.post('/v1/wcs/shelf/batch-save', payload)
+}

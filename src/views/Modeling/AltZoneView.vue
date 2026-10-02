@@ -5,7 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$transfer" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">대체존(Alternative Zone) 설정</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis"
+            >대체존(Alternative Zone) 설정</span
+          >
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.modeling.altZone.breadcrumb') }}
           </v-chip>
@@ -67,8 +69,8 @@
           <v-col cols="12" sm="6" md="3">
             <v-text-field
               v-model="searchParams.sourceZoneName"
-              label="원본 존 명칭"
-              placeholder="예: ZONE_A, RAW_MAT"
+              label="기준(원본) 존 명칭"
+              placeholder="예: TESTZONE001"
               variant="outlined"
               density="compact"
               hide-details
@@ -82,7 +84,7 @@
             <v-text-field
               v-model="searchParams.alternativeZoneName"
               label="대체 존 명칭"
-              placeholder="예: ZONE_B, BUFFER"
+              placeholder="예: TESTZONE002"
               variant="outlined"
               density="compact"
               hide-details
@@ -92,7 +94,7 @@
           </v-col>
 
           <!-- 우선순위 -->
-          <v-col cols="12" sm="6" md="1">
+          <v-col cols="12" sm="6" md="2">
             <v-text-field
               v-model="searchParams.priority"
               label="우선순위"
@@ -108,8 +110,8 @@
           <!-- 사용 여부 -->
           <v-col cols="12" sm="6" md="1">
             <v-select
-              v-model="searchParams.useState"
-              :items="useStateFilterOptions"
+              v-model="searchParams.useYn"
+              :items="useYnFilterOptions"
               :label="$t('table.useYn')"
               variant="outlined"
               density="compact"
@@ -118,7 +120,7 @@
           </v-col>
 
           <!-- 검색 및 초기화 버튼 -->
-          <v-col cols="12" sm="6" md="2" class="d-flex align-center">
+          <v-col cols="12" sm="6" md="1" class="d-flex align-center">
             <v-btn
               color="primary"
               variant="flat"
@@ -140,7 +142,7 @@
         </v-row>
       </div>
 
-      <!-- 중앙 데이터 테이블 (useDataTable 컴포저블 전담 연동) -->
+      <!-- 중앙 데이터 테이블 -->
       <BaseDataTable
         :headers="headers"
         :items="displayItems"
@@ -151,7 +153,7 @@
         v-on:update:options="onUpdateOptions"
         v-on:click:row="onRowClick"
       >
-        <!-- 원본 존 하이라이트 -->
+        <!-- 기준(원본) 존 하이라이트 -->
         <template #[`item.sourceZoneName`]="{ item }">
           <span class="font-weight-bold text-primary">{{ item.sourceZoneName }}</span>
         </template>
@@ -168,37 +170,34 @@
           <span class="font-weight-bold">{{ item.alternativeZoneName }}</span>
         </template>
 
-        <!-- 임계 적재율 포맷팅 -->
-        <template #[`item.threshold`]="{ item }">
-          <span class="font-weight-medium text-indigo">{{ item.threshold }}%</span>
-        </template>
-
-        <!-- 최대 수용 수량 -->
-        <template #[`item.maxCount`]="{ item }">
-          <span>{{ formatNumber(item.maxCount) }}</span>
-        </template>
-
         <!-- 사용 여부 칩 -->
-        <template #[`item.useState`]="{ item }">
+        <template #[`item.useYn`]="{ item }">
           <v-chip
-            :color="getUseStateColor(item.useState)"
+            :color="item.useYn === 'Y' ? 'success' : 'grey'"
             size="x-small"
             variant="flat"
             class="font-weight-bold"
           >
-            {{ getUseStateText(item.useState) }}
+            {{ item.useYn === 'Y' ? $t('common.use') : $t('common.unuse') }}
           </v-chip>
         </template>
 
+        <!-- 설명 말줄임 -->
+        <template #[`item.description`]="{ item }">
+          <span :title="item.description" class="comment-text-cell">
+            {{ item.description || '-' }}
+          </span>
+        </template>
+
         <!-- 수정 일시 포맷팅 -->
-        <template #[`item.eventTime`]="{ item }">
-          <span class="text-caption">{{ formatDateTime(item.eventTime) }}</span>
+        <template #[`item.lastEventTime`]="{ item }">
+          <span class="text-caption">{{ formatDateTime(item.lastEventTime) }}</span>
         </template>
 
         <!-- 비고 말줄임 -->
-        <template #[`item.eventComment`]="{ item }">
-          <span :title="item.eventComment" class="comment-text-cell">
-            {{ item.eventComment || '-' }}
+        <template #[`item.lastEventComment`]="{ item }">
+          <span :title="getCommentTooltip(item)" class="comment-text-cell">
+            {{ item.lastEventComment || item.lastEventName || '-' }}
           </span>
         </template>
 
@@ -225,38 +224,37 @@ import { fetchWcsAlternativeStorageZonesApi } from '@/api/wcsAlternativeStorageZ
 import { formatDateTime } from '@/utils/dateUtils'
 
 const panelStore = usePanelStore()
-
-// 검색 파라미터 상태
 const { t } = useI18n()
 
+// 검색 파라미터 상태
 const searchParams = reactive({
   factoryName: '전체',
   sourceZoneName: '',
   alternativeZoneName: '',
   priority: '',
-  useState: '전체',
+  useYn: '전체',
 })
 
-const factoryFilterOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
-const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
+const factoryFilterOptions = ['전체', 'insert', 'powder', 'common']
+const useYnFilterOptions = ['전체', 'Y', 'N']
 
-// 테이블 컬럼 정의
+// 백엔드 DTO(WcsAlternativeStorageZoneResponse) 규격에 일치하는 헤더 목록
 const headers = [
   { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
-  { title: '기준(원본) 존', key: 'sourceZoneName', align: 'start', width: '150px', sortable: true },
-  { title: t('table.priority'), key: 'priority', align: 'center', width: '90px' },
-  { title: '대체 존', key: 'alternativeZoneName', align: 'start', width: '150px' },
-  { title: '전환 조건 (임계치)', key: 'threshold', align: 'end', width: '130px' },
-  { title: '최대 수용량', key: 'maxCount', align: 'end', width: '110px' },
-  { title: t('table.useState'), key: 'useState', align: 'center', width: '100px' },
-  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '100px' },
-  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
-  { title: t('table.eventComment'), key: 'eventComment', align: 'start', width: '150px' },
+  { title: '기준(원본) 존', key: 'sourceZoneName', align: 'start', width: '160px', sortable: true },
+  { title: t('table.priority'), key: 'priority', align: 'center', width: '100px', sortable: true },
+  { title: '대체 존', key: 'alternativeZoneName', align: 'start', width: '160px' },
+  { title: t('table.useState'), key: 'useYn', align: 'center', width: '100px' },
+  { title: '설명', key: 'description', align: 'start', width: '200px' },
+  { title: t('table.eventUser'), key: 'lastEventUser', align: 'center', width: '110px' },
+  { title: t('table.eventTime'), key: 'lastEventTime', align: 'center', width: '160px' },
+  { title: t('table.eventComment'), key: 'lastEventComment', align: 'start', width: '160px' },
 ]
 
-// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
-const { items, totalItems, loading, options, loadData, updateOptions } =
-  useDataTable(fetchWcsAlternativeStorageZonesApi)
+// 목록 조회는 useDataTable 전담
+const { items, totalItems, loading, options, loadData, updateOptions } = useDataTable(
+  fetchWcsAlternativeStorageZonesApi,
+)
 
 function getSanitizedParams() {
   const params = {}
@@ -269,16 +267,20 @@ function getSanitizedParams() {
   if (searchParams.alternativeZoneName && searchParams.alternativeZoneName.trim() !== '') {
     params.alternativeZoneName = searchParams.alternativeZoneName.trim()
   }
-  if (searchParams.priority !== '' && searchParams.priority !== null && searchParams.priority !== undefined) {
+  if (
+    searchParams.priority !== '' &&
+    searchParams.priority !== null &&
+    searchParams.priority !== undefined
+  ) {
     params.priority = Number(searchParams.priority)
   }
-  if (searchParams.useState && searchParams.useState !== '전체') {
-    params.useState = searchParams.useState
+  if (searchParams.useYn && searchParams.useYn !== '전체') {
+    params.useYn = searchParams.useYn
   }
   return params
 }
 
-// 데이터 정규화 및 바인딩 리스트 계산 (4개 복합키 compositeKey 결합)
+// 4개 복합키(factoryName + sourceZoneName + alternativeZoneName + priority) 결합 및 필드 정규화
 const displayItems = computed(function () {
   const list = items.value || []
   const result = []
@@ -286,11 +288,10 @@ const displayItems = computed(function () {
   for (let i = 0; i < list.length; i++) {
     const raw = list[i]
     if (raw) {
-      const fn = raw.factoryName || 'INSERT'
-      const sz = raw.sourceZoneName || raw.primaryZone || ''
-      const az = raw.alternativeZoneName || raw.altZone || ''
-      const pri = raw.priority != null ? raw.priority : (i + 1)
-      const th = raw.threshold != null ? raw.threshold : (raw.thresholdRate != null ? raw.thresholdRate : 90)
+      const fn = raw.factoryName || 'insert'
+      const sz = raw.sourceZoneName || ''
+      const az = raw.alternativeZoneName || ''
+      const pri = raw.priority != null ? raw.priority : i + 1
 
       result.push({
         ...raw,
@@ -299,12 +300,12 @@ const displayItems = computed(function () {
         sourceZoneName: sz,
         alternativeZoneName: az,
         priority: pri,
-        threshold: th,
-        maxCount: raw.maxCount != null ? raw.maxCount : (raw.maxCapacity != null ? raw.maxCapacity : 0),
-        useState: raw.useState || (raw.activeYn === 'N' || raw.useYn === 'N' ? 'UNUSE' : 'USE'),
-        eventUser: raw.eventUser || raw.lastEventUser || '-',
-        eventTime: raw.eventTime || raw.lastEventTime || raw.updatedAt || null,
-        eventComment: raw.eventComment || raw.lastEventComment || raw.description || '',
+        useYn: raw.useYn || 'Y',
+        description: raw.description || '-',
+        lastEventUser: raw.lastEventUser || raw.eventUser || '-',
+        lastEventTime: raw.lastEventTime || raw.eventTime || null,
+        lastEventName: raw.lastEventName || '',
+        lastEventComment: raw.lastEventComment || raw.eventComment || '',
       })
     }
   }
@@ -312,30 +313,11 @@ const displayItems = computed(function () {
   return result
 })
 
-function getUseStateColor(state) {
-  if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return 'success'
-  }
-  if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return 'grey'
-  }
-  return 'default'
-}
-
-function getUseStateText(state) {
-  if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return t('common.use')
-  }
-  if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return t('common.unuse')
-  }
-  return state || '-'
-}
-
-function formatNumber(value) {
-  if (value === null || value === undefined || value === '') return '0'
-  const num = Number(value)
-  return isNaN(num) ? String(value) : num.toLocaleString()
+function getCommentTooltip(item) {
+  const parts = []
+  if (item.lastEventName) parts.push('[' + item.lastEventName + ']')
+  if (item.lastEventComment) parts.push(item.lastEventComment)
+  return parts.length > 0 ? parts.join(' ') : '-'
 }
 
 function handleSearch() {
@@ -348,7 +330,7 @@ function handleReset() {
   searchParams.sourceZoneName = ''
   searchParams.alternativeZoneName = ''
   searchParams.priority = ''
-  searchParams.useState = '전체'
+  searchParams.useYn = '전체'
   options.page = 0
   loadData(getSanitizedParams())
 }
@@ -357,7 +339,6 @@ function onUpdateOptions(newOptions) {
   updateOptions(newOptions, getSanitizedParams())
 }
 
-// [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
 function onAddAltZone() {
   panelStore.openPanel(markRaw(AltZoneViewForm), {
     mode: 'CREATE',
@@ -369,9 +350,8 @@ function onAddAltZone() {
   })
 }
 
-// 행(Row) 클릭 시 수정 모드로 우측 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   panelStore.openPanel(markRaw(AltZoneViewForm), {
     mode: 'UPDATE',
     data: itemData,
@@ -391,8 +371,7 @@ function handleExport() {
 
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
-    csvContent +
-    '소속공장,기준(원본)존,우선순위,대체존,임계적재율(%),최대수용량,사용여부,수정자,수정일시,비고\n'
+    csvContent + '소속공장,기준(원본)존,우선순위,대체존,사용여부,설명,수정자,수정일시,비고\n'
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]
@@ -401,12 +380,11 @@ function handleExport() {
       item.sourceZoneName || '',
       item.priority != null ? item.priority : '',
       item.alternativeZoneName || '',
-      item.threshold != null ? item.threshold + '%' : '',
-      item.maxCount != null ? item.maxCount : 0,
-      getUseStateText(item.useState),
-      item.eventUser || '',
-      formatDateTime(item.eventTime),
-      '"' + (item.eventComment ? item.eventComment.replace(/"/g, '""') : '') + '"',
+      item.useYn || 'Y',
+      '"' + (item.description ? item.description.replace(/"/g, '""') : '') + '"',
+      item.lastEventUser || '',
+      formatDateTime(item.lastEventTime),
+      '"' + (item.lastEventComment ? item.lastEventComment.replace(/"/g, '""') : '') + '"',
     ]
     csvContent = csvContent + row.join(',') + '\n'
   }
@@ -414,7 +392,10 @@ function handleExport() {
   const encodedUri = encodeURI(csvContent)
   const link = document.createElement('a')
   link.setAttribute('href', encodedUri)
-  link.setAttribute('download', 'AlternativeZones_' + new Date().toISOString().slice(0, 10) + '.csv')
+  link.setAttribute(
+    'download',
+    'AlternativeZones_' + new Date().toISOString().slice(0, 10) + '.csv',
+  )
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)

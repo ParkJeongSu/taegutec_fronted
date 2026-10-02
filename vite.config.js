@@ -38,6 +38,10 @@ export default defineConfig(function (configEnv) {
         autoInstall: true, // 없는 아이콘을 쓸 때 자동으로 패키지 설치
       }),
     ],
+    build: {
+      outDir: 'dist',
+      emptyOutDir: true, // 빌드 시 dist 폴더 비우기 강제
+    },
     define: {
       // sockjs-client의 Node.js 전역 객체 참조 에러 해결
       global: 'window',

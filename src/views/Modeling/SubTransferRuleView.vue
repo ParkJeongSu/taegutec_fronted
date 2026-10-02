@@ -5,7 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$cogSyncOutline" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">Sub Transfer Rule (하위 반송 규칙)</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis"
+            >세부 반송 룰(Sub Transfer Rule) 관리</span
+          >
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.modeling.subTransferRule.breadcrumb') }}
           </v-chip>
@@ -68,7 +70,7 @@
             <v-text-field
               v-model="searchParams.equipmentName"
               label="설비 명칭"
-              placeholder="예: STK-01, AGV"
+              placeholder="예: WH1, STK01"
               variant="outlined"
               density="compact"
               hide-details
@@ -82,7 +84,7 @@
             <v-text-field
               v-model="searchParams.moduleName"
               label="모듈 명칭"
-              placeholder="예: CRANE-1, MOD-01"
+              placeholder="예: CR01, CONV01"
               variant="outlined"
               density="compact"
               hide-details
@@ -95,8 +97,8 @@
           <v-col cols="12" sm="6" md="2">
             <v-text-field
               v-model="searchParams.routeLinkId"
-              label="링크 ID"
-              placeholder="예: 1"
+              label="라우트 링크 ID"
+              placeholder="예: 1000"
               type="number"
               variant="outlined"
               density="compact"
@@ -105,24 +107,12 @@
             ></v-text-field>
           </v-col>
 
-          <!-- 규칙 유형 -->
+          <!-- 모듈 타입 -->
           <v-col cols="12" sm="6" md="2">
             <v-select
-              v-model="searchParams.ruleType"
-              :items="ruleTypeFilterOptions"
-              label="규칙 유형"
-              variant="outlined"
-              density="compact"
-              hide-details
-            ></v-select>
-          </v-col>
-
-          <!-- 사용 여부 -->
-          <v-col cols="12" sm="6" md="1">
-            <v-select
-              v-model="searchParams.useState"
-              :items="useStateFilterOptions"
-              :label="$t('table.useYn')"
+              v-model="searchParams.moduleType"
+              :items="moduleTypeFilterOptions"
+              label="모듈 타입"
               variant="outlined"
               density="compact"
               hide-details
@@ -130,7 +120,7 @@
           </v-col>
 
           <!-- 검색 및 초기화 버튼 -->
-          <v-col cols="12" sm="6" md="1" class="d-flex align-center">
+          <v-col cols="12" sm="12" md="2" class="d-flex align-center justify-end">
             <v-btn
               color="primary"
               variant="flat"
@@ -170,7 +160,7 @@
 
         <!-- 모듈 명칭 -->
         <template #[`item.moduleName`]="{ item }">
-          <span class="font-weight-medium">{{ item.moduleName }}</span>
+          <span class="font-weight-bold">{{ item.moduleName }}</span>
         </template>
 
         <!-- 라우트 링크 ID -->
@@ -180,58 +170,51 @@
           </v-chip>
         </template>
 
-        <!-- 우선순위 -->
-        <template #[`item.priority`]="{ item }">
-          <v-chip size="x-small" color="secondary" variant="flat" class="font-weight-bold">
-            {{ item.priority }}
-          </v-chip>
-        </template>
-
-        <!-- 규칙 유형 칩 -->
-        <template #[`item.ruleType`]="{ item }">
+        <!-- 모듈 타입 칩 -->
+        <template #[`item.moduleType`]="{ item }">
           <v-chip
-            :color="getRuleTypeColor(item.ruleType)"
+            :color="getModuleTypeColor(item.moduleType)"
             size="x-small"
             variant="tonal"
-            class="font-weight-medium"
+            class="font-weight-bold"
           >
-            {{ item.ruleType || '-' }}
+            {{ item.moduleType || '-' }}
           </v-chip>
         </template>
 
-        <!-- 동작 유형 칩 -->
-        <template #[`item.actionType`]="{ item }">
+        <!-- 캐리어 수량 -->
+        <template #[`item.carrierCount`]="{ item }">
+          <span class="font-weight-medium">{{ formatNumber(item.carrierCount) }}</span>
+        </template>
+
+        <!-- NG 상태 칩 -->
+        <template #[`item.ngStatus`]="{ item }">
           <v-chip
-            :color="getActionTypeColor(item.actionType)"
+            :color="getNgStatusColor(item.ngStatus)"
             size="x-small"
             variant="flat"
             class="font-weight-bold"
           >
-            {{ item.actionType || '-' }}
+            {{ item.ngStatus || '-' }}
           </v-chip>
         </template>
 
-        <!-- 사용 여부 칩 -->
-        <template #[`item.useState`]="{ item }">
-          <v-chip
-            :color="getUseStateColor(item.useState)"
-            size="x-small"
-            variant="flat"
-            class="font-weight-bold"
-          >
-            {{ getUseStateText(item.useState) }}
-          </v-chip>
+        <!-- 설명 말줄임 -->
+        <template #[`item.description`]="{ item }">
+          <span :title="item.description" class="comment-text-cell">
+            {{ item.description || '-' }}
+          </span>
         </template>
 
         <!-- 수정 일시 포맷팅 -->
-        <template #[`item.eventTime`]="{ item }">
-          <span class="text-caption">{{ formatDateTime(item.eventTime) }}</span>
+        <template #[`item.lastEventTime`]="{ item }">
+          <span class="text-caption">{{ formatDateTime(item.lastEventTime) }}</span>
         </template>
 
         <!-- 비고 말줄임 -->
-        <template #[`item.eventComment`]="{ item }">
-          <span :title="item.eventComment" class="comment-text-cell">
-            {{ item.eventComment || '-' }}
+        <template #[`item.lastEventComment`]="{ item }">
+          <span :title="getCommentTooltip(item)" class="comment-text-cell">
+            {{ item.lastEventComment || item.lastEventName || '-' }}
           </span>
         </template>
 
@@ -258,50 +241,39 @@ import { fetchWcsSubTransferRulesApi } from '@/api/wcsSubTransferRule'
 import { formatDateTime } from '@/utils/dateUtils'
 
 const panelStore = usePanelStore()
-
-// 검색 파라미터 상태
 const { t } = useI18n()
 
+// 검색 파라미터 상태
 const searchParams = reactive({
   factoryName: '전체',
   equipmentName: '',
   moduleName: '',
   routeLinkId: '',
-  ruleType: '전체',
-  useState: '전체',
+  moduleType: '전체',
 })
 
-const factoryFilterOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
-const ruleTypeFilterOptions = [
-  '전체',
-  'DIRECT',
-  'SHORTEST_PATH',
-  'CONGESTION_BYPASS',
-  'INTERLOCK',
-  'SPEED_LIMIT',
-  'MANUAL',
-]
-const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
+const factoryFilterOptions = ['전체', 'insert', 'powder', 'common']
+const moduleTypeFilterOptions = ['전체', 'CRANE', 'CONVEYOR', 'PORT', 'VEHICLE', 'STATION']
 
-// 테이블 컬럼 정의
+// 백엔드 WcsSubTransferRuleResponse 필드 기준 테이블 헤더 정의
 const headers = [
-  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '90px' },
   { title: '설비 명칭', key: 'equipmentName', align: 'start', width: '130px', sortable: true },
   { title: '모듈 명칭', key: 'moduleName', align: 'start', width: '130px', sortable: true },
   { title: '링크 ID', key: 'routeLinkId', align: 'center', width: '110px', sortable: true },
-  { title: t('table.priority'), key: 'priority', align: 'center', width: '90px' },
-  { title: '규칙 명칭', key: 'ruleName', align: 'start', width: '180px' },
-  { title: '규칙 유형', key: 'ruleType', align: 'center', width: '140px' },
-  { title: '동작 유형', key: 'actionType', align: 'center', width: '110px' },
-  { title: t('table.useState'), key: 'useState', align: 'center', width: '100px' },
-  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '100px' },
-  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
-  { title: t('table.eventComment'), key: 'eventComment', align: 'start', width: '150px' },
+  { title: '모듈 타입', key: 'moduleType', align: 'center', width: '110px' },
+  { title: '캐리어 수량', key: 'carrierCount', align: 'end', width: '100px' },
+  { title: '불량(NG) 상태', key: 'ngStatus', align: 'center', width: '110px' },
+  { title: '설명', key: 'description', align: 'start', width: '180px' },
+  { title: t('table.eventUser'), key: 'lastEventUser', align: 'center', width: '100px' },
+  { title: t('table.eventTime'), key: 'lastEventTime', align: 'center', width: '160px' },
+  { title: t('table.eventComment'), key: 'lastEventComment', align: 'start', width: '160px' },
 ]
 
-// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
-const { items, totalItems, loading, options, loadData, updateOptions } =
-  useDataTable(fetchWcsSubTransferRulesApi)
+// 1. 목록 조회는 useDataTable 전담
+const { items, totalItems, loading, options, loadData, updateOptions } = useDataTable(
+  fetchWcsSubTransferRulesApi,
+)
 
 function getSanitizedParams() {
   const params = {}
@@ -314,19 +286,20 @@ function getSanitizedParams() {
   if (searchParams.moduleName && searchParams.moduleName.trim() !== '') {
     params.moduleName = searchParams.moduleName.trim()
   }
-  if (searchParams.routeLinkId !== '' && searchParams.routeLinkId !== null && searchParams.routeLinkId !== undefined) {
+  if (
+    searchParams.routeLinkId !== '' &&
+    searchParams.routeLinkId !== null &&
+    searchParams.routeLinkId !== undefined
+  ) {
     params.routeLinkId = Number(searchParams.routeLinkId)
   }
-  if (searchParams.ruleType && searchParams.ruleType !== '전체') {
-    params.ruleType = searchParams.ruleType
-  }
-  if (searchParams.useState && searchParams.useState !== '전체') {
-    params.useState = searchParams.useState
+  if (searchParams.moduleType && searchParams.moduleType !== '전체') {
+    params.moduleType = searchParams.moduleType
   }
   return params
 }
 
-// 데이터 정규화 및 바인딩 리스트 계산 (4개 복합키 compositeKey 결합)
+// 데이터 정규화 및 4개 복합키(factoryName + equipmentName + moduleName + routeLinkId) 결합
 const displayItems = computed(function () {
   const list = items.value || []
   const result = []
@@ -334,14 +307,10 @@ const displayItems = computed(function () {
   for (let i = 0; i < list.length; i++) {
     const raw = list[i]
     if (raw) {
-      const fn = raw.factoryName || 'INSERT'
-      const eq = raw.equipmentName || raw.eqpName || ''
-      const mod = raw.moduleName || raw.modName || ''
-      const rId = raw.routeLinkId != null ? raw.routeLinkId : (raw.linkId != null ? raw.linkId : (i + 1))
-      const pri = raw.priority != null ? raw.priority : 1
-      const rName = raw.ruleName || raw.subRuleName || ('RULE-' + eq + '-' + mod)
-      const rType = raw.ruleType || raw.subRuleType || raw.algorithm || 'DIRECT'
-      const aType = raw.actionType || raw.action || 'TRANSFER'
+      const fn = raw.factoryName || 'insert'
+      const eq = raw.equipmentName || ''
+      const mod = raw.moduleName || ''
+      const rId = raw.routeLinkId != null ? raw.routeLinkId : i + 1
 
       result.push({
         ...raw,
@@ -350,14 +319,14 @@ const displayItems = computed(function () {
         equipmentName: eq,
         moduleName: mod,
         routeLinkId: rId,
-        priority: pri,
-        ruleName: rName,
-        ruleType: rType,
-        actionType: aType,
-        useState: raw.useState || (raw.activeYn === 'N' || raw.useYn === 'N' ? 'UNUSE' : 'USE'),
-        eventUser: raw.eventUser || raw.lastEventUser || '-',
-        eventTime: raw.eventTime || raw.lastEventTime || null,
-        eventComment: raw.eventComment || raw.lastEventComment || raw.description || '',
+        carrierCount: raw.carrierCount != null ? raw.carrierCount : 0,
+        moduleType: raw.moduleType || '-',
+        ngStatus: raw.ngStatus || '-',
+        description: raw.description || '-',
+        lastEventUser: raw.lastEventUser || raw.eventUser || '-',
+        lastEventTime: raw.lastEventTime || raw.eventTime || null,
+        lastEventName: raw.lastEventName || '',
+        lastEventComment: raw.lastEventComment || raw.eventComment || '',
       })
     }
   }
@@ -365,46 +334,36 @@ const displayItems = computed(function () {
   return result
 })
 
-function getRuleTypeColor(type) {
+function getModuleTypeColor(type) {
   if (!type) return 'grey'
   const t = String(type).toUpperCase()
-  if (t === 'SHORTEST_PATH') return 'primary'
-  if (t === 'CONGESTION_BYPASS') return 'orange'
-  if (t === 'INTERLOCK') return 'error'
-  if (t === 'SPEED_LIMIT') return 'warning'
-  if (t === 'DIRECT') return 'teal'
+  if (t === 'CRANE') return 'primary'
+  if (t === 'CONVEYOR') return 'teal'
+  if (t === 'PORT') return 'indigo'
+  if (t === 'VEHICLE') return 'orange'
   return 'blue-grey'
 }
 
-function getActionTypeColor(action) {
-  if (!action) return 'grey'
-  const a = String(action).toUpperCase()
-  if (a === 'TRANSFER') return 'primary'
-  if (a === 'WAIT') return 'warning'
-  if (a === 'STOP') return 'error'
-  if (a === 'BYPASS') return 'deep-purple'
-  if (a === 'ROTATE') return 'indigo'
-  return 'grey'
+function getNgStatusColor(status) {
+  if (!status) return 'grey'
+  const s = String(status).toUpperCase()
+  if (s === 'NORMAL' || s === 'OK' || s === 'GOOD' || s === 'NONE') return 'success'
+  if (s === 'NG' || s === 'ERROR' || s === 'FAULT' || s === 'REJECT') return 'error'
+  if (s === 'WARN' || s === 'WARNING') return 'warning'
+  return 'blue-grey'
 }
 
-function getUseStateColor(state) {
-  if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return 'success'
-  }
-  if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return 'grey'
-  }
-  return 'default'
+function getCommentTooltip(item) {
+  const parts = []
+  if (item.lastEventName) parts.push('[' + item.lastEventName + ']')
+  if (item.lastEventComment) parts.push(item.lastEventComment)
+  return parts.length > 0 ? parts.join(' ') : '-'
 }
 
-function getUseStateText(state) {
-  if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return t('common.use')
-  }
-  if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return t('common.unuse')
-  }
-  return state || '-'
+function formatNumber(value) {
+  if (value === null || value === undefined || value === '') return '0'
+  const num = Number(value)
+  return isNaN(num) ? String(value) : num.toLocaleString()
 }
 
 function handleSearch() {
@@ -417,8 +376,7 @@ function handleReset() {
   searchParams.equipmentName = ''
   searchParams.moduleName = ''
   searchParams.routeLinkId = ''
-  searchParams.ruleType = '전체'
-  searchParams.useState = '전체'
+  searchParams.moduleType = '전체'
   options.page = 0
   loadData(getSanitizedParams())
 }
@@ -427,25 +385,23 @@ function onUpdateOptions(newOptions) {
   updateOptions(newOptions, getSanitizedParams())
 }
 
-// [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
 function onAddRule() {
   panelStore.openPanel(markRaw(SubTransferRuleViewForm), {
     mode: 'CREATE',
     data: null,
-    title: '신규 하위 반송 규칙 등록',
+    title: '신규 세부 반송 룰 등록',
     onSuccess: function () {
       loadData(getSanitizedParams())
     },
   })
 }
 
-// 행(Row) 클릭 시 수정 모드로 우측 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   panelStore.openPanel(markRaw(SubTransferRuleViewForm), {
     mode: 'UPDATE',
     data: itemData,
-    title: '하위 반송 규칙 정보 수정',
+    title: '세부 반송 룰 정보 수정',
     onSuccess: function () {
       loadData(getSanitizedParams())
     },
@@ -455,14 +411,14 @@ function onRowClick(event, row) {
 function handleExport() {
   const list = displayItems.value
   if (!list || list.length === 0) {
-    alert('내보낼 하위 반송 규칙 데이터가 없습니다.')
+    alert('내보낼 세부 반송 룰 데이터가 없습니다.')
     return
   }
 
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    '소속공장,설비명칭,모듈명칭,링크ID,우선순위,규칙명칭,규칙유형,동작유형,사용여부,수정자,수정일시,비고\n'
+    '소속공장,설비명칭,모듈명칭,링크ID,모듈타입,캐리어수량,NG상태,설명,수정자,수정일시,비고\n'
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]
@@ -471,14 +427,13 @@ function handleExport() {
       item.equipmentName || '',
       item.moduleName || '',
       item.routeLinkId != null ? item.routeLinkId : '',
-      item.priority != null ? item.priority : '',
-      item.ruleName || '',
-      item.ruleType || '',
-      item.actionType || '',
-      getUseStateText(item.useState),
-      item.eventUser || '',
-      formatDateTime(item.eventTime),
-      '"' + (item.eventComment ? item.eventComment.replace(/"/g, '""') : '') + '"',
+      item.moduleType || '',
+      item.carrierCount != null ? item.carrierCount : 0,
+      item.ngStatus || '',
+      '"' + (item.description ? item.description.replace(/"/g, '""') : '') + '"',
+      item.lastEventUser || '',
+      formatDateTime(item.lastEventTime),
+      '"' + (item.lastEventComment ? item.lastEventComment.replace(/"/g, '""') : '') + '"',
     ]
     csvContent = csvContent + row.join(',') + '\n'
   }
@@ -486,7 +441,10 @@ function handleExport() {
   const encodedUri = encodeURI(csvContent)
   const link = document.createElement('a')
   link.setAttribute('href', encodedUri)
-  link.setAttribute('download', 'SubTransferRules_' + new Date().toISOString().slice(0, 10) + '.csv')
+  link.setAttribute(
+    'download',
+    'SubTransferRules_' + new Date().toISOString().slice(0, 10) + '.csv',
+  )
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -512,7 +470,7 @@ onMounted(function () {
 
 .comment-text-cell {
   display: block;
-  max-width: 150px;
+  max-width: 160px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -5,7 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$robotIndustrial" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.transfer.carrier.title') }}</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.transfer.carrier.title')
+          }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.transfer.carrier.breadcrumb') }}
           </v-chip>
@@ -77,19 +79,19 @@
             ></v-text-field>
           </v-col>
 
-          <!-- 캐리어 타입 필터 -->
+          <!-- 캐리어 그룹 필터 -->
           <v-col cols="12" sm="6" md="2">
             <v-select
-              v-model="searchParams.carrierType"
-              :items="carrierTypeFilterOptions"
-              :label="$t('table.carrierType')"
+              v-model="searchParams.carrierGroup"
+              :items="carrierGroupFilterOptions"
+              label="캐리어 그룹"
               variant="outlined"
               density="compact"
               hide-details
             ></v-select>
           </v-col>
 
-          <!-- 동작 상태 필터 -->
+          <!-- 캐리어 상태 필터 -->
           <v-col cols="12" sm="6" md="2">
             <v-select
               v-model="searchParams.carrierStatus"
@@ -101,16 +103,18 @@
             ></v-select>
           </v-col>
 
-          <!-- 사용 여부 필터 -->
+          <!-- 소속 설비 필터 -->
           <v-col cols="12" sm="6" md="2">
-            <v-select
-              v-model="searchParams.useState"
-              :items="useStateFilterOptions"
-              :label="$t('table.useYn')"
+            <v-text-field
+              v-model="searchParams.currentEquipmentName"
+              label="현재 설비"
+              placeholder="예: WH1, STK01"
               variant="outlined"
               density="compact"
               hide-details
-            ></v-select>
+              prepend-inner-icon="$magnify"
+              v-on:keyup.enter="handleSearch"
+            ></v-text-field>
           </v-col>
 
           <!-- 검색 및 초기화 버튼 -->
@@ -147,26 +151,21 @@
         v-on:click:row="onRowClick"
         v-on:update:options="onUpdateOptions"
       >
-        <!-- 캐리어 타입 컬럼 -->
-        <template #[`item.carrierType`]="{ item }">
-          <v-chip size="x-small" variant="tonal" color="primary" class="font-weight-bold">
-            {{ item.carrierType }}
+        <!-- 캐리어 명칭 하이라이트 -->
+        <template #[`item.carrierName`]="{ item }">
+          <span class="font-weight-bold text-primary">{{ item.carrierName }}</span>
+        </template>
+
+        <!-- 캐리어 그룹 칩 -->
+        <template #[`item.carrierGroup`]="{ item }">
+          <v-chip size="x-small" variant="outlined" color="primary" class="font-weight-medium">
+            {{ item.carrierGroup || '-' }}
           </v-chip>
         </template>
 
-        <!-- 배터리 컬럼 커스텀 렌더링 -->
-        <template #[`item.battery`]="{ item }">
-          <div class="d-flex align-center justify-center">
-            <v-icon
-              :icon="getBatteryIcon(item.battery)"
-              size="16"
-              :color="getBatteryColor(item.battery)"
-              class="mr-1"
-            />
-            <span class="font-weight-bold" :class="getBatteryTextColor(item.battery)">
-              {{ item.battery }}%
-            </span>
-          </div>
+        <!-- 캐리어 타입 칩 -->
+        <template #[`item.carrierType`]="{ item }">
+          <span class="font-weight-medium">{{ item.carrierType || '-' }}</span>
         </template>
 
         <!-- 동작 상태 컬럼 커스텀 렌더링 -->
@@ -177,28 +176,30 @@
             variant="flat"
             class="font-weight-bold"
           >
-            {{ item.carrierStatus }}
+            {{ item.carrierStatus || '-' }}
           </v-chip>
         </template>
 
-        <!-- 적재 트레이 ID 컬럼 -->
-        <template #[`item.loadedTrayId`]="{ item }">
-          <span v-if="item.loadedTrayId && item.loadedTrayId !== '-'" class="font-weight-medium text-primary">
-            {{ item.loadedTrayId }}
+        <!-- 현재 위치 -->
+        <template #[`item.currentPositionName`]="{ item }">
+          <span class="font-weight-medium">{{ item.currentPositionName || '-' }}</span>
+        </template>
+
+        <!-- 소속 존 -->
+        <template #[`item.zoneName`]="{ item }">
+          <span class="text-blue-grey-darken-1">{{ item.zoneName || '-' }}</span>
+        </template>
+
+        <!-- 수정 일시 포맷팅 -->
+        <template #[`item.lastEventTime`]="{ item }">
+          <span class="text-caption">{{ formatDateTime(item.lastEventTime) }}</span>
+        </template>
+
+        <!-- 비고 말줄임 -->
+        <template #[`item.lastEventComment`]="{ item }">
+          <span :title="getCommentTooltip(item)" class="comment-text-cell">
+            {{ item.lastEventComment || item.lastEventName || '-' }}
           </span>
-          <span v-else class="text-medium-emphasis">-</span>
-        </template>
-
-        <!-- 사용 여부 컬럼 커스텀 렌더링 -->
-        <template #[`item.useState`]="{ item }">
-          <v-chip
-            :color="getUseStateColor(item.useState)"
-            size="x-small"
-            variant="flat"
-            class="font-weight-bold"
-          >
-            {{ getUseStateText(item.useState) }}
-          </v-chip>
         </template>
 
         <!-- 데이터 없음 슬롯 -->
@@ -221,50 +222,49 @@ import CarrierViewForm from './components/CarrierViewForm.vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useDataTable } from '@/composables/useDataTable'
 import { fetchWcsCarriersApi } from '@/api/wcsCarrier'
+import { formatDateTime } from '@/utils/dateUtils'
 
 const panelStore = usePanelStore()
-
-// 검색 파라미터 상태
 const { t } = useI18n()
 
+// 검색 파라미터 상태
 const searchParams = reactive({
   factoryName: '전체',
   carrierName: '',
-  carrierType: '전체',
+  carrierGroup: '전체',
   carrierStatus: '전체',
-  useState: '전체',
+  currentEquipmentName: '',
 })
 
-const factoryFilterOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
-const carrierTypeFilterOptions = ['전체', 'RGV', 'OHT', 'AGV', 'AMR']
-const statusFilterOptions = [
-  '전체',
-  'IDLE',
-  'MOVING',
-  'LOADING',
-  'UNLOADING',
-  'CHARGING',
-  'ERROR',
-  'DOWN',
-]
-const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
+const factoryFilterOptions = ['전체', 'insert', 'powder', 'common']
+const carrierGroupFilterOptions = ['전체', 'Tray', 'Container']
+const statusFilterOptions = ['전체', 'Stored', 'Transferring', 'Abnormal', 'NONE']
 
-// 테이블 컬럼 정의
+// 백엔드 WcsCarrierResponse 필드 기준 테이블 헤더 정의
 const headers = [
-  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
-  { title: t('table.carrierName'), key: 'carrierName', align: 'start', width: '120px' },
-  { title: t('table.carrierType'), key: 'carrierType', align: 'center', width: '90px' },
-  { title: t('table.currentNode'), key: 'currentNode', align: 'start', width: '130px' },
-  { title: t('table.destNode'), key: 'destNode', align: 'start', width: '130px' },
-  { title: t('table.battery'), key: 'battery', align: 'center', width: '110px' },
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '90px' },
+  {
+    title: t('table.carrierName'),
+    key: 'carrierName',
+    align: 'start',
+    width: '150px',
+    sortable: true,
+  },
+  { title: '그룹', key: 'carrierGroup', align: 'center', width: '100px' },
+  { title: t('table.carrierType'), key: 'carrierType', align: 'center', width: '100px' },
   { title: t('table.carrierStatus'), key: 'carrierStatus', align: 'center', width: '110px' },
-  { title: t('table.loadedTrayId'), key: 'loadedTrayId', align: 'center', width: '130px' },
-  { title: t('table.useState'), key: 'useState', align: 'center', width: '90px' },
-  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '100px' },
-  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
+  { title: '현재 설비', key: 'currentEquipmentName', align: 'center', width: '100px' },
+  { title: '현재 위치', key: 'currentPositionName', align: 'center', width: '110px' },
+  { title: '소속 존', key: 'zoneName', align: 'center', width: '90px' },
+  { title: 'Lot 명', key: 'lotName', align: 'start', width: '110px' },
+  { title: 'Order ID', key: 'orderId', align: 'start', width: '110px' },
+  { title: '사용 횟수', key: 'carrierUseCount', align: 'end', width: '90px' },
+  { title: t('table.eventUser'), key: 'lastEventUser', align: 'center', width: '100px' },
+  { title: t('table.eventTime'), key: 'lastEventTime', align: 'center', width: '160px' },
+  { title: t('table.eventComment'), key: 'lastEventComment', align: 'start', width: '160px' },
 ]
 
-// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
+// 1. 목록 조회는 useDataTable 전담
 const { items, totalItems, loading, options, loadData, updateOptions } =
   useDataTable(fetchWcsCarriersApi)
 
@@ -276,19 +276,19 @@ function getSanitizedParams() {
   if (searchParams.carrierName && searchParams.carrierName.trim() !== '') {
     params.carrierName = searchParams.carrierName.trim()
   }
-  if (searchParams.carrierType && searchParams.carrierType !== '전체') {
-    params.carrierType = searchParams.carrierType
+  if (searchParams.carrierGroup && searchParams.carrierGroup !== '전체') {
+    params.carrierGroup = searchParams.carrierGroup
   }
   if (searchParams.carrierStatus && searchParams.carrierStatus !== '전체') {
     params.carrierStatus = searchParams.carrierStatus
   }
-  if (searchParams.useState && searchParams.useState !== '전체') {
-    params.useState = searchParams.useState
+  if (searchParams.currentEquipmentName && searchParams.currentEquipmentName.trim() !== '') {
+    params.currentEquipmentName = searchParams.currentEquipmentName.trim()
   }
   return params
 }
 
-// 복합키 결합 및 데이터 정규화
+// 2개 복합키(factoryName + carrierName) 결합 및 데이터 정규화
 const displayItems = computed(function () {
   const list = items.value || []
   const result = []
@@ -296,23 +296,28 @@ const displayItems = computed(function () {
   for (let i = 0; i < list.length; i++) {
     const raw = list[i]
     if (raw) {
-      const fn = raw.factoryName || 'INSERT'
-      const cn = raw.carrierName || raw.carrierId || ''
+      const fn = raw.factoryName || 'insert'
+      const cn = raw.carrierName || ''
 
       result.push({
         ...raw,
         compositeKey: fn + '_' + cn,
         factoryName: fn,
         carrierName: cn,
-        carrierType: raw.carrierType || raw.type || 'RGV',
-        currentNode: raw.currentNode || '-',
-        destNode: raw.destNode || '-',
-        battery: raw.battery != null ? Number(raw.battery) : 100,
-        carrierStatus: raw.carrierStatus || raw.status || 'IDLE',
-        loadedTrayId: raw.loadedTrayId || raw.trayId || '-',
-        useState: raw.useState || (raw.useYn === 'N' ? 'UNUSE' : 'USE'),
-        eventUser: raw.eventUser || '-',
-        eventTime: raw.eventTime || raw.updateTime || '-',
+        carrierGroup: raw.carrierGroup || '-',
+        carrierType: raw.carrierType || '-',
+        carrierDetailType: raw.carrierDetailType || '-',
+        carrierStatus: raw.carrierStatus || '-',
+        currentEquipmentName: raw.currentEquipmentName || '-',
+        currentPositionName: raw.currentPositionName || '-',
+        zoneName: raw.zoneName || '-',
+        lotName: raw.lotName || '-',
+        orderId: raw.orderId || '-',
+        carrierUseCount: raw.carrierUseCount != null ? raw.carrierUseCount : 0,
+        lastEventUser: raw.lastEventUser || raw.eventUser || '-',
+        lastEventTime: raw.lastEventTime || raw.eventTime || null,
+        lastEventName: raw.lastEventName || '',
+        lastEventComment: raw.lastEventComment || raw.eventComment || '',
       })
     }
   }
@@ -321,72 +326,20 @@ const displayItems = computed(function () {
 })
 
 function getStatusColor(status) {
-  if (status === 'MOVING' || status === 'RUNNING') {
-    return 'info'
-  }
-  if (status === 'LOADING' || status === 'UNLOADING') {
-    return 'primary'
-  }
-  if (status === 'CHARGING') {
-    return 'warning'
-  }
-  if (status === 'IDLE') {
-    return 'success'
-  }
-  if (status === 'ERROR' || status === 'DOWN') {
-    return 'error'
-  }
-  return 'grey'
+  if (!status) return 'grey'
+  const s = String(status).toUpperCase()
+  if (s === 'STORED') return 'success'
+  if (s === 'TRANSFERRING') return 'info'
+  if (s === 'ABNORMAL' || s === 'ERROR' || s === 'FAULT') return 'error'
+  if (s === 'NONE' || s === 'EMPTY') return 'grey'
+  return 'primary'
 }
 
-function getBatteryColor(battery) {
-  const val = Number(battery) || 0
-  if (val < 20) {
-    return 'error'
-  }
-  if (val < 50) {
-    return 'warning'
-  }
-  return 'success'
-}
-
-function getBatteryTextColor(battery) {
-  const val = Number(battery) || 0
-  if (val < 20) {
-    return 'text-error'
-  }
-  if (val < 50) {
-    return 'text-warning'
-  }
-  return 'text-success'
-}
-
-function getBatteryIcon(battery) {
-  const val = Number(battery) || 0
-  if (val <= 10) return '$batteryAlert'
-  if (val <= 30) return '$batteryLow'
-  if (val <= 70) return '$batteryMedium'
-  return '$batteryHigh'
-}
-
-function getUseStateColor(state) {
-  if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return 'success'
-  }
-  if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return 'grey'
-  }
-  return 'default'
-}
-
-function getUseStateText(state) {
-  if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return t('common.use')
-  }
-  if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return t('common.unuse')
-  }
-  return state || '-'
+function getCommentTooltip(item) {
+  const parts = []
+  if (item.lastEventName) parts.push('[' + item.lastEventName + ']')
+  if (item.lastEventComment) parts.push(item.lastEventComment)
+  return parts.length > 0 ? parts.join(' ') : '-'
 }
 
 function handleSearch() {
@@ -397,9 +350,9 @@ function handleSearch() {
 function handleReset() {
   searchParams.factoryName = '전체'
   searchParams.carrierName = ''
-  searchParams.carrierType = '전체'
+  searchParams.carrierGroup = '전체'
   searchParams.carrierStatus = '전체'
-  searchParams.useState = '전체'
+  searchParams.currentEquipmentName = ''
   options.page = 0
   loadData(getSanitizedParams())
 }
@@ -408,7 +361,6 @@ function onUpdateOptions(newOptions) {
   updateOptions(newOptions, getSanitizedParams())
 }
 
-// [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
 function onAddCarrier() {
   panelStore.openPanel(markRaw(CarrierViewForm), {
     mode: 'CREATE',
@@ -420,9 +372,8 @@ function onAddCarrier() {
   })
 }
 
-// 행(Row) 클릭 시 수정 모드로 우측 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   panelStore.openPanel(markRaw(CarrierViewForm), {
     mode: 'UPDATE',
     data: itemData,
@@ -443,22 +394,25 @@ function handleExport() {
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    `${t('table.factoryName')},${t('table.carrierName')},${t('table.carrierType')},${t('table.currentNode')},${t('table.destNode')},${t('table.battery')},${t('table.carrierStatus')},${t('table.loadedTrayId')},${t('table.useState')},${t('table.eventUser')},${t('table.eventTime')}\n`
+    '소속공장,캐리어명,그룹,타입,상태,현재설비,현재위치,소속존,Lot명,OrderId,사용횟수,수정자,수정일시,비고\n'
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]
     const row = [
       item.factoryName || '',
       item.carrierName || '',
+      item.carrierGroup || '',
       item.carrierType || '',
-      item.currentNode || '',
-      item.destNode || '',
-      (item.battery != null ? item.battery : 0) + '%',
       item.carrierStatus || '',
-      item.loadedTrayId || '',
-      item.useState || '',
-      item.eventUser || '',
-      item.eventTime || '',
+      item.currentEquipmentName || '',
+      item.currentPositionName || '',
+      item.zoneName || '',
+      item.lotName || '',
+      item.orderId || '',
+      item.carrierUseCount != null ? item.carrierUseCount : 0,
+      item.lastEventUser || '',
+      formatDateTime(item.lastEventTime),
+      '"' + (item.lastEventComment ? item.lastEventComment.replace(/"/g, '""') : '') + '"',
     ]
     csvContent = csvContent + row.join(',') + '\n'
   }
@@ -486,5 +440,12 @@ onMounted(function () {
 }
 .carrier-action-buttons {
   gap: 8px;
+}
+.comment-text-cell {
+  display: block;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

@@ -131,6 +131,7 @@ import {
   mdiViewDashboardOutline,
   mdiStairsDown,
   mdiHomeRoof,
+  mdiAccountMultipleCheck,
 } from '@mdi/js'
 
 // 아이콘 별칭(alias)을 만듭니다.
@@ -277,6 +278,7 @@ const aliases = {
   viewDashboardOutline: mdiViewDashboardOutline,
   stairsDown: mdiStairsDown,
   homeRoof: mdiHomeRoof,
+  accountMultipleCheck: mdiAccountMultipleCheck,
 }
 
 // 설정들을 export 합니다.

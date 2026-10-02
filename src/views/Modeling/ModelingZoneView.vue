@@ -68,7 +68,7 @@
             <v-text-field
               v-model="searchParams.zoneName"
               label="존 명칭 (Zone Name)"
-              placeholder="예: ZONE_A, BUF_01"
+              placeholder="예: C1C, EXZONE01"
               variant="outlined"
               density="compact"
               hide-details
@@ -135,9 +135,16 @@
         v-on:update:options="onUpdateOptions"
         v-on:click:row="onRowClick"
       >
-        <!-- 존 명칭 강조 -->
+        <!-- 존 명칭 및 색상 인디케이터 -->
         <template #[`item.zoneName`]="{ item }">
-          <span class="font-weight-bold text-primary">{{ item.zoneName }}</span>
+          <div class="d-flex align-center">
+            <span
+              v-if="item.zoneColor"
+              class="color-dot mr-2"
+              :style="{ backgroundColor: item.zoneColor }"
+            ></span>
+            <span class="font-weight-bold text-primary">{{ item.zoneName }}</span>
+          </div>
         </template>
 
         <!-- 존 타입 칩 -->
@@ -155,18 +162,30 @@
         <!-- 적재 방식 -->
         <template #[`item.loadType`]="{ item }">
           <v-chip size="x-small" variant="outlined" color="blue-grey" class="font-weight-medium">
-            {{ item.loadType || 'SINGLE' }}
+            {{ item.loadType || '-' }}
           </v-chip>
         </template>
 
         <!-- 선반 선택 모드 -->
         <template #[`item.shelfSelectMode`]="{ item }">
-          <span class="font-weight-medium">{{ item.shelfSelectMode || 'NEAREST' }}</span>
+          <v-chip
+            size="x-small"
+            variant="flat"
+            color="blue-grey-lighten-4"
+            class="font-weight-medium"
+          >
+            {{ item.shelfSelectMode || '-' }}
+          </v-chip>
         </template>
 
         <!-- 존 용량 포맷팅 -->
         <template #[`item.zoneCapacity`]="{ item }">
           <span class="font-weight-medium">{{ formatNumber(item.zoneCapacity) }}</span>
+        </template>
+
+        <!-- 존 크기 포맷팅 -->
+        <template #[`item.zoneSize`]="{ item }">
+          <span>{{ formatNumber(item.zoneSize) }}</span>
         </template>
 
         <!-- 최대 적재율 % -->
@@ -205,6 +224,11 @@
           </v-chip>
         </template>
 
+        <!-- 전열 간격 -->
+        <template #[`item.frontRowInterval`]="{ item }">
+          <span>{{ item.frontRowInterval != null ? item.frontRowInterval : 0 }}</span>
+        </template>
+
         <!-- 수정자 -->
         <template #[`item.lastEventUser`]="{ item }">
           <span>{{ item.lastEventUser || '-' }}</span>
@@ -215,10 +239,10 @@
           <span class="text-caption">{{ formatDateTime(item.lastEventTime) }}</span>
         </template>
 
-        <!-- 비고 말줄임 -->
+        <!-- 비고 / 이벤트 명칭 말줄임 -->
         <template #[`item.lastEventComment`]="{ item }">
-          <span :title="item.lastEventComment" class="comment-text-cell">
-            {{ item.lastEventComment || '-' }}
+          <span :title="getCommentTooltip(item)" class="comment-text-cell">
+            {{ item.lastEventComment || item.lastEventName || '-' }}
           </span>
         </template>
 
@@ -238,7 +262,7 @@
 import { useI18n } from 'vue-i18n'
 import { reactive, computed, markRaw, onMounted } from 'vue'
 import BaseDataTable from '@/components/common/BaseDataTable.vue'
-import ZoneViewForm from './components/ModelingZoneViewForm.vue'
+import ModelingZoneViewForm from './components/ModelingZoneViewForm.vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useDataTable } from '@/composables/useDataTable'
 import { fetchWcsZonesApi } from '@/api/wcsZone'
@@ -255,28 +279,39 @@ const searchParams = reactive({
   loadType: '전체',
 })
 
-const factoryFilterOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
-const zoneTypeFilterOptions = ['전체', 'STORAGE', 'BUFFER', 'REJECT', 'RACK', 'TEMPORARY']
-const loadTypeFilterOptions = ['전체', 'SINGLE', 'DOUBLE']
+const factoryFilterOptions = ['전체', 'insert', 'powder', 'common']
+const zoneTypeFilterOptions = [
+  '전체',
+  '06',
+  'test001',
+  'test002',
+  'STORAGE',
+  'BUFFER',
+  'REJECT',
+  'RACK',
+]
+const loadTypeFilterOptions = ['전체', 'P', 'SINGLE', 'DOUBLE']
 
-// 테이블 컬럼 정의 (headers)
+// 테이블 컬럼 정의 (WcsZoneResponse 백엔드 필드 완전 일치)
 const headers = [
-  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
-  { title: '존 명칭', key: 'zoneName', align: 'start', width: '130px', sortable: true },
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '90px' },
+  { title: '존 명칭', key: 'zoneName', align: 'start', width: '140px', sortable: true },
   { title: '존 타입', key: 'zoneType', align: 'center', width: '110px' },
-  { title: '적재 방식', key: 'loadType', align: 'center', width: '110px' },
+  { title: '적재 방식', key: 'loadType', align: 'center', width: '100px' },
   { title: '선반 선택 모드', key: 'shelfSelectMode', align: 'center', width: '130px' },
   { title: '존 용량', key: 'zoneCapacity', align: 'end', width: '100px' },
-  { title: '최대 적재율', key: 'maxCapacityPercent', align: 'end', width: '110px' },
-  { title: '사용 적재율', key: 'useCapacityPercent', align: 'end', width: '110px' },
-  { title: '딥 우선 여부', key: 'deepFirstFlag', align: 'center', width: '100px' },
-  { title: '대기 구역 여부', key: 'waitingAreaFlag', align: 'center', width: '110px' },
+  { title: '존 크기', key: 'zoneSize', align: 'end', width: '100px' },
+  { title: '전열 간격', key: 'frontRowInterval', align: 'end', width: '90px' },
+  { title: '최대 적재율', key: 'maxCapacityPercent', align: 'end', width: '100px' },
+  { title: '사용 적재율', key: 'useCapacityPercent', align: 'end', width: '100px' },
+  { title: '딥 우선', key: 'deepFirstFlag', align: 'center', width: '90px' },
+  { title: '대기 구역', key: 'waitingAreaFlag', align: 'center', width: '90px' },
   { title: t('table.eventUser'), key: 'lastEventUser', align: 'center', width: '100px' },
   { title: t('table.eventTime'), key: 'lastEventTime', align: 'center', width: '160px' },
-  { title: t('table.eventComment'), key: 'lastEventComment', align: 'start', width: '150px' },
+  { title: t('table.eventComment'), key: 'lastEventComment', align: 'start', width: '160px' },
 ]
 
-// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
+// 1. 역할 분리: 목록 조회 영역은 useDataTable 컴포저블 전담
 const { items, totalItems, loading, options, loadData, updateOptions } =
   useDataTable(fetchWcsZonesApi)
 
@@ -297,7 +332,7 @@ function getSanitizedParams() {
   return params
 }
 
-// 데이터 정규화 및 바인딩 리스트 계산 (복합키 compositeKey 결합)
+// 응답 DTO 필드 정규화 (복합키: factoryName_zoneName)
 const displayItems = computed(function () {
   const list = items.value || []
   const result = []
@@ -305,12 +340,11 @@ const displayItems = computed(function () {
   for (let i = 0; i < list.length; i++) {
     const raw = list[i]
     if (raw) {
-      const fn = raw.factoryName || 'INSERT'
+      const fn = raw.factoryName || 'insert'
       const zn = raw.zoneName || ''
 
       const isDeepFirst =
         raw.deepFirstFlag === true || raw.deepFirstFlag === 'Y' || raw.deepFirstFlag === 'true'
-
       const isWaitingArea =
         raw.waitingAreaFlag === true ||
         raw.waitingAreaFlag === 'Y' ||
@@ -321,21 +355,21 @@ const displayItems = computed(function () {
         compositeKey: fn + '_' + zn,
         factoryName: fn,
         zoneName: zn,
-        zoneType: raw.zoneType || 'STORAGE',
-        loadType: raw.loadType || 'SINGLE',
-        shelfSelectMode: raw.shelfSelectMode || 'NEAREST',
-        zoneCapacity:
-          raw.zoneCapacity != null ? raw.zoneCapacity : raw.capacity != null ? raw.capacity : 0,
-        zoneSize: raw.zoneSize != null ? raw.zoneSize : raw.size != null ? raw.size : 0,
-        frontRowInterval: raw.frontRowInterval != null ? raw.frontRowInterval : 0,
-        maxCapacityPercent: raw.maxCapacityPercent != null ? raw.maxCapacityPercent : 95,
-        useCapacityPercent: raw.useCapacityPercent != null ? raw.useCapacityPercent : 0,
-        zoneColor: raw.zoneColor || '',
         deepFirstFlag: isDeepFirst,
+        frontRowInterval: raw.frontRowInterval != null ? raw.frontRowInterval : 0,
+        loadType: raw.loadType || null,
+        maxCapacityPercent: raw.maxCapacityPercent != null ? Number(raw.maxCapacityPercent) : 100,
+        zoneCapacity: raw.zoneCapacity != null ? raw.zoneCapacity : 0,
+        zoneColor: raw.zoneColor || '',
+        zoneSize: raw.zoneSize != null ? raw.zoneSize : 0,
+        zoneType: raw.zoneType || null,
+        shelfSelectMode: raw.shelfSelectMode || 'NEAR_PORT',
+        useCapacityPercent: raw.useCapacityPercent != null ? Number(raw.useCapacityPercent) : 0,
         waitingAreaFlag: isWaitingArea,
-        lastEventUser: raw.lastEventUser || raw.eventUser || raw.modifyUser || '-',
-        lastEventTime: raw.lastEventTime || raw.eventTime || raw.modifyTime || null,
-        lastEventComment: raw.lastEventComment || raw.eventComment || '',
+        lastEventComment: raw.lastEventComment || '',
+        lastEventName: raw.lastEventName || '',
+        lastEventTime: raw.lastEventTime || null,
+        lastEventUser: raw.lastEventUser || '-',
       })
     }
   }
@@ -350,7 +384,8 @@ function getZoneTypeColor(type) {
   if (tStr === 'BUFFER') return 'indigo'
   if (tStr === 'REJECT') return 'error'
   if (tStr === 'RACK') return 'teal'
-  if (tStr === 'TEMPORARY') return 'warning'
+  if (tStr === '06') return 'deep-purple'
+  if (tStr.indexOf('TEST') === 0) return 'amber-darken-2'
   return 'blue-grey'
 }
 
@@ -364,6 +399,13 @@ function getUsageRateClass(usePercent, maxPercent) {
     return 'text-warning font-weight-medium'
   }
   return 'text-high-emphasis'
+}
+
+function getCommentTooltip(item) {
+  const parts = []
+  if (item.lastEventName) parts.push('[' + item.lastEventName + ']')
+  if (item.lastEventComment) parts.push(item.lastEventComment)
+  return parts.length > 0 ? parts.join(' ') : '-'
 }
 
 function formatNumber(value) {
@@ -390,9 +432,8 @@ function onUpdateOptions(newOptions) {
   updateOptions(newOptions, getSanitizedParams())
 }
 
-// [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
 function onAddZone() {
-  panelStore.openPanel(markRaw(ZoneViewForm), {
+  panelStore.openPanel(markRaw(ModelingZoneViewForm), {
     mode: 'CREATE',
     data: null,
     title: 'WCS 보관 존(Zone) 신규 등록',
@@ -402,10 +443,9 @@ function onAddZone() {
   })
 }
 
-// 행(Row) 클릭 시 수정 모드로 우측 슬라이드 패널 오픈
 function onRowClick(event, row) {
   const itemData = row && row.item ? row.item : row
-  panelStore.openPanel(markRaw(ZoneViewForm), {
+  panelStore.openPanel(markRaw(ModelingZoneViewForm), {
     mode: 'UPDATE',
     data: itemData,
     title: 'WCS 보관 존(Zone) 정보 수정',
@@ -415,7 +455,6 @@ function onRowClick(event, row) {
   })
 }
 
-// CSV 엑셀 내보내기 핸들러
 function handleExport() {
   const list = displayItems.value
   if (!list || list.length === 0) {
@@ -426,7 +465,7 @@ function handleExport() {
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    '소속공장,존명칭,존타입,적재방식,선반선택모드,존용량,최대적재율(%),사용적재율(%),딥우선여부,대기구역여부,수정자,수정일시,비고\n'
+    '소속공장,존명칭,존타입,적재방식,선반선택모드,존용량,존크기,전열간격,최대적재율(%),사용적재율(%),딥우선,대기구역,이벤트명,수정자,수정일시,비고\n'
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]
@@ -437,10 +476,13 @@ function handleExport() {
       item.loadType || '',
       item.shelfSelectMode || '',
       item.zoneCapacity != null ? item.zoneCapacity : 0,
+      item.zoneSize != null ? item.zoneSize : 0,
+      item.frontRowInterval != null ? item.frontRowInterval : 0,
       (item.maxCapacityPercent != null ? item.maxCapacityPercent : 0) + '%',
       (item.useCapacityPercent != null ? item.useCapacityPercent : 0) + '%',
       item.deepFirstFlag ? 'Y' : 'N',
       item.waitingAreaFlag ? 'Y' : 'N',
+      item.lastEventName || '',
       item.lastEventUser || '',
       formatDateTime(item.lastEventTime),
       '"' + (item.lastEventComment ? item.lastEventComment.replace(/"/g, '""') : '') + '"',
@@ -475,9 +517,17 @@ onMounted(function () {
   gap: 8px;
 }
 
+.color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
 .comment-text-cell {
   display: block;
-  max-width: 150px;
+  max-width: 160px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

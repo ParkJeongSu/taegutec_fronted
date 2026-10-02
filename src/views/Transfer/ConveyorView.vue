@@ -5,7 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$robotIndustrial" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.transfer.conveyor.title') }}</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.transfer.conveyor.title')
+          }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.transfer.conveyor.breadcrumb') }}
           </v-chip>
@@ -63,12 +65,12 @@
             ></v-select>
           </v-col>
 
-          <!-- 컨베이어 그룹 검색 필드 -->
+          <!-- 컨베이어 그룹 -->
           <v-col cols="12" sm="6" md="2">
             <v-text-field
               v-model="searchParams.conveyorGroup"
               :label="$t('views.transfer.conveyor.conveyorGroup')"
-              :placeholder="$t('views.transfer.conveyor.placeholderGroupEx')"
+              placeholder="예: 311, 312"
               variant="outlined"
               density="compact"
               hide-details
@@ -77,12 +79,12 @@
             ></v-text-field>
           </v-col>
 
-          <!-- 컨베이어 명 검색 필드 -->
+          <!-- 컨베이어 명칭 -->
           <v-col cols="12" sm="6" md="2">
             <v-text-field
               v-model="searchParams.conveyorName"
               :label="$t('table.conveyorName')"
-              :placeholder="$t('views.transfer.conveyor.placeholderNameEx')"
+              placeholder="예: 31103, 31112"
               variant="outlined"
               density="compact"
               hide-details
@@ -91,10 +93,10 @@
             ></v-text-field>
           </v-col>
 
-          <!-- 운전 상태 필터 -->
+          <!-- 설비 운전 상태 필터 -->
           <v-col cols="12" sm="6" md="2">
             <v-select
-              v-model="searchParams.conveyorStatus"
+              v-model="searchParams.status"
               :items="statusFilterOptions"
               :label="$t('table.status')"
               variant="outlined"
@@ -103,12 +105,12 @@
             ></v-select>
           </v-col>
 
-          <!-- 사용 여부 필터 -->
+          <!-- 방향성 필터 -->
           <v-col cols="12" sm="6" md="2">
             <v-select
-              v-model="searchParams.useState"
-              :items="useStateFilterOptions"
-              :label="$t('table.useYn')"
+              v-model="searchParams.direction"
+              :items="directionFilterOptions"
+              label="반송 방향"
               variant="outlined"
               density="compact"
               hide-details
@@ -116,7 +118,7 @@
           </v-col>
 
           <!-- 검색 및 초기화 버튼 -->
-          <v-col cols="12" sm="6" md="2" class="d-flex align-center">
+          <v-col cols="12" sm="12" md="2" class="d-flex align-center justify-end">
             <v-btn
               color="primary"
               variant="flat"
@@ -149,36 +151,65 @@
         v-on:click:row="onRowClick"
         v-on:update:options="onUpdateOptions"
       >
+        <!-- 컨베이어 명칭 하이라이트 -->
+        <template #[`item.conveyorName`]="{ item }">
+          <span class="font-weight-bold text-primary">{{ item.conveyorName }}</span>
+        </template>
+
         <!-- 운전 상태 컬럼 커스텀 렌더링 -->
-        <template #[`item.conveyorStatus`]="{ item }">
+        <template #[`item.status`]="{ item }">
           <v-chip
-            :color="getStatusColor(item.conveyorStatus)"
+            :color="getStatusColor(item.status)"
             size="x-small"
             variant="flat"
             class="font-weight-bold"
           >
-            {{ item.conveyorStatus }}
+            {{ item.status || '-' }}
           </v-chip>
         </template>
 
-        <!-- 현재 캐리어 컬럼 커스텀 렌더링 -->
-        <template #[`item.currentCarrier`]="{ item }">
-          <span v-if="item.currentCarrier && item.currentCarrier !== '-'" class="font-weight-medium text-primary">
-            {{ item.currentCarrier }}
+        <!-- 반송 방향 칩 -->
+        <template #[`item.direction`]="{ item }">
+          <v-chip
+            :color="getDirectionColor(item.direction)"
+            size="x-small"
+            variant="tonal"
+            class="font-weight-medium"
+          >
+            {{ item.direction || '-' }}
+          </v-chip>
+        </template>
+
+        <!-- 캐리어 유무 칩 -->
+        <template #[`item.carrierExist`]="{ item }">
+          <v-chip
+            :color="item.carrierExist === 'Empty' ? 'grey' : 'indigo'"
+            size="x-small"
+            variant="flat"
+            class="font-weight-medium"
+          >
+            {{ item.carrierExist || '-' }}
+          </v-chip>
+        </template>
+
+        <!-- 현재 적재 캐리어 ID -->
+        <template #[`item.carrierName`]="{ item }">
+          <span v-if="item.carrierName" class="font-weight-bold text-primary">
+            {{ item.carrierName }}
           </span>
           <span v-else class="text-medium-emphasis">-</span>
         </template>
 
-        <!-- 사용 여부 컬럼 커스텀 렌더링 -->
-        <template #[`item.useState`]="{ item }">
-          <v-chip
-            :color="getUseStateColor(item.useState)"
-            size="x-small"
-            variant="flat"
-            class="font-weight-bold"
-          >
-            {{ getUseStateText(item.useState) }}
-          </v-chip>
+        <!-- 수정 일시 포맷팅 -->
+        <template #[`item.lastEventTime`]="{ item }">
+          <span class="text-caption">{{ formatDateTime(item.lastEventTime) }}</span>
+        </template>
+
+        <!-- 비고 말줄임 -->
+        <template #[`item.lastEventComment`]="{ item }">
+          <span :title="getCommentTooltip(item)" class="comment-text-cell">
+            {{ item.lastEventComment || item.lastEventName || '-' }}
+          </span>
         </template>
 
         <!-- 데이터 없음 슬롯 -->
@@ -201,41 +232,50 @@ import ConveyorViewForm from './components/ConveyorViewForm.vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useDataTable } from '@/composables/useDataTable'
 import { fetchWcsConveyorsApi } from '@/api/wcsConveyor'
+import { formatDateTime } from '@/utils/dateUtils'
 
 const panelStore = usePanelStore()
-
-// 검색 파라미터 상태
 const { t } = useI18n()
 
+// 검색 파라미터 상태
 const searchParams = reactive({
   factoryName: '전체',
   conveyorGroup: '',
   conveyorName: '',
-  conveyorStatus: '전체',
-  useState: '전체',
+  status: '전체',
+  direction: '전체',
 })
 
-const factoryFilterOptions = ['전체', 'INSERT', 'POWDER', 'COMMON']
-const statusFilterOptions = ['전체', 'RUN', 'STOP', 'ALARM', 'IDLE', 'ERROR']
-const useStateFilterOptions = ['전체', 'USE', 'UNUSE']
+const factoryFilterOptions = ['전체', 'insert', 'powder', 'common']
+const statusFilterOptions = ['전체', 'Idle', 'Run', 'Stop', 'Alarm', 'Error']
+const directionFilterOptions = ['전체', 'Inbound', 'Outbound', 'Both']
 
-// 테이블 컬럼 정의
+// 백엔드 WcsConveyorResponse 필드 기준 테이블 헤더 정의
 const headers = [
-  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '100px' },
-  { title: t('table.group'), key: 'conveyorGroup', align: 'start', width: '120px' },
-  { title: t('table.conveyorName'), key: 'conveyorName', align: 'start', width: '130px' },
-  { title: t('table.conveyorNo'), key: 'conveyorNumber', align: 'center', width: '80px' },
-  { title: t('table.conveyorNo'), key: 'localNo', align: 'center', width: '90px' },
-  { title: t('table.fromNode'), key: 'fromNode', align: 'start', width: '120px' },
-  { title: t('table.toNode'), key: 'toNode', align: 'start', width: '120px' },
-  { title: t('table.status'), key: 'conveyorStatus', align: 'center', width: '100px' },
-  { title: t('table.carrierId'), key: 'currentCarrier', align: 'center', width: '130px' },
-  { title: t('table.useState'), key: 'useState', align: 'center', width: '90px' },
-  { title: t('table.eventUser'), key: 'eventUser', align: 'center', width: '100px' },
-  { title: t('table.eventTime'), key: 'eventTime', align: 'center', width: '160px' },
+  { title: t('table.factoryName'), key: 'factoryName', align: 'center', width: '90px' },
+  { title: t('table.group'), key: 'conveyorGroup', align: 'center', width: '90px' },
+  {
+    title: t('table.conveyorName'),
+    key: 'conveyorName',
+    align: 'start',
+    width: '130px',
+    sortable: true,
+  },
+  { title: '라인 No', key: 'conveyorNumber', align: 'center', width: '80px' },
+  { title: '로컬 No', key: 'localNo', align: 'center', width: '80px' },
+  { title: '컨베이어 타입', key: 'conveyorType', align: 'center', width: '130px' },
+  { title: t('table.status'), key: 'status', align: 'center', width: '100px' },
+  { title: '반송 방향', key: 'direction', align: 'center', width: '100px' },
+  { title: '적재 여부', key: 'carrierExist', align: 'center', width: '100px' },
+  { title: t('table.carrierId'), key: 'carrierName', align: 'center', width: '120px' },
+  { title: '구역명', key: 'areaName', align: 'start', width: '100px' },
+  { title: '서버명', key: 'serverName', align: 'start', width: '110px' },
+  { title: t('table.eventUser'), key: 'lastEventUser', align: 'center', width: '100px' },
+  { title: t('table.eventTime'), key: 'lastEventTime', align: 'center', width: '160px' },
+  { title: t('table.eventComment'), key: 'lastEventComment', align: 'start', width: '160px' },
 ]
 
-// 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
+// 1. 목록 조회는 useDataTable 전담
 const { items, totalItems, loading, options, loadData, updateOptions } =
   useDataTable(fetchWcsConveyorsApi)
 
@@ -250,16 +290,16 @@ function getSanitizedParams() {
   if (searchParams.conveyorName && searchParams.conveyorName.trim() !== '') {
     params.conveyorName = searchParams.conveyorName.trim()
   }
-  if (searchParams.conveyorStatus && searchParams.conveyorStatus !== '전체') {
-    params.conveyorStatus = searchParams.conveyorStatus
+  if (searchParams.status && searchParams.status !== '전체') {
+    params.status = searchParams.status
   }
-  if (searchParams.useState && searchParams.useState !== '전체') {
-    params.useState = searchParams.useState
+  if (searchParams.direction && searchParams.direction !== '전체') {
+    params.direction = searchParams.direction
   }
   return params
 }
 
-// 5개 복합키 결합 및 데이터 정규화
+// 5개 복합키(factoryName + conveyorGroup + conveyorName + conveyorNumber + localNo) 결합 및 정규화
 const displayItems = computed(function () {
   const list = items.value || []
   const result = []
@@ -267,9 +307,9 @@ const displayItems = computed(function () {
   for (let i = 0; i < list.length; i++) {
     const raw = list[i]
     if (raw) {
-      const fn = raw.factoryName || 'INSERT'
+      const fn = raw.factoryName || 'insert'
       const cg = raw.conveyorGroup || ''
-      const cn = raw.conveyorName || raw.lineName || raw.cvId || ''
+      const cn = raw.conveyorName || ''
       const cnum = raw.conveyorNumber != null ? raw.conveyorNumber : 1
       const lno = raw.localNo != null ? raw.localNo : 1
 
@@ -281,13 +321,17 @@ const displayItems = computed(function () {
         conveyorName: cn,
         conveyorNumber: cnum,
         localNo: lno,
-        fromNode: raw.fromNode || '-',
-        toNode: raw.toNode || '-',
-        conveyorStatus: raw.conveyorStatus || raw.status || 'RUN',
-        currentCarrier: raw.currentCarrier || '-',
-        useState: raw.useState || (raw.useYn === 'N' ? 'UNUSE' : 'USE'),
-        eventUser: raw.eventUser || '-',
-        eventTime: raw.eventTime || raw.updateTime || '-',
+        conveyorType: raw.conveyorType || '-',
+        status: raw.status || 'Idle',
+        direction: raw.direction || '-',
+        carrierExist: raw.carrierExist || '-',
+        carrierName: raw.carrierName || '',
+        areaName: raw.areaName || '-',
+        serverName: raw.serverName || '-',
+        lastEventUser: raw.lastEventUser || raw.eventUser || '-',
+        lastEventTime: raw.lastEventTime || raw.eventTime || null,
+        lastEventName: raw.lastEventName || '',
+        lastEventComment: raw.lastEventComment || raw.eventComment || '',
       })
     }
   }
@@ -296,39 +340,29 @@ const displayItems = computed(function () {
 })
 
 function getStatusColor(status) {
-  if (status === 'RUN' || status === 'ONLINE' || status === 'RUNNING') {
-    return 'success'
-  }
-  if (status === 'IDLE' || status === 'AUTO') {
-    return 'primary'
-  }
-  if (status === 'STOP' || status === 'MANUAL') {
-    return 'grey'
-  }
-  if (status === 'ALARM' || status === 'ERROR' || status === 'DOWN') {
-    return 'error'
-  }
+  if (!status) return 'grey'
+  const s = String(status).toUpperCase()
+  if (s === 'RUN' || s === 'RUNNING' || s === 'ACTIVE') return 'success'
+  if (s === 'IDLE' || s === 'AUTO') return 'primary'
+  if (s === 'STOP' || s === 'PAUSE') return 'grey'
+  if (s === 'ALARM' || s === 'ERROR' || s === 'FAULT' || s === 'DOWN') return 'error'
   return 'default'
 }
 
-function getUseStateColor(state) {
-  if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return 'success'
-  }
-  if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return 'grey'
-  }
-  return 'default'
+function getDirectionColor(dir) {
+  if (!dir) return 'grey'
+  const d = String(dir).toUpperCase()
+  if (d === 'INBOUND') return 'teal'
+  if (d === 'OUTBOUND') return 'deep-orange'
+  if (d === 'BOTH') return 'indigo'
+  return 'blue-grey'
 }
 
-function getUseStateText(state) {
-  if (state === 'USE' || state === 'ACTIVE' || state === 'Y' || state === '사용') {
-    return t('common.use')
-  }
-  if (state === 'UNUSE' || state === 'INACTIVE' || state === 'N' || state === '미사용') {
-    return t('common.unuse')
-  }
-  return state || '-'
+function getCommentTooltip(item) {
+  const parts = []
+  if (item.lastEventName) parts.push('[' + item.lastEventName + ']')
+  if (item.lastEventComment) parts.push(item.lastEventComment)
+  return parts.length > 0 ? parts.join(' ') : '-'
 }
 
 function handleSearch() {
@@ -340,8 +374,8 @@ function handleReset() {
   searchParams.factoryName = '전체'
   searchParams.conveyorGroup = ''
   searchParams.conveyorName = ''
-  searchParams.conveyorStatus = '전체'
-  searchParams.useState = '전체'
+  searchParams.status = '전체'
+  searchParams.direction = '전체'
   options.page = 0
   loadData(getSanitizedParams())
 }
@@ -350,7 +384,6 @@ function onUpdateOptions(newOptions) {
   updateOptions(newOptions, getSanitizedParams())
 }
 
-// [신규 등록] 버튼 클릭 시 우측 슬라이드 패널 오픈
 function onAddConveyor() {
   panelStore.openPanel(markRaw(ConveyorViewForm), {
     mode: 'CREATE',
@@ -362,9 +395,8 @@ function onAddConveyor() {
   })
 }
 
-// 행(Row) 클릭 시 수정 모드로 우측 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   panelStore.openPanel(markRaw(ConveyorViewForm), {
     mode: 'UPDATE',
     data: itemData,
@@ -385,7 +417,7 @@ function handleExport() {
   let csvContent = 'data:text/csv;charset=utf-8,\uFEFF'
   csvContent =
     csvContent +
-    `${t('table.factoryName')},${t('table.conveyorGroup')},${t('table.conveyorName')},${t('table.conveyorNo')},LocalNo,${t('table.fromNode')},${t('table.toNode')},${t('table.status')},${t('table.carrierId')},${t('table.useState')},${t('table.eventUser')},${t('table.eventTime')}\n`
+    '소속공장,컨베이어그룹,컨베이어명칭,라인번호,로컬번호,컨베이어타입,운전상태,반송방향,적재상태,캐리어명,구역명,서버명,수정자,수정일시,비고\n'
 
   for (let i = 0; i < list.length; i++) {
     const item = list[i]
@@ -395,13 +427,16 @@ function handleExport() {
       item.conveyorName || '',
       item.conveyorNumber != null ? item.conveyorNumber : '',
       item.localNo != null ? item.localNo : '',
-      item.fromNode || '',
-      item.toNode || '',
-      item.conveyorStatus || '',
-      item.currentCarrier || '',
-      item.useState || '',
-      item.eventUser || '',
-      item.eventTime || '',
+      item.conveyorType || '',
+      item.status || '',
+      item.direction || '',
+      item.carrierExist || '',
+      item.carrierName || '',
+      item.areaName || '',
+      item.serverName || '',
+      item.lastEventUser || '',
+      formatDateTime(item.lastEventTime),
+      '"' + (item.lastEventComment ? item.lastEventComment.replace(/"/g, '""') : '') + '"',
     ]
     csvContent = csvContent + row.join(',') + '\n'
   }
@@ -429,5 +464,12 @@ onMounted(function () {
 }
 .conveyor-action-buttons {
   gap: 8px;
+}
+.comment-text-cell {
+  display: block;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

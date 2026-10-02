@@ -25,7 +25,7 @@
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            placeholder="예: ZONE_A, BUF_01"
+            placeholder="예: C1C, EXZONE01"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
@@ -33,35 +33,39 @@
 
         <!-- 존 타입 -->
         <v-col cols="12" sm="6">
-          <v-select
+          <v-combobox
             v-model="formData.zoneType"
             :items="zoneTypeOptions"
             label="존 타입 (ZONE_TYPE)"
             variant="outlined"
             density="compact"
-          ></v-select>
+            clearable
+            placeholder="선택 또는 직접 입력"
+          ></v-combobox>
         </v-col>
 
         <!-- 적재 방식 -->
         <v-col cols="12" sm="6">
-          <v-select
+          <v-combobox
             v-model="formData.loadType"
             :items="loadTypeOptions"
             label="적재 방식 (LOAD_TYPE)"
             variant="outlined"
             density="compact"
-          ></v-select>
+            clearable
+            placeholder="선택 또는 직접 입력 (예: P, SINGLE)"
+          ></v-combobox>
         </v-col>
 
         <!-- 선반 선택 모드 -->
         <v-col cols="12" sm="6">
-          <v-select
+          <v-combobox
             v-model="formData.shelfSelectMode"
             :items="shelfSelectModeOptions"
             label="선반 선택 모드 (SHELF_SELECT_MODE)"
             variant="outlined"
             density="compact"
-          ></v-select>
+          ></v-combobox>
         </v-col>
 
         <!-- 존 용량 -->
@@ -69,11 +73,11 @@
           <v-text-field
             v-model.number="formData.zoneCapacity"
             type="number"
-            label="존 용량 (ZONE_CAPACITY)"
+            label="존 총 용량 (ZONE_CAPACITY)"
             variant="outlined"
             density="compact"
             :rules="[validateRequiredNumber]"
-            placeholder="예: 100"
+            placeholder="예: 1784"
             required
           ></v-text-field>
         </v-col>
@@ -86,7 +90,7 @@
             label="존 크기 (ZONE_SIZE)"
             variant="outlined"
             density="compact"
-            placeholder="예: 1"
+            placeholder="예: 1784"
           ></v-text-field>
         </v-col>
 
@@ -111,7 +115,7 @@
             variant="outlined"
             density="compact"
             :rules="[validatePercent]"
-            placeholder="예: 95"
+            placeholder="예: 100.00"
           ></v-text-field>
         </v-col>
 
@@ -124,7 +128,7 @@
             variant="outlined"
             density="compact"
             :rules="[validatePercent]"
-            placeholder="예: 0"
+            placeholder="예: 0.00"
           ></v-text-field>
         </v-col>
 
@@ -135,15 +139,23 @@
             label="존 색상 코드 (ZONE_COLOR)"
             variant="outlined"
             density="compact"
-            placeholder="예: #1976D2"
-          ></v-text-field>
+            placeholder="예: #32ccbcff, #ce9ffcff"
+          >
+            <template #prepend-inner>
+              <span
+                v-if="formData.zoneColor"
+                class="color-preview-box mr-1"
+                :style="{ backgroundColor: formData.zoneColor }"
+              ></span>
+            </template>
+          </v-text-field>
         </v-col>
 
         <!-- 딥 우선 여부 & 대기 구역 여부 -->
         <v-col cols="12" sm="6" class="d-flex align-center switch-group-col">
           <v-switch
             v-model="formData.deepFirstFlag"
-            label="딥 우선 여부 (DEEP_FIRST)"
+            label="딥 우선 (DEEP_FIRST)"
             color="primary"
             density="compact"
             hide-details
@@ -151,14 +163,14 @@
           ></v-switch>
           <v-switch
             v-model="formData.waitingAreaFlag"
-            label="대기 구역 여부 (WAITING_AREA)"
+            label="대기 구역 (WAITING_AREA)"
             color="teal"
             density="compact"
             hide-details
           ></v-switch>
         </v-col>
 
-        <!-- 비고 / 사유 -->
+        <!-- 비고 / 변경 사유 -->
         <v-col cols="12">
           <v-textarea
             v-model="formData.lastEventComment"
@@ -166,7 +178,7 @@
             variant="outlined"
             density="compact"
             rows="3"
-            placeholder="비고 또는 특이사항 입력"
+            placeholder="설정 변경 사유 또는 특이사항 입력"
           ></v-textarea>
         </v-col>
       </v-row>
@@ -209,7 +221,9 @@
     <!-- 삭제 확인 모달 -->
     <ConfirmDialog
       v-model="deleteConfirmDialog"
-      :message="'[' + formData.factoryName + ' / ' + formData.zoneName + '] 보관 존을 삭제하시겠습니까?'"
+      :message="
+        '[' + formData.factoryName + ' / ' + formData.zoneName + '] 보관 존을 삭제하시겠습니까?'
+      "
       v-on:confirm="onConfirmDelete"
     />
   </div>
@@ -220,11 +234,7 @@ import { useI18n } from 'vue-i18n'
 import { ref, reactive, computed, watch } from 'vue'
 import { usePanelStore } from '@/stores/panelStore'
 import { useApi } from '@/composables/useApi'
-import {
-  createWcsZoneApi,
-  updateWcsZoneApi,
-  deleteWcsZoneApi,
-} from '@/api/wcsZone'
+import { createWcsZoneApi, updateWcsZoneApi, deleteWcsZoneApi } from '@/api/wcsZone'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const { t } = useI18n()
@@ -239,12 +249,12 @@ const panelStore = usePanelStore()
 const formRef = ref(null)
 const deleteConfirmDialog = ref(false)
 
-const factoryOptions = ['INSERT', 'POWDER', 'COMMON']
-const zoneTypeOptions = ['STORAGE', 'BUFFER', 'REJECT', 'RACK', 'TEMPORARY']
-const loadTypeOptions = ['SINGLE', 'DOUBLE']
-const shelfSelectModeOptions = ['NEAREST', 'RANDOM', 'SEQUENTIAL']
+const factoryOptions = ['insert', 'powder', 'common']
+const zoneTypeOptions = ['06', 'test001', 'test002', 'STORAGE', 'BUFFER', 'REJECT', 'RACK']
+const loadTypeOptions = ['P', 'SINGLE', 'DOUBLE']
+const shelfSelectModeOptions = ['NEAR_PORT', 'DEFAULT', 'NEAREST', 'RANDOM']
 
-// useApi를 통한 트랜잭션 CUD API 바인딩
+// useApi를 통한 트랜잭션 CUD API 바인딩 (단일 params 객체 수신 규격 준수)
 const { loading: isCreating, execute: executeCreate } = useApi(createWcsZoneApi)
 
 const { loading: isUpdating, execute: executeUpdate } = useApi(function (params) {
@@ -269,35 +279,35 @@ const isCreateMode = computed(function () {
 })
 
 const formData = reactive({
-  factoryName: 'INSERT',
+  factoryName: 'insert',
   zoneName: '',
-  zoneType: 'STORAGE',
-  loadType: 'SINGLE',
-  shelfSelectMode: 'NEAREST',
-  zoneCapacity: 100,
-  zoneSize: 1,
+  zoneType: null,
+  loadType: null,
+  shelfSelectMode: 'NEAR_PORT',
+  zoneCapacity: 1000,
+  zoneSize: 1000,
   frontRowInterval: 0,
-  maxCapacityPercent: 95,
-  useCapacityPercent: 0,
-  zoneColor: '#1976D2',
-  deepFirstFlag: false,
+  maxCapacityPercent: 100.0,
+  useCapacityPercent: 0.0,
+  zoneColor: '#32ccbcff',
+  deepFirstFlag: true,
   waitingAreaFlag: false,
   lastEventComment: '',
 })
 
 function resetForm() {
-  formData.factoryName = 'INSERT'
+  formData.factoryName = 'insert'
   formData.zoneName = ''
-  formData.zoneType = 'STORAGE'
-  formData.loadType = 'SINGLE'
-  formData.shelfSelectMode = 'NEAREST'
-  formData.zoneCapacity = 100
-  formData.zoneSize = 1
+  formData.zoneType = null
+  formData.loadType = null
+  formData.shelfSelectMode = 'NEAR_PORT'
+  formData.zoneCapacity = 1000
+  formData.zoneSize = 1000
   formData.frontRowInterval = 0
-  formData.maxCapacityPercent = 95
-  formData.useCapacityPercent = 0
-  formData.zoneColor = '#1976D2'
-  formData.deepFirstFlag = false
+  formData.maxCapacityPercent = 100.0
+  formData.useCapacityPercent = 0.0
+  formData.zoneColor = '#32ccbcff'
+  formData.deepFirstFlag = true
   formData.waitingAreaFlag = false
   formData.lastEventComment = ''
 }
@@ -308,17 +318,20 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.factoryName = newVal.factoryName || 'INSERT'
-      formData.zoneName = isCreateMode.value ? '' : (newVal.zoneName || '')
-      formData.zoneType = newVal.zoneType || 'STORAGE'
-      formData.loadType = newVal.loadType || 'SINGLE'
-      formData.shelfSelectMode = newVal.shelfSelectMode || 'NEAREST'
-      formData.zoneCapacity = newVal.zoneCapacity != null ? Number(newVal.zoneCapacity) : 100
-      formData.zoneSize = newVal.zoneSize != null ? Number(newVal.zoneSize) : 1
-      formData.frontRowInterval = newVal.frontRowInterval != null ? Number(newVal.frontRowInterval) : 0
-      formData.maxCapacityPercent = newVal.maxCapacityPercent != null ? Number(newVal.maxCapacityPercent) : 95
-      formData.useCapacityPercent = newVal.useCapacityPercent != null ? Number(newVal.useCapacityPercent) : 0
-      formData.zoneColor = newVal.zoneColor || '#1976D2'
+      formData.factoryName = newVal.factoryName || 'insert'
+      formData.zoneName = isCreateMode.value ? '' : newVal.zoneName || ''
+      formData.zoneType = newVal.zoneType || null
+      formData.loadType = newVal.loadType || null
+      formData.shelfSelectMode = newVal.shelfSelectMode || 'NEAR_PORT'
+      formData.zoneCapacity = newVal.zoneCapacity != null ? Number(newVal.zoneCapacity) : 0
+      formData.zoneSize = newVal.zoneSize != null ? Number(newVal.zoneSize) : 0
+      formData.frontRowInterval =
+        newVal.frontRowInterval != null ? Number(newVal.frontRowInterval) : 0
+      formData.maxCapacityPercent =
+        newVal.maxCapacityPercent != null ? Number(newVal.maxCapacityPercent) : 100.0
+      formData.useCapacityPercent =
+        newVal.useCapacityPercent != null ? Number(newVal.useCapacityPercent) : 0.0
+      formData.zoneColor = newVal.zoneColor || '#32ccbcff'
       formData.deepFirstFlag =
         newVal.deepFirstFlag === true ||
         newVal.deepFirstFlag === 'Y' ||
@@ -343,7 +356,12 @@ function validateRequired(value) {
 }
 
 function validateRequiredNumber(value) {
-  if (value !== null && value !== undefined && String(value).trim() !== '' && !isNaN(Number(value))) {
+  if (
+    value !== null &&
+    value !== undefined &&
+    String(value).trim() !== '' &&
+    !isNaN(Number(value))
+  ) {
     return true
   }
   return '숫자를 입력해주세요.'
@@ -382,17 +400,17 @@ async function onHandleSave() {
     const payload = {
       factoryName: formData.factoryName,
       zoneName: formData.zoneName,
-      zoneType: formData.zoneType,
-      loadType: formData.loadType,
-      shelfSelectMode: formData.shelfSelectMode,
+      zoneType: formData.zoneType || undefined,
+      loadType: formData.loadType || undefined,
+      shelfSelectMode: formData.shelfSelectMode || 'NEAR_PORT',
       zoneCapacity: Number(formData.zoneCapacity) || 0,
       zoneSize: Number(formData.zoneSize) || 0,
       frontRowInterval: Number(formData.frontRowInterval) || 0,
       maxCapacityPercent: Number(formData.maxCapacityPercent) || 0,
       useCapacityPercent: Number(formData.useCapacityPercent) || 0,
       zoneColor: formData.zoneColor || undefined,
-      deepFirstFlag: formData.deepFirstFlag ? 'Y' : 'N',
-      waitingAreaFlag: formData.waitingAreaFlag ? 'Y' : 'N',
+      deepFirstFlag: Boolean(formData.deepFirstFlag),
+      waitingAreaFlag: Boolean(formData.waitingAreaFlag),
       lastEventComment: formData.lastEventComment || undefined,
     }
 
@@ -400,7 +418,6 @@ async function onHandleSave() {
       await executeCreate(payload)
       alert(t('common.saveSuccess'))
     } else {
-      // 복합키(factoryName + zoneName) 기준 수정 요청
       await executeUpdate({
         factoryName: formData.factoryName,
         zoneName: formData.zoneName,
@@ -424,11 +441,10 @@ async function onHandleSave() {
 
 async function onConfirmDelete() {
   try {
-    // 복합키(factoryName + zoneName) 기준 삭제 요청
     await executeDelete({
       factoryName: formData.factoryName,
       zoneName: formData.zoneName,
-      eventUser: 'SYSTEM',
+      eventUser: 'aim',
       eventComment: 'Zone deleted',
     })
     alert(t('common.deleteSuccess'))
@@ -458,5 +474,13 @@ async function onConfirmDelete() {
 
 .switch-group-col {
   min-height: 56px;
+}
+
+.color-preview-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  display: inline-block;
+  border: 1px solid rgba(0, 0, 0, 0.2);
 }
 </style>

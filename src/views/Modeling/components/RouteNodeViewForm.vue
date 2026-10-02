@@ -22,17 +22,30 @@
           <v-text-field
             v-model.number="formData.routeNodeId"
             type="number"
-            label="노드 ID (ROUTE_NODE_ID)"
+            label="라우트 노드 ID (ROUTE_NODE_ID)"
             variant="outlined"
             density="compact"
             :rules="[validateRequiredNumber]"
-            placeholder="예: 101"
+            placeholder="예: 1000"
             :disabled="!isCreateMode"
             required
           ></v-text-field>
         </v-col>
 
-        <!-- 노드 명칭 -->
+        <!-- 노드 비즈니스 코드 (nodeId) -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.nodeId"
+            label="노드 코드 (NODE_ID)"
+            variant="outlined"
+            density="compact"
+            :rules="[validateRequired]"
+            placeholder="예: WH01_IN_OUT_01"
+            required
+          ></v-text-field>
+        </v-col>
+
+        <!-- 노드 명칭 (nodeName) -->
         <v-col cols="12" sm="6">
           <v-text-field
             v-model="formData.nodeName"
@@ -40,124 +53,120 @@
             variant="outlined"
             density="compact"
             :rules="[validateRequired]"
-            placeholder="예: NODE-01, 입고 투입 노드"
+            placeholder="예: WH01 IN OUT PORT 01"
             required
           ></v-text-field>
         </v-col>
 
-        <!-- 노드 유형 -->
+        <!-- 노드 유형 (routeNodeType) -->
         <v-col cols="12" sm="6">
           <v-select
-            v-model="formData.nodeType"
-            :items="nodeTypeOptions"
-            :label="$t('table.nodeType')"
+            v-model="formData.routeNodeType"
+            :items="routeNodeTypeOptions"
+            label="노드 유형 (ROUTE_NODE_TYPE)"
             variant="outlined"
             density="compact"
           ></v-select>
         </v-col>
 
-        <!-- X 좌표 -->
-        <v-col cols="12" sm="4">
-          <v-text-field
-            v-model.number="formData.xCoord"
-            type="number"
-            label="X 좌표 (X_COORD)"
-            variant="outlined"
-            density="compact"
-            placeholder="예: 120.0"
-          ></v-text-field>
-        </v-col>
-
-        <!-- Y 좌표 -->
-        <v-col cols="12" sm="4">
-          <v-text-field
-            v-model.number="formData.yCoord"
-            type="number"
-            label="Y 좌표 (Y_COORD)"
-            variant="outlined"
-            density="compact"
-            placeholder="예: 450.0"
-          ></v-text-field>
-        </v-col>
-
-        <!-- Z 좌표 -->
-        <v-col cols="12" sm="4">
-          <v-text-field
-            v-model.number="formData.zCoord"
-            type="number"
-            label="Z 좌표 (Z_COORD)"
-            variant="outlined"
-            density="compact"
-            placeholder="예: 0.0"
-          ></v-text-field>
-        </v-col>
-
-        <!-- 최대 대기 수 -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model.number="formData.maxWait"
-            type="number"
-            label="최대 대기 수 (MAX_WAIT)"
-            variant="outlined"
-            density="compact"
-            placeholder="예: 2"
-          ></v-text-field>
-        </v-col>
-
-        <!-- 연결 링크 수 -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model.number="formData.linkCount"
-            type="number"
-            label="연결 링크 수 (LINK_COUNT)"
-            variant="outlined"
-            density="compact"
-            placeholder="예: 1"
-          ></v-text-field>
-        </v-col>
-
-        <!-- 소속 존(Zone) -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.zoneName"
-            label="소속 존 명칭 (ZONE_NAME)"
-            variant="outlined"
-            density="compact"
-            placeholder="예: ZONE_A, RAW_MAT"
-          ></v-text-field>
-        </v-col>
-
-        <!-- 스토커 / 창고 명 -->
-        <v-col cols="12" sm="6">
-          <v-text-field
-            v-model="formData.stockerName"
-            label="스토커 명 (STOCKER_NAME)"
-            variant="outlined"
-            density="compact"
-            placeholder="예: WH1, STK-01"
-          ></v-text-field>
-        </v-col>
-
-        <!-- 사용 여부 -->
+        <!-- 리라우트 유형 (rerouteType) -->
         <v-col cols="12" sm="6">
           <v-select
-            v-model="formData.useState"
-            :items="useStateOptions"
-            :label="$t('views.modeling.routeNode.formUseState')"
+            v-model="formData.rerouteType"
+            :items="rerouteTypeOptions"
+            label="리라우트 유형 (REROUTE_TYPE)"
             variant="outlined"
             density="compact"
           ></v-select>
         </v-col>
 
-        <!-- 비고 / 설명 -->
+        <!-- 베이 ID (bayId) -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.bayId"
+            label="베이 ID (BAY_ID)"
+            variant="outlined"
+            density="compact"
+            placeholder="예: GR313"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 유닛 ID (unitId) -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.unitId"
+            label="유닛 ID (UNIT_ID)"
+            variant="outlined"
+            density="compact"
+            placeholder="예: 31303"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 설비 ID (equipmentId) -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.equipmentId"
+            label="설비 ID (EQUIPMENT_ID)"
+            variant="outlined"
+            density="compact"
+            placeholder="예: WH1"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 크레인 ID (craneId) -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.craneId"
+            label="크레인 ID (CRANE_ID)"
+            variant="outlined"
+            density="compact"
+            placeholder="예: CR01"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 제어기 타입 (controllerType) -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model="formData.controllerType"
+            label="제어기 타입 (CONTROLLER_TYPE)"
+            variant="outlined"
+            density="compact"
+            placeholder="예: SCS"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 순번 (nodeSeq) -->
+        <v-col cols="12" sm="6">
+          <v-text-field
+            v-model.number="formData.nodeSeq"
+            type="number"
+            label="노드 순번 (NODE_SEQ)"
+            variant="outlined"
+            density="compact"
+            placeholder="1"
+          ></v-text-field>
+        </v-col>
+
+        <!-- 사용 여부 (useYn) -->
+        <v-col cols="12" sm="6">
+          <v-select
+            v-model="formData.useYn"
+            :items="useYnOptions"
+            :label="$t('table.useYn')"
+            variant="outlined"
+            density="compact"
+          ></v-select>
+        </v-col>
+
+        <!-- 설명 (description) -->
         <v-col cols="12">
           <v-textarea
-            v-model="formData.eventComment"
-            :label="$t('common.comment')"
+            v-model="formData.description"
+            label="노드 설명 (DESCRIPTION)"
             variant="outlined"
             density="compact"
             rows="3"
-            placeholder="비고 또는 변경 사유 입력"
+            placeholder="포트 설명 또는 특이사항 입력"
           ></v-textarea>
         </v-col>
       </v-row>
@@ -200,7 +209,15 @@
     <!-- 삭제 확인 모달 -->
     <ConfirmDialog
       v-model="deleteConfirmDialog"
-      :message="'[' + formData.factoryName + ' / ' + formData.routeNodeId + ' (' + (formData.nodeName || '') + ')] 라우트 노드를 삭제하시겠습니까?'"
+      :message="
+        '[' +
+        formData.factoryName +
+        ' / ' +
+        formData.routeNodeId +
+        ' (' +
+        (formData.nodeName || formData.nodeId) +
+        ')] 라우트 노드를 삭제하시겠습니까?'
+      "
       v-on:confirm="onConfirmDelete"
     />
   </div>
@@ -230,19 +247,12 @@ const panelStore = usePanelStore()
 const formRef = ref(null)
 const deleteConfirmDialog = ref(false)
 
-const factoryOptions = ['INSERT', 'POWDER', 'COMMON']
-const nodeTypeOptions = [
-  'STATION',
-  'BRANCH',
-  'MERGE',
-  'BUFFER',
-  'CROSS',
-  'NORMAL',
-  'DIVERSION',
-]
-const useStateOptions = [
-  { title: t('common.useStatusActive'), value: 'USE' },
-  { title: t('common.useStatusInactive'), value: 'UNUSE' },
+const factoryOptions = ['insert', 'powder', 'common']
+const routeNodeTypeOptions = ['INOUT_PORT', 'IN_PORT', 'OUT_PORT', 'STATION', 'BRANCH', 'MERGE']
+const rerouteTypeOptions = ['ON_ARRIVAL', 'NONE', 'DYNAMIC']
+const useYnOptions = [
+  { title: t('common.use'), value: 'Y' },
+  { title: t('common.unuse'), value: 'N' },
 ]
 
 // useApi를 통한 CUD API 바인딩
@@ -265,35 +275,37 @@ const isCreateMode = computed(function () {
 })
 
 const formData = reactive({
-  factoryName: 'INSERT',
+  factoryName: 'insert',
   routeNodeId: null,
+  nodeId: '',
   nodeName: '',
-  nodeType: 'STATION',
-  xCoord: 0,
-  yCoord: 0,
-  zCoord: 0,
-  maxWait: 1,
-  linkCount: 1,
-  zoneName: '',
-  stockerName: '',
-  useState: 'USE',
-  eventComment: '',
+  routeNodeType: 'INOUT_PORT',
+  rerouteType: 'ON_ARRIVAL',
+  bayId: '',
+  unitId: '',
+  equipmentId: 'WH1',
+  craneId: 'CR01',
+  controllerType: 'SCS',
+  nodeSeq: 1,
+  useYn: 'Y',
+  description: '',
 })
 
 function resetForm() {
-  formData.factoryName = 'INSERT'
+  formData.factoryName = 'insert'
   formData.routeNodeId = null
+  formData.nodeId = ''
   formData.nodeName = ''
-  formData.nodeType = 'STATION'
-  formData.xCoord = 0
-  formData.yCoord = 0
-  formData.zCoord = 0
-  formData.maxWait = 1
-  formData.linkCount = 1
-  formData.zoneName = ''
-  formData.stockerName = ''
-  formData.useState = 'USE'
-  formData.eventComment = ''
+  formData.routeNodeType = 'INOUT_PORT'
+  formData.rerouteType = 'ON_ARRIVAL'
+  formData.bayId = ''
+  formData.unitId = ''
+  formData.equipmentId = 'WH1'
+  formData.craneId = 'CR01'
+  formData.controllerType = 'SCS'
+  formData.nodeSeq = 1
+  formData.useYn = 'Y'
+  formData.description = ''
 }
 
 watch(
@@ -302,19 +314,24 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.factoryName = newVal.factoryName || 'INSERT'
-      formData.routeNodeId = isCreateMode.value ? null : (newVal.routeNodeId != null ? Number(newVal.routeNodeId) : (newVal.nodeId != null ? Number(newVal.nodeId) : null))
-      formData.nodeName = newVal.nodeName || newVal.name || ''
-      formData.nodeType = newVal.nodeType || newVal.type || 'STATION'
-      formData.xCoord = newVal.xCoord != null ? Number(newVal.xCoord) : (newVal.positionX != null ? Number(newVal.positionX) : (newVal.x != null ? Number(newVal.x) : 0))
-      formData.yCoord = newVal.yCoord != null ? Number(newVal.yCoord) : (newVal.positionY != null ? Number(newVal.positionY) : (newVal.y != null ? Number(newVal.y) : 0))
-      formData.zCoord = newVal.zCoord != null ? Number(newVal.zCoord) : (newVal.positionZ != null ? Number(newVal.positionZ) : (newVal.z != null ? Number(newVal.z) : 0))
-      formData.maxWait = newVal.maxWait != null ? Number(newVal.maxWait) : 1
-      formData.linkCount = newVal.linkCount != null ? Number(newVal.linkCount) : 1
-      formData.zoneName = newVal.zoneName || ''
-      formData.stockerName = newVal.stockerName || ''
-      formData.useState = newVal.useState || (newVal.useYn === 'N' ? 'UNUSE' : 'USE')
-      formData.eventComment = newVal.eventComment || ''
+      formData.factoryName = newVal.factoryName || 'insert'
+      formData.routeNodeId = isCreateMode.value
+        ? null
+        : newVal.routeNodeId != null
+          ? Number(newVal.routeNodeId)
+          : null
+      formData.nodeId = newVal.nodeId || ''
+      formData.nodeName = newVal.nodeName || ''
+      formData.routeNodeType = newVal.routeNodeType || 'INOUT_PORT'
+      formData.rerouteType = newVal.rerouteType || 'ON_ARRIVAL'
+      formData.bayId = newVal.bayId || ''
+      formData.unitId = newVal.unitId || ''
+      formData.equipmentId = newVal.equipmentId || 'WH1'
+      formData.craneId = newVal.craneId || 'CR01'
+      formData.controllerType = newVal.controllerType || 'SCS'
+      formData.nodeSeq = newVal.nodeSeq != null ? Number(newVal.nodeSeq) : 1
+      formData.useYn = newVal.useYn || 'Y'
+      formData.description = newVal.description || ''
     } else {
       resetForm()
     }
@@ -330,7 +347,12 @@ function validateRequired(value) {
 }
 
 function validateRequiredNumber(value) {
-  if (value !== null && value !== undefined && String(value).trim() !== '' && !isNaN(Number(value))) {
+  if (
+    value !== null &&
+    value !== undefined &&
+    String(value).trim() !== '' &&
+    !isNaN(Number(value))
+  ) {
     return true
   }
   return '숫자를 입력해주세요.'
@@ -358,27 +380,24 @@ async function onHandleSave() {
     const payload = {
       factoryName: formData.factoryName,
       routeNodeId: Number(formData.routeNodeId),
+      nodeId: formData.nodeId,
       nodeName: formData.nodeName,
-      nodeType: formData.nodeType,
-      positionX: Number(formData.xCoord) || 0,
-      positionY: Number(formData.yCoord) || 0,
-      positionZ: Number(formData.zCoord) || 0,
-      xCoord: Number(formData.xCoord) || 0,
-      yCoord: Number(formData.yCoord) || 0,
-      zCoord: Number(formData.zCoord) || 0,
-      maxWait: Number(formData.maxWait) || 0,
-      linkCount: Number(formData.linkCount) || 0,
-      zoneName: formData.zoneName || undefined,
-      stockerName: formData.stockerName || undefined,
-      useState: formData.useState,
-      eventComment: formData.eventComment || undefined,
+      routeNodeType: formData.routeNodeType,
+      rerouteType: formData.rerouteType,
+      bayId: formData.bayId || undefined,
+      unitId: formData.unitId || undefined,
+      equipmentId: formData.equipmentId || undefined,
+      craneId: formData.craneId || undefined,
+      controllerType: formData.controllerType || undefined,
+      nodeSeq: Number(formData.nodeSeq) || 1,
+      useYn: formData.useYn,
+      description: formData.description || undefined,
     }
 
     if (isCreateMode.value) {
       await executeCreate(payload)
       alert(t('common.saveSuccess'))
     } else {
-      // 복합키(factoryName + routeNodeId) 기준 수정 요청
       await executeUpdate({
         factoryName: formData.factoryName,
         routeNodeId: formData.routeNodeId,
@@ -402,7 +421,6 @@ async function onHandleSave() {
 
 async function onConfirmDelete() {
   try {
-    // 복합키(factoryName + routeNodeId) 기준 삭제 요청
     await executeDelete({
       factoryName: formData.factoryName,
       routeNodeId: formData.routeNodeId,
@@ -427,7 +445,6 @@ async function onConfirmDelete() {
 .form-container {
   height: 100%;
 }
-
 .action-buttons-container {
   background-color: #fafafa;
 }

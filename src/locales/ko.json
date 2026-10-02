@@ -146,6 +146,7 @@
     "DEPT_MGMT": "부서",
     "MENU_MGMT": "메뉴",
     "USER_GROUP_MGMT": "유저 그룹",
+    "USER_GROUP_USER": "유저 그룹 사용자 매핑",
     "MENU_AUTH": "메뉴 권한",
     "ADMIN_AUTH": "관리자 권한",
     "POLICY": "시스템 정책",

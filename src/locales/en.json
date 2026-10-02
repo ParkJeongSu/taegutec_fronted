@@ -146,6 +146,7 @@
     "DEPT_MGMT": "Department",
     "MENU_MGMT": "Menu",
     "USER_GROUP_MGMT": "User Group",
+    "USER_GROUP_USER": "User Group User",
     "MENU_AUTH": "Menu Authority",
     "ADMIN_AUTH": "Admin Authority",
     "POLICY": "System Policy",

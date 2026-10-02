@@ -119,7 +119,7 @@
             <div class="d-flex align-center justify-space-between">
               <v-text-field
                 v-model="assignedSearchKeyword"
-                placeholder="소속 유저 사번/이름 검색"
+                placeholder="사번 / 성명 검색"
                 variant="outlined"
                 density="compact"
                 hide-details
@@ -145,7 +145,11 @@
 
           <!-- 소속 유저 테이블 (선택 후 우측으로 제외 가능) -->
           <div class="panel-scroll-area flex-grow-1">
-            <v-table density="compact" hover class="custom-user-table">
+            <div v-if="isAssignedLoading" class="d-flex justify-center py-8">
+              <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
+            </div>
+
+            <v-table v-else density="compact" hover class="custom-user-table">
               <thead>
                 <tr>
                   <th style="width: 40px">
@@ -180,7 +184,9 @@
                       v-on:update:model-value="toggleAssignedUser(user.userId)"
                     />
                   </td>
-                  <td class="text-center font-weight-bold text-primary">{{ user.userId }}</td>
+                  <td class="text-center font-weight-bold text-primary">
+                    {{ user.employeeId || user.userId }}
+                  </td>
                   <td class="text-start font-weight-medium">{{ user.userName }}</td>
                   <td class="text-start text-caption text-medium-emphasis">
                     {{ user.departmentName || '-' }}
@@ -245,7 +251,11 @@
 
           <!-- 전체 유저 테이블 (선택 후 좌측으로 추가 가능) -->
           <div class="panel-scroll-area flex-grow-1">
-            <v-table density="compact" hover class="custom-user-table">
+            <div v-if="isAllUserLoading" class="d-flex justify-center py-8">
+              <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
+            </div>
+
+            <v-table v-else density="compact" hover class="custom-user-table">
               <thead>
                 <tr>
                   <th style="width: 40px">
@@ -280,7 +290,9 @@
                       v-on:update:model-value="toggleAvailableUser(user.userId)"
                     />
                   </td>
-                  <td class="text-center font-weight-bold">{{ user.userId }}</td>
+                  <td class="text-center font-weight-bold">
+                    {{ user.employeeId || user.userId }}
+                  </td>
                   <td class="text-start font-weight-medium">{{ user.userName }}</td>
                   <td class="text-start text-caption text-medium-emphasis">
                     {{ user.departmentName || '-' }}
@@ -323,20 +335,19 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useApi } from '@/composables/useApi'
 import { fetchUserGroupsApi } from '@/api/userGroup'
 import { fetchUsersApi } from '@/api/user'
-// 백엔드 프로젝트의 유저그룹-유저 매핑 API
 import { fetchUsersByUserGroupIdApi, saveBatchUserGroupUsersApi } from '@/api/userGroupUser'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
 const factoryList = ['INSERT', 'POWDER', 'COMMON']
 const selectedFactory = ref('INSERT')
 
-// 상태 변수
+// 1단: 그룹 상태
 const userGroupList = ref([])
 const selectedGroup = ref(null)
 
-// 2단: 현재 그룹 소속 유저 목록 및 원본 스냅샷 (변경 여부 추적용)
+// 2단: 선택 그룹 소속 유저 목록 및 원본 스냅샷 (배열로 관리)
 const assignedUsers = ref([])
-const originalAssignedUserIds = ref([])
+const originalAssignedMembers = ref([]) // 원본 UserGroupMemberResponse 목록
 const selectedAssignedIds = ref([])
 const assignedSearchKeyword = ref('')
 
@@ -345,7 +356,7 @@ const allUserList = ref([])
 const selectedAvailableIds = ref([])
 const allUserSearchKeyword = ref('')
 
-// 저장 모달 및 피드백 상태
+// 저장 모달 및 알림 상태
 const saveConfirmDialog = ref(false)
 const saveConfirmMessage = ref('')
 const snackbar = reactive({ show: false, message: '', color: 'success' })
@@ -364,17 +375,29 @@ function showNotification(msg, color) {
   snackbar.show = true
 }
 
-// 변경 여부 계산 (원본과 현재 assignedUsers의 ID 목록 비교)
+// 응답 객체에서 순수 배열(Content)을 안전하게 추출하는 헬퍼 함수
+function extractArrayFromResponse(res) {
+  if (!res) return []
+  if (Array.isArray(res)) return res
+  if (res.data) {
+    if (Array.isArray(res.data)) return res.data
+    if (res.data.content && Array.isArray(res.data.content)) return res.data.content
+  }
+  if (res.content && Array.isArray(res.content)) return res.content
+  return []
+}
+
+// 변경 여부 계산
 const isModified = computed(function () {
-  if (assignedUsers.value.length !== originalAssignedUserIds.value.length) {
+  if (assignedUsers.value.length !== originalAssignedMembers.value.length) {
     return true
   }
   const currentSet = {}
   for (let i = 0; i < assignedUsers.value.length; i++) {
-    currentSet[assignedUsers.value[i].userId] = true
+    currentSet[String(assignedUsers.value[i].userId)] = true
   }
-  for (let i = 0; i < originalAssignedUserIds.value.length; i++) {
-    if (!currentSet[originalAssignedUserIds.value[i]]) {
+  for (let i = 0; i < originalAssignedMembers.value.length; i++) {
+    if (!currentSet[String(originalAssignedMembers.value[i].userId)]) {
       return true
     }
   }
@@ -389,10 +412,16 @@ const filteredAssignedUsers = computed(function () {
   const result = []
   for (let i = 0; i < assignedUsers.value.length; i++) {
     const u = assignedUsers.value[i]
+    const empId = u.employeeId ? String(u.employeeId).toLowerCase() : ''
+    const uId = u.userId ? String(u.userId).toLowerCase() : ''
+    const uName = u.userName ? String(u.userName).toLowerCase() : ''
+    const dept = u.departmentName ? String(u.departmentName).toLowerCase() : ''
+
     if (
-      (u.userId && u.userId.toLowerCase().indexOf(kw) !== -1) ||
-      (u.userName && u.userName.toLowerCase().indexOf(kw) !== -1) ||
-      (u.departmentName && u.departmentName.toLowerCase().indexOf(kw) !== -1)
+      empId.indexOf(kw) !== -1 ||
+      uId.indexOf(kw) !== -1 ||
+      uName.indexOf(kw) !== -1 ||
+      dept.indexOf(kw) !== -1
     ) {
       result.push(u)
     }
@@ -400,11 +429,11 @@ const filteredAssignedUsers = computed(function () {
   return result
 })
 
-// 3단 필터링 목록 (이미 소속된 유저는 3단 목록에서 자동 제외)
+// 3단 필터링 목록 (소속된 유저는 우측 풀에서 제외)
 const filteredAvailableUsers = computed(function () {
   const assignedMap = {}
   for (let i = 0; i < assignedUsers.value.length; i++) {
-    assignedMap[assignedUsers.value[i].userId] = true
+    assignedMap[String(assignedUsers.value[i].userId)] = true
   }
 
   const kw = allUserSearchKeyword.value.trim().toLowerCase()
@@ -412,14 +441,19 @@ const filteredAvailableUsers = computed(function () {
 
   for (let i = 0; i < allUserList.value.length; i++) {
     const u = allUserList.value[i]
-    // 소속되어 있지 않은 유저만 우측 풀에 표시
-    if (!assignedMap[u.userId]) {
+    if (!assignedMap[String(u.userId)]) {
+      const empId = u.employeeId ? String(u.employeeId).toLowerCase() : ''
+      const uId = u.userId ? String(u.userId).toLowerCase() : ''
+      const uName = u.userName ? String(u.userName).toLowerCase() : ''
+      const dept = u.departmentName ? String(u.departmentName).toLowerCase() : ''
+
       if (!kw) {
         result.push(u)
       } else if (
-        (u.userId && u.userId.toLowerCase().indexOf(kw) !== -1) ||
-        (u.userName && u.userName.toLowerCase().indexOf(kw) !== -1) ||
-        (u.departmentName && u.departmentName.toLowerCase().indexOf(kw) !== -1)
+        empId.indexOf(kw) !== -1 ||
+        uId.indexOf(kw) !== -1 ||
+        uName.indexOf(kw) !== -1 ||
+        dept.indexOf(kw) !== -1
       ) {
         result.push(u)
       }
@@ -485,20 +519,21 @@ function toggleAvailableUser(userId) {
   }
 }
 
-// ◄ 추가 (우측 풀에서 좌측 소속 목록으로 이동)
+// ◄ 추가 (우측 풀에서 좌측 소속 목록으로 복사/이동)
 function assignSelectedUsers() {
   const targetMap = {}
   for (let i = 0; i < selectedAvailableIds.value.length; i++) {
-    targetMap[selectedAvailableIds.value[i]] = true
+    targetMap[String(selectedAvailableIds.value[i])] = true
   }
 
   const added = []
   for (let i = 0; i < allUserList.value.length; i++) {
-    if (targetMap[allUserList.value[i].userId]) {
+    if (targetMap[String(allUserList.value[i].userId)]) {
       added.push(allUserList.value[i])
     }
   }
 
+  // assignedUsers가 항상 배열임을 보장하며 병합
   assignedUsers.value = assignedUsers.value.concat(added)
   selectedAvailableIds.value = []
 }
@@ -507,12 +542,12 @@ function assignSelectedUsers() {
 function removeSelectedUsers() {
   const targetMap = {}
   for (let i = 0; i < selectedAssignedIds.value.length; i++) {
-    targetMap[selectedAssignedIds.value[i]] = true
+    targetMap[String(selectedAssignedIds.value[i])] = true
   }
 
   const remaining = []
   for (let i = 0; i < assignedUsers.value.length; i++) {
-    if (!targetMap[assignedUsers.value[i].userId]) {
+    if (!targetMap[String(assignedUsers.value[i].userId)]) {
       remaining.push(assignedUsers.value[i])
     }
   }
@@ -521,11 +556,11 @@ function removeSelectedUsers() {
   selectedAssignedIds.value = []
 }
 
-// [API] 사용자 그룹 목록 조회
+// [API 1] 사용자 그룹 목록 조회
 async function loadUserGroups() {
   try {
     const res = await executeFetchGroups({ page: 0, size: 100, factoryName: selectedFactory.value })
-    const list = (res && res.data && res.data.content) || (res && res.content) || []
+    const list = extractArrayFromResponse(res)
     userGroupList.value = list
 
     if (list.length > 0) {
@@ -533,13 +568,14 @@ async function loadUserGroups() {
     } else {
       selectedGroup.value = null
       assignedUsers.value = []
+      originalAssignedMembers.value = []
     }
   } catch (err) {
     console.error('Fetch user groups error:', err)
   }
 }
 
-// [API] 전체 사용자 목록 풀 조회
+// [API 2] 전체 사용자 목록 풀 조회
 async function loadAllUsers() {
   try {
     const res = await executeFetchAllUsers({
@@ -547,17 +583,29 @@ async function loadAllUsers() {
       size: 2000,
       factoryName: selectedFactory.value,
     })
-    const list =
-      (res && res.data && res.data.content) ||
-      (res && res.content) ||
-      (Array.isArray(res) ? res : [])
-    allUserList.value = list
+    const rawList = extractArrayFromResponse(res)
+
+    // UserGroupMemberResponse 필드 규격에 맞게 통일화
+    const normalized = []
+    for (let i = 0; i < rawList.length; i++) {
+      const u = rawList[i]
+      if (u) {
+        normalized.push({
+          userId: u.id || u.userId, // TSID 식별자
+          employeeId: u.userId || u.employeeId || '', // 사번
+          userName: u.userName || '',
+          departmentName: u.departmentName || '',
+          factoryName: u.factoryName || selectedFactory.value,
+        })
+      }
+    }
+    allUserList.value = normalized
   } catch (err) {
     console.error('Fetch all users error:', err)
   }
 }
 
-// [API] 선택 그룹의 소속 유저 조회
+// [API 3] 선택 그룹의 소속 유저 조회
 async function selectUserGroup(group) {
   if (!group) return
   selectedGroup.value = group
@@ -565,19 +613,16 @@ async function selectUserGroup(group) {
   selectedAvailableIds.value = []
 
   try {
-    const res = await executeFetchAssignedUsers(group.id)
-    const list = (res && res.data) || (Array.isArray(res) ? res : [])
+    const res = await executeFetchAssignedUsers(group.id, { page: 0, size: 2000 })
+    // Page<UserGroupMemberResponse>에서 content 배열만 안전하게 추출
+    const list = extractArrayFromResponse(res)
 
-    assignedUsers.value = list
-    const origIds = []
-    for (let i = 0; i < list.length; i++) {
-      origIds.push(list[i].userId)
-    }
-    originalAssignedUserIds.value = origIds
+    assignedUsers.value = list.slice()
+    originalAssignedMembers.value = list.slice() // 원본 스냅샷 보관
   } catch (err) {
     console.error('Fetch assigned users error:', err)
     assignedUsers.value = []
-    originalAssignedUserIds.value = []
+    originalAssignedMembers.value = []
   }
 }
 
@@ -601,27 +646,27 @@ function onOpenSaveConfirm() {
   saveConfirmDialog.value = true
 }
 
-// [API] 일괄 저장 실행
+// [API 4] 일괄 저장 실행
 async function onConfirmSave() {
   if (!selectedGroup.value) return
 
   try {
-    const userIds = []
+    const targetUserIds = []
     for (let i = 0; i < assignedUsers.value.length; i++) {
-      userIds.push(assignedUsers.value[i].userId)
+      targetUserIds.push(assignedUsers.value[i].userId)
     }
 
-    const payload = {
-      factoryName: selectedFactory.value,
+    // saveBatchUserGroupUsersApi 스펙에 맞춘 옵션 전달
+    await executeSaveBatch({
       userGroupId: selectedGroup.value.id,
-      userIdList: userIds,
-      eventName: 'UserGroupUsersBatchSaved',
+      factoryName: selectedFactory.value,
+      currentUserGroupMembers: originalAssignedMembers.value,
+      userIdList: targetUserIds,
       eventUser: 'aim',
-    }
+    })
 
-    await executeSaveBatch(payload)
     showNotification('사용자 그룹 매핑이 성공적으로 저장되었습니다.', 'success')
-    // 재조회하여 상태 스냅샷 갱신
+    // 저장 후 최신 데이터 재조회
     await selectUserGroup(selectedGroup.value)
   } catch (err) {
     console.error('Save user group users failed:', err)

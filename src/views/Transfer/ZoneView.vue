@@ -64,6 +64,7 @@
                 color="primary"
                 variant="outlined"
                 class="bank-toggle-group flex-grow-1"
+                v-on:update:model-value="onBankChange"
               >
                 <v-btn
                   v-for="(b, idx) in bankOptions"
@@ -96,11 +97,11 @@
       </div>
     </v-card>
 
-    <!-- 중앙 통계 요약 바 -->
+    <!-- 중앙 통계 요약 바 (실제 유효 셀 수 기준) -->
     <v-row density="compact" class="mb-3">
       <v-col cols="6" sm="3">
         <v-card class="elevation-1 pa-3 stat-card">
-          <div class="text-caption text-medium-emphasis">{{ $t('zone.totalCells') }}</div>
+          <div class="text-caption text-medium-emphasis">유효 셸프 수</div>
           <div class="text-h6 font-weight-bold text-primary">
             {{ totalCellCount.toLocaleString() }} {{ $t('views.transfer.zone.cellUnit') }}
           </div>
@@ -240,6 +241,11 @@
           <span class="legend-carrier-dot"></span>
           <span class="legend-text font-weight-medium">{{ $t('zone.carrierLoaded') }}</span>
         </div>
+
+        <div class="legend-item-chip ml-2">
+          <span class="legend-invalid-box"></span>
+          <span class="legend-text font-weight-medium text-disabled">미설치 공간(선택 불가)</span>
+        </div>
       </div>
     </v-card>
 
@@ -284,11 +290,10 @@
           v-on:mouseleave="handleMouseLeave"
         ></canvas>
 
-        <!-- 호버 플로팅 툴팁 -->
+        <!-- 호버 플로팅 툴팁 (유효 셀만 노출) -->
         <div
-          v-if="hoveredShelf"
-          class="floating-tooltip elevation-4"
-          :class="{ 'tooltip-visible': hoveredShelf !== null }"
+          v-if="hoveredShelf && hoveredShelf.isValidShelf"
+          class="floating-tooltip elevation-4 tooltip-visible"
           ref="tooltipRef"
         >
           <div class="tooltip-header font-weight-bold text-primary mb-1">
@@ -361,7 +366,9 @@ const authStore = useAuthStore()
 // 랙 규격 상수
 const MAX_ROW = 92
 const MAX_STAGE = 25
-const TOTAL_CELLS = MAX_ROW * MAX_STAGE // 2,300
+
+// 상태 갱신 트리거 카운터
+const stateVersion = ref(0)
 
 // 스토커 및 Bank 옵션
 const selectedStocker = ref('WH1')
@@ -385,7 +392,7 @@ const targetZone = ref('')
 const zoomLevel = ref('fit')
 const isSaving = ref(false)
 
-// 1. WCS Zone 및 Shelf 데이터 조회를 위한 useDataTable 전담 연동
+// WCS Zone 및 Shelf 데이터 조회를 위한 useDataTable 전담 연동
 const {
   items: zoneRawItems,
   loading: loadingZones,
@@ -474,23 +481,17 @@ function getFactoryName() {
   return import.meta.env.VITE_PLANT_TYPE || 'insert'
 }
 
-// 빈 2,300개 셀 기본 구조 초기화
+// 2,300개 전체 격자를 초기화하되 기본 isValidShelf = false 처리
 function initializeEmptyMatrix() {
   shelfMatrix = []
   const list = []
-  const bank = bankOptions[selectedBankIndex.value]
 
   for (let r = 0; r <= MAX_ROW; r++) {
     shelfMatrix[r] = []
     if (r === 0) continue
     for (let s = 1; s <= MAX_STAGE; s++) {
-      const colStr = String(bank.col).padStart(2, '0')
-      const rowStr = String(r).padStart(3, '0')
-      const stgStr = String(s).padStart(2, '0')
-      const shelfName = colStr + rowStr + stgStr
-
       const cell = {
-        shelfName: shelfName,
+        shelfName: '',
         row: r,
         stage: s,
         zoneName: 'EMPTY',
@@ -498,6 +499,7 @@ function initializeEmptyMatrix() {
         isSelected: false,
         isModified: false,
         originalZone: 'EMPTY',
+        isValidShelf: false, // 💡 실제 DB에 존재하는 유효 셸프 여부
       }
       shelfMatrix[r][s] = cell
       list.push(cell)
@@ -506,16 +508,30 @@ function initializeEmptyMatrix() {
   shelfList.value = list
 }
 
-// 통계 지표 계산
+// 통계 지표 계산 (실제 유효 셸프 isValidShelf: true 인 대상만 집계)
 const totalCellCount = computed(function () {
-  return TOTAL_CELLS
-})
-
-const occupiedCellCount = computed(function () {
+  void stateVersion.value
   let count = 0
   const list = shelfList.value
   for (let i = 0; i < list.length; i++) {
-    if (list[i].carrierName) {
+    if (list[i].isValidShelf) {
+      count++
+    }
+  }
+  return count
+})
+
+const occupiedCellCount = computed(function () {
+  void stateVersion.value
+  let count = 0
+  const list = shelfList.value
+  for (let i = 0; i < list.length; i++) {
+    if (
+      list[i].isValidShelf &&
+      list[i].carrierName &&
+      list[i].carrierName !== '-' &&
+      String(list[i].carrierName).trim() !== ''
+    ) {
       count++
     }
   }
@@ -528,10 +544,11 @@ const occupancyRate = computed(function () {
 })
 
 const selectedCellCount = computed(function () {
+  void stateVersion.value
   let count = 0
   const list = shelfList.value
   for (let i = 0; i < list.length; i++) {
-    if (list[i].isSelected) {
+    if (list[i].isValidShelf && list[i].isSelected) {
       count++
     }
   }
@@ -539,10 +556,11 @@ const selectedCellCount = computed(function () {
 })
 
 const modifiedCount = computed(function () {
+  void stateVersion.value
   let count = 0
   const list = shelfList.value
   for (let i = 0; i < list.length; i++) {
-    if (list[i].isModified) {
+    if (list[i].isValidShelf && list[i].isModified) {
       count++
     }
   }
@@ -550,6 +568,7 @@ const modifiedCount = computed(function () {
 })
 
 const zoneStats = computed(function () {
+  void stateVersion.value
   const stats = {}
   const names = availableZoneNames.value
   for (let k = 0; k < names.length; k++) {
@@ -558,17 +577,19 @@ const zoneStats = computed(function () {
 
   const list = shelfList.value
   for (let i = 0; i < list.length; i++) {
-    const z = list[i].zoneName || 'EMPTY'
-    if (stats[z] !== undefined) {
-      stats[z]++
-    } else {
-      stats[z] = 1
+    if (list[i].isValidShelf) {
+      const z = list[i].zoneName || 'EMPTY'
+      if (stats[z] !== undefined) {
+        stats[z]++
+      } else {
+        stats[z] = 1
+      }
     }
   }
   return stats
 })
 
-// 2. Zone 목록 로드 (WCS Zone API)
+// Zone 목록 로드 (WCS Zone API)
 async function fetchZoneList() {
   try {
     await loadZoneData({
@@ -585,7 +606,6 @@ async function fetchZoneList() {
       const z = zones[i]
       if (z && z.zoneName) {
         const rawColor = z.zoneColor || '#32ccbc'
-        // 8자리 헥스 색상 투명도 처리 보정
         const color = rawColor.length === 9 ? rawColor.substring(0, 7) : rawColor
         newMap[z.zoneName] = {
           color: color,
@@ -598,12 +618,13 @@ async function fetchZoneList() {
     if (!targetZone.value && zones.length > 0) {
       targetZone.value = zones[0].zoneName
     }
+    stateVersion.value++
   } catch (err) {
     console.error('Zone list fetch error:', err)
   }
 }
 
-// 3. 셸프 목록 로드 및 매핑 (WCS Shelf API)
+// 셸프 목록 로드 및 매핑 (WCS Shelf API)
 async function handleSearch() {
   hoveredShelf.value = null
   const bank = bankOptions[selectedBankIndex.value]
@@ -616,31 +637,34 @@ async function handleSearch() {
   initializeEmptyMatrix()
 
   try {
-    // Bank 전체 조회를 위해 최대치(2500개) 설정
     await loadShelfData({
       factoryName: getFactoryName(),
       stockerName: selectedStocker.value,
+      col: bank.col,
       bin: bank.bin,
-      size: 2500,
+      size: 3000,
     })
 
     const fetchedList = shelfRawItems.value || []
     for (let i = 0; i < fetchedList.length; i++) {
       const item = fetchedList[i]
-      const r = item.row
-      const s = item.stage
+      const r = Number(item.row)
+      const s = Number(item.stage)
       if (r >= 1 && r <= MAX_ROW && s >= 1 && s <= MAX_STAGE) {
         const cell = shelfMatrix[r][s]
         if (cell) {
-          cell.shelfName = item.shelfName || cell.shelfName
-          cell.zoneName = item.zoneName || 'EMPTY'
+          cell.shelfName = item.shelfName || ''
+          cell.zoneName =
+            item.zoneName && item.zoneName.trim() !== '' ? item.zoneName.trim() : 'EMPTY'
           cell.originalZone = cell.zoneName
           cell.carrierName = item.carrierName || null
           cell.isModified = false
           cell.isSelected = false
+          cell.isValidShelf = true // 💡 DB에 실제로 존재하는 셸프임을 확인
         }
       }
     }
+    stateVersion.value++
     showMessage(t('zone.cellsLoaded', { count: fetchedList.length }))
   } catch (err) {
     console.error('Shelf search failed:', err)
@@ -651,6 +675,10 @@ async function handleSearch() {
       drawCanvas()
     })
   }
+}
+
+function onBankChange() {
+  handleSearch()
 }
 
 // 캔버스 렌더링 치수 계산
@@ -787,10 +815,20 @@ function drawCanvas() {
     for (let s = 1; s <= MAX_STAGE; s++) {
       const yIndex = MAX_STAGE - s
       const cellY = headerT + yIndex * cellH
-
       const shelf = shelfMatrix[r] ? shelfMatrix[r][s] : null
-      const zone = shelf && shelf.zoneName ? shelf.zoneName : 'EMPTY'
 
+      // 💡 1. DB에 없는 비어있는 공간(미설치 영역) 렌더링
+      if (!shelf || !shelf.isValidShelf) {
+        ctx.fillStyle = '#ECEFF1'
+        ctx.fillRect(cellX + 1, cellY + 1, cellW - 2, cellH - 2)
+        ctx.strokeStyle = '#E0E0E0'
+        ctx.lineWidth = 1
+        ctx.strokeRect(cellX + 0.5, cellY + 0.5, cellW - 1, cellH - 1)
+        continue
+      }
+
+      // 💡 2. 유효한 셸프 렌더링
+      const zone = shelf.zoneName ? shelf.zoneName : 'EMPTY'
       ctx.fillStyle = getZoneColor(zone)
       ctx.fillRect(cellX + 1, cellY + 1, cellW - 2, cellH - 2)
 
@@ -799,7 +837,7 @@ function drawCanvas() {
       ctx.strokeRect(cellX + 0.5, cellY + 0.5, cellW - 1, cellH - 1)
 
       // 캐리어 적재 표시
-      if (shelf && shelf.carrierName) {
+      if (shelf.carrierName) {
         const markerW = Math.max(4, Math.floor(cellW * 0.45))
         const markerH = Math.max(4, Math.floor(cellH * 0.45))
         const mx = cellX + (cellW - markerW) / 2
@@ -813,7 +851,7 @@ function drawCanvas() {
       }
 
       // 변경 대기 상태 (노란색 모서리 마커)
-      if (shelf && shelf.isModified) {
+      if (shelf.isModified) {
         ctx.fillStyle = '#FFD600'
         ctx.beginPath()
         ctx.moveTo(cellX + 1, cellY + 1)
@@ -823,7 +861,7 @@ function drawCanvas() {
         ctx.fill()
       }
 
-      if (shelf && shelf.isSelected) {
+      if (shelf.isSelected) {
         selectedCells.push({ x: cellX, y: cellY, w: cellW, h: cellH })
       }
     }
@@ -941,9 +979,9 @@ function handleMouseMove(event) {
   const mouseY = event.clientY - rect.top
 
   const hovered = getCellFromCanvasCoords(mouseX, mouseY)
-  hoveredShelf.value = hovered
+  hoveredShelf.value = hovered && hovered.isValidShelf ? hovered : null
 
-  if (hovered) {
+  if (hoveredShelf.value) {
     tooltipPos.x = mouseX + 15
     tooltipPos.y = mouseY + 15
     nextTick(function () {
@@ -974,7 +1012,8 @@ function handleMouseUp(event) {
 
   if (dist < 4) {
     const clickedCell = getCellFromCanvasCoords(mouseX, mouseY)
-    if (clickedCell) {
+    // 💡 유효한 셸프만 클릭 토글 허용
+    if (clickedCell && clickedCell.isValidShelf) {
       if (toolMode.value === 'select') {
         clickedCell.isSelected = !clickedCell.isSelected
       } else {
@@ -989,7 +1028,8 @@ function handleMouseUp(event) {
       if (!shelfMatrix[r]) continue
       for (let s = range.startStage; s <= range.endStage; s++) {
         const shelf = shelfMatrix[r][s]
-        if (shelf) {
+        // 💡 유효한 셸프만 드래그 선택 영역에 포함
+        if (shelf && shelf.isValidShelf) {
           shelf.isSelected = isSelectMode
         }
       }
@@ -997,6 +1037,7 @@ function handleMouseUp(event) {
   }
 
   dragInfo.isDragging = false
+  stateVersion.value++
   drawCanvas()
 }
 
@@ -1010,11 +1051,16 @@ function handleMouseLeave() {
 
 function selectAllCells() {
   const list = shelfList.value
+  let count = 0
   for (let i = 0; i < list.length; i++) {
-    list[i].isSelected = true
+    if (list[i].isValidShelf) {
+      list[i].isSelected = true
+      count++
+    }
   }
+  stateVersion.value++
   drawCanvas()
-  showMessage(t('views.transfer.zone.selectedAllMsg', { count: list.length }))
+  showMessage(t('views.transfer.zone.selectedAllMsg', { count: count }))
 }
 
 function clearSelection() {
@@ -1022,14 +1068,18 @@ function clearSelection() {
   for (let i = 0; i < list.length; i++) {
     list[i].isSelected = false
   }
+  stateVersion.value++
   drawCanvas()
 }
 
 function invertSelection() {
   const list = shelfList.value
   for (let i = 0; i < list.length; i++) {
-    list[i].isSelected = !list[i].isSelected
+    if (list[i].isValidShelf) {
+      list[i].isSelected = !list[i].isSelected
+    }
   }
+  stateVersion.value++
   drawCanvas()
 }
 
@@ -1037,13 +1087,16 @@ function selectByZone(zoneKey) {
   const list = shelfList.value
   let count = 0
   for (let i = 0; i < list.length; i++) {
-    if (list[i].zoneName === zoneKey) {
-      list[i].isSelected = true
-      count++
-    } else {
-      list[i].isSelected = false
+    if (list[i].isValidShelf) {
+      if (list[i].zoneName === zoneKey) {
+        list[i].isSelected = true
+        count++
+      } else {
+        list[i].isSelected = false
+      }
     }
   }
+  stateVersion.value++
   drawCanvas()
   showMessage(t('views.transfer.zone.selectedZoneMsg', { zone: zoneKey, count: count }))
 }
@@ -1060,7 +1113,7 @@ function applyZoneBatch() {
 
   for (let i = 0; i < list.length; i++) {
     const shelf = list[i]
-    if (shelf.isSelected) {
+    if (shelf.isValidShelf && shelf.isSelected) {
       if (shelf.zoneName !== selectedZone) {
         shelf.zoneName = selectedZone
         shelf.isModified = shelf.zoneName !== shelf.originalZone
@@ -1069,18 +1122,20 @@ function applyZoneBatch() {
     }
   }
 
+  stateVersion.value++
   drawCanvas()
   showMessage(t('zone.applySuccess', { count: appliedCount, zone: selectedZone }))
 }
 
-// 4. WCS Shelf Batch Save API 연동
+// WCS Shelf Batch Save API 연동
 async function saveChanges() {
   const modifiedList = []
   const list = shelfList.value
 
   for (let i = 0; i < list.length; i++) {
     const s = list[i]
-    if (s.isModified) {
+    // 💡 유효 셸프이면서 변경된 항목만 전송
+    if (s.isValidShelf && s.isModified) {
       modifiedList.push({
         factoryName: getFactoryName(),
         shelfName: s.shelfName,
@@ -1097,7 +1152,6 @@ async function saveChanges() {
 
   isSaving.value = true
 
-  // 변경 대상 Zone별로 그룹화하여 일괄 저장 요청 수행
   const groupedByZone = {}
   for (let i = 0; i < modifiedList.length; i++) {
     const item = modifiedList[i]
@@ -1127,7 +1181,6 @@ async function saveChanges() {
       await saveBatchShelfApi(payload)
     }
 
-    // 성공 시 변경 플래그 리셋
     for (let i = 0; i < list.length; i++) {
       const s = list[i]
       if (s.isModified) {
@@ -1136,6 +1189,7 @@ async function saveChanges() {
       }
     }
 
+    stateVersion.value++
     drawCanvas()
     showMessage(t('zone.saveSuccess'))
   } catch (err) {
@@ -1249,6 +1303,15 @@ onUnmounted(function () {
   margin-right: 6px;
 }
 
+.legend-invalid-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background-color: #eceff1;
+  border: 1px solid #e0e0e0;
+  margin-right: 6px;
+}
+
 .legend-text {
   font-size: 11px;
   color: #37474f;
@@ -1288,7 +1351,6 @@ onUnmounted(function () {
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  display: none;
 }
 
 .tooltip-visible {

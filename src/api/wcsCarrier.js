@@ -15,7 +15,8 @@ export function fetchWcsCarriersApi(params) {
  * @param {string} carrierName
  */
 export function fetchWcsCarrierByIdApi(factoryName, carrierName) {
-  const path = '/v1/wcs/carrier/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(carrierName)
+  const path =
+    '/v1/wcs/carrier/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(carrierName)
   return axiosInstance.get(path)
 }
 
@@ -34,7 +35,8 @@ export function createWcsCarrierApi(payload) {
  * @param {Object} payload
  */
 export function updateWcsCarrierApi(factoryName, carrierName, payload) {
-  const path = '/v1/wcs/carrier/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(carrierName)
+  const path =
+    '/v1/wcs/carrier/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(carrierName)
   return axiosInstance.put(path, payload)
 }
 
@@ -42,9 +44,22 @@ export function updateWcsCarrierApi(factoryName, carrierName, payload) {
  * WCS 캐리어 단건 삭제 (복합키: factoryName + carrierName)
  * @param {string} factoryName
  * @param {string} carrierName
- * @param {Object} [params]
+ * @param {string} [eventUser]
+ * @param {string} [eventComment]
  */
-export function deleteWcsCarrierApi(factoryName, carrierName, params) {
-  const path = '/v1/wcs/carrier/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(carrierName)
-  return axiosInstance.delete(path, { params: params })
+export function deleteWcsCarrierApi(factoryName, carrierName, eventUser, eventComment) {
+  const path =
+    '/v1/wcs/carrier/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(carrierName)
+
+  const queryParams = {}
+  if (eventUser) {
+    queryParams.eventUser = eventUser
+  }
+  if (eventComment) {
+    queryParams.eventComment = eventComment
+  }
+
+  return axiosInstance.delete(path, {
+    params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+  })
 }

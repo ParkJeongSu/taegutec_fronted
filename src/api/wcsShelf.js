@@ -57,9 +57,10 @@ export function updateWcsShelfApi(factoryName, stockerName, shelfName, payload) 
  * @param {string} factoryName
  * @param {string} stockerName
  * @param {string} shelfName
- * @param {Object} [params]
+ * @param {string} [eventUser]
+ * @param {string} [eventComment]
  */
-export function deleteWcsShelfApi(factoryName, stockerName, shelfName, params) {
+export function deleteWcsShelfApi(factoryName, stockerName, shelfName, eventUser, eventComment) {
   const path =
     '/v1/wcs/shelf/' +
     encodeURIComponent(factoryName) +
@@ -67,7 +68,18 @@ export function deleteWcsShelfApi(factoryName, stockerName, shelfName, params) {
     encodeURIComponent(stockerName) +
     '/' +
     encodeURIComponent(shelfName)
-  return axiosInstance.delete(path, { params: params })
+
+  const queryParams = {}
+  if (eventUser) {
+    queryParams.eventUser = eventUser
+  }
+  if (eventComment) {
+    queryParams.eventComment = eventComment
+  }
+
+  return axiosInstance.delete(path, {
+    params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+  })
 }
 
 /**

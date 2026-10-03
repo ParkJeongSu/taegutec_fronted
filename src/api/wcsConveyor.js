@@ -17,7 +17,13 @@ export function fetchWcsConveyorsApi(params) {
  * @param {number|string} conveyorNumber
  * @param {number|string} localNo
  */
-export function fetchWcsConveyorByIdApi(factoryName, conveyorGroup, conveyorName, conveyorNumber, localNo) {
+export function fetchWcsConveyorByIdApi(
+  factoryName,
+  conveyorGroup,
+  conveyorName,
+  conveyorNumber,
+  localNo,
+) {
   const path =
     '/v1/wcs/conveyor/' +
     encodeURIComponent(factoryName) +
@@ -78,7 +84,8 @@ export function updateWcsConveyorApi(
  * @param {string} conveyorName
  * @param {number|string} conveyorNumber
  * @param {number|string} localNo
- * @param {Object} [params]
+ * @param {string} [eventUser]
+ * @param {string} [eventComment]
  */
 export function deleteWcsConveyorApi(
   factoryName,
@@ -86,7 +93,8 @@ export function deleteWcsConveyorApi(
   conveyorName,
   conveyorNumber,
   localNo,
-  params,
+  eventUser,
+  eventComment,
 ) {
   const path =
     '/v1/wcs/conveyor/' +
@@ -99,5 +107,16 @@ export function deleteWcsConveyorApi(
     conveyorNumber +
     '/' +
     localNo
-  return axiosInstance.delete(path, { params: params })
+
+  const queryParams = {}
+  if (eventUser) {
+    queryParams.eventUser = eventUser
+  }
+  if (eventComment) {
+    queryParams.eventComment = eventComment
+  }
+
+  return axiosInstance.delete(path, {
+    params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+  })
 }

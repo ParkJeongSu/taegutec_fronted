@@ -15,7 +15,9 @@ export function fetchWcsStockersApi(params) {
  * @param {string} stockerName
  */
 export function fetchWcsStockerByIdApi(factoryName, stockerName) {
-  return axiosInstance.get('/v1/wcs/stocker/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(stockerName))
+  return axiosInstance.get(
+    '/v1/wcs/stocker/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(stockerName),
+  )
 }
 
 /**
@@ -33,15 +35,32 @@ export function createWcsStockerApi(payload) {
  * @param {Object} payload
  */
 export function updateWcsStockerApi(factoryName, stockerName, payload) {
-  return axiosInstance.put('/v1/wcs/stocker/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(stockerName), payload)
+  return axiosInstance.put(
+    '/v1/wcs/stocker/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(stockerName),
+    payload,
+  )
 }
 
 /**
- * WCS 스토커 단건 삭제 (복합키: factoryName + stockerName)
+ * WCS 스토커 삭제
  * @param {string} factoryName
  * @param {string} stockerName
- * @param {Object} [params]
+ * @param {string} [eventUser]
+ * @param {string} [eventComment]
  */
-export function deleteWcsStockerApi(factoryName, stockerName, params) {
-  return axiosInstance.delete('/v1/wcs/stocker/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(stockerName), { params: params })
+export function deleteWcsStockerApi(factoryName, stockerName, eventUser, eventComment) {
+  const path =
+    '/v1/wcs/stocker/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(stockerName)
+
+  const queryParams = {}
+  if (eventUser) {
+    queryParams.eventUser = eventUser
+  }
+  if (eventComment) {
+    queryParams.eventComment = eventComment
+  }
+
+  return axiosInstance.delete(path, {
+    params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
+  })
 }

@@ -168,6 +168,14 @@ export const componentMap = {
     return import('@/views/Settings/UserGroupUserView.vue')
   }),
 
+  // 6. PRODUCTION (생산)
+  ProductionStartView: defineAsyncComponent(function () {
+    return import('@/views/Production/ProductionStartView.vue')
+  }),
+  ProductionEndView: defineAsyncComponent(function () {
+    return import('@/views/Production/ProductionEndView.vue')
+  }),
+
   // 기존 화면 (하위 호환 유지)
   ProcessStatusView: defineAsyncComponent(function () {
     return import('@/views/Production/ProcessStatusView.vue')
@@ -188,3 +196,4 @@ export const componentMap = {
     return import('@/views/History/ProcessStatusHistoryView.vue')
   }),
 }
+

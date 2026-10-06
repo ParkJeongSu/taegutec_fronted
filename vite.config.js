@@ -14,7 +14,7 @@ import vuetify from 'vite-plugin-vuetify'
 export default defineConfig(function (configEnv) {
   const mode = configEnv.mode
   const env = loadEnv(mode, process.cwd(), '')
-  const targetUrl = env.VITE_BACKEND_URL || 'http://localhost:11421'
+  const targetUrl = env.VITE_BACKEND_URL || 'http://localhost:11422'
 
   return {
     // ----------------------------------------------------

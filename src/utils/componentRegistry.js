@@ -187,12 +187,21 @@ export const componentMap = {
     return import('@/views/Equipment/EquipmentHistoryView.vue')
   }),
 
-  // 8. WAREHOUSE (창고 입/출고)
+  // 8. WAREHOUSE (창고 입/출고 및 재고 관리)
   InboundView: defineAsyncComponent(function () {
     return import('@/views/Warehouse/InboundView.vue')
   }),
   OutboundView: defineAsyncComponent(function () {
     return import('@/views/Warehouse/OutboundView.vue')
+  }),
+  DebaggingView: defineAsyncComponent(function () {
+    return import('@/views/Warehouse/DebaggingView.vue')
+  }),
+  InventoryStatusView: defineAsyncComponent(function () {
+    return import('@/views/Warehouse/InventoryStatusView.vue')
+  }),
+  StockTakingView: defineAsyncComponent(function () {
+    return import('@/views/Warehouse/StockTakingView.vue')
   }),
 
 

@@ -88,6 +88,8 @@ export default createVuetify({
           secondary: '#66BB6A',
           background: '#F1F8E9',
           surface: '#FFFFFF',
+          'surface-variant': '#F5F5F5', // 👈 밝은 그레이 톤으로 지정
+          'on-surface-variant': '#424242', // 👈 그 위 텍스트 컬러
           accent: '#FFC107',
           error: '#FF5252',
           success: '#4CAF50',

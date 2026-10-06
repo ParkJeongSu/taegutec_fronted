@@ -144,6 +144,13 @@ export const useMenuStore = defineStore('menu', function () {
       OUTBOUND: 'OutboundView',
       WAREHOUSE_INBOUND: 'InboundView',
       WAREHOUSE_OUTBOUND: 'OutboundView',
+      DEBAGGING: 'DebaggingView',
+      DEBAG: 'DebaggingView',
+      INVENTORY_STATUS: 'InventoryStatusView',
+      INVENTORY: 'InventoryStatusView',
+      STOCK_STATUS: 'InventoryStatusView',
+      STOCK_TAKING: 'StockTakingView',
+      STOCKTAKING: 'StockTakingView',
     }
 
 

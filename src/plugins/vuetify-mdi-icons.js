@@ -133,6 +133,11 @@ import {
   mdiHomeRoof,
   mdiAccountMultipleCheck,
   mdiFire,
+  mdiPackageVariantClosed,
+  mdiShippingPallet,
+  mdiBarcodeScan,
+  mdiScaleBalance,
+  mdiClipboardCheckOutline,
 } from '@mdi/js'
 
 // 아이콘 별칭(alias)을 만듭니다.
@@ -281,6 +286,11 @@ const aliases = {
   homeRoof: mdiHomeRoof,
   accountMultipleCheck: mdiAccountMultipleCheck,
   fire: mdiFire,
+  packageVariantClosed: mdiPackageVariantClosed,
+  pallet: mdiShippingPallet,
+  barcodeScan: mdiBarcodeScan,
+  scaleBalance: mdiScaleBalance,
+  clipboardCheckOutline: mdiClipboardCheckOutline,
 }
 
 // 설정들을 export 합니다.

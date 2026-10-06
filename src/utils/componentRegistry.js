@@ -175,6 +175,10 @@ export const componentMap = {
   ProductionEndView: defineAsyncComponent(function () {
     return import('@/views/Production/ProductionEndView.vue')
   }),
+  OrderHistoryView: defineAsyncComponent(function () {
+    return import('@/views/Production/OrderHistoryView.vue')
+  }),
+
 
   // 기존 화면 (하위 호환 유지)
   ProcessStatusView: defineAsyncComponent(function () {

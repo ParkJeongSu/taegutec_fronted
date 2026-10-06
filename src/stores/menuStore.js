@@ -133,11 +133,13 @@ export const useMenuStore = defineStore('menu', function () {
       PROCESS_STATUS_VER2: 'ProcessStatusVer2View',
       PRODUCTION_START: 'ProductionStartView',
       PRODUCTION_END: 'ProductionEndView',
+      ORDER_HISTORY: 'OrderHistoryView',
       PURGE_CONFIG: 'PurgeConfigView',
       PROCESS_INFO: 'ProcessInfoView',
       PURGE_LOG: 'PurgeLogView',
       PROCESS_STATUS_HISTORY: 'ProcessStatusHistoryView',
     }
+
 
 
     if (map[upper]) {

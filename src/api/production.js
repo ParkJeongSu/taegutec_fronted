@@ -1233,3 +1233,285 @@ export async function endProductionApi(payload) {
   }
 }
 
+// ==========================================
+// 6. Order 이력 조회 Mock 데이터 및 API
+// ==========================================
+export const ORDER_HISTORIES_MOCK = [
+  {
+    id: 1,
+    eventTime: '2026-10-06T13:45:22',
+    orderId: '1',
+    equipmentName: 'MIX-01',
+    equipmentType: 'Mixing',
+    operationStatus: 'COMPLETE',
+    inCarrierId: 'CST-0101',
+    outCarrierId: 'CST-0201',
+    batchLot: 'BLOT-261006-01',
+    weight: 2.48,
+    eventUser: 'OP_POWDER_01',
+    eventComment: '습식 고전단 혼합 4시간 완료 및 배출 캐리어 적재',
+  },
+  {
+    id: 2,
+    eventTime: '2026-10-06T09:30:10',
+    orderId: '1',
+    equipmentName: 'MIX-01',
+    equipmentType: 'Mixing',
+    operationStatus: 'START',
+    inCarrierId: 'CST-0101',
+    outCarrierId: '-',
+    batchLot: 'BLOT-261006-01',
+    weight: 2.5,
+    eventUser: 'OP_POWDER_01',
+    eventComment: '원자재 분말 수동 투입 조업 시작',
+  },
+  {
+    id: 3,
+    eventTime: '2026-10-06T08:15:00',
+    orderId: '1',
+    equipmentName: 'INC-01',
+    equipmentType: 'Income',
+    operationStatus: 'COMPLETE',
+    inCarrierId: 'CST-0050',
+    outCarrierId: 'CST-0101',
+    batchLot: 'BLOT-261006-01',
+    weight: 2.5,
+    eventUser: 'OP_INCOME_01',
+    eventComment: '원자재 수납 호퍼 계량 투입 완료',
+  },
+  {
+    id: 4,
+    eventTime: '2026-10-06T14:10:45',
+    orderId: 'ORD-2026-101',
+    equipmentName: 'INC-02',
+    equipmentType: 'Income',
+    operationStatus: 'START',
+    inCarrierId: 'CR-101',
+    outCarrierId: '-',
+    batchLot: 'LOT-WC-2610-001',
+    weight: 1.75,
+    eventUser: 'OP_POWDER_01',
+    eventComment: '초미립 WC 원자재 자동 공급 투입 시작',
+  },
+  {
+    id: 5,
+    eventTime: '2026-10-06T12:20:15',
+    orderId: 'ORD-2026-102',
+    equipmentName: 'RED-01',
+    equipmentType: 'Reduction',
+    operationStatus: 'START',
+    inCarrierId: 'CR-201',
+    outCarrierId: '-',
+    batchLot: 'LOT-RD-2610-011',
+    weight: 2.5,
+    eventUser: 'OP_RED_01',
+    eventComment: '로터리 환원로 865°C 고온 수소 환원 투입',
+  },
+  {
+    id: 6,
+    eventTime: '2026-10-06T11:05:30',
+    orderId: 'ORD-2026-103',
+    equipmentName: 'DOP-01',
+    equipmentType: 'Doping',
+    operationStatus: 'COMPLETE',
+    inCarrierId: 'IBC-301',
+    outCarrierId: 'IBC-302',
+    batchLot: 'LOT-DP-2610-004',
+    weight: 1.0,
+    eventUser: 'OP_DOP_02',
+    eventComment: '코발트 첨가제 정밀 습식 도핑 6.0% 완료',
+  },
+  {
+    id: 7,
+    eventTime: '2026-10-06T10:40:12',
+    orderId: 'ORD-2026-106',
+    equipmentName: 'SCR-01',
+    equipmentType: 'Screen',
+    operationStatus: 'COMPLETE',
+    inCarrierId: 'CR-401',
+    outCarrierId: 'CR-402',
+    batchLot: 'LOT-SC-2610-021',
+    weight: 2.0,
+    eventUser: 'OP_SCR_01',
+    eventComment: '#400 메쉬 진동 체분 통과 완료 및 분급 회수',
+  },
+  {
+    id: 8,
+    eventTime: '2026-10-06T09:15:00',
+    orderId: 'ORD-2026-107',
+    equipmentName: 'BLD-01',
+    equipmentType: 'Blending',
+    operationStatus: 'START',
+    inCarrierId: 'CR-501',
+    outCarrierId: '-',
+    batchLot: 'LOT-BL-2610-031',
+    weight: 2.25,
+    eventUser: 'OP_BLD_01',
+    eventComment: '더블콘 블렌더 대용량 분말 균일 혼합 시작',
+  },
+  {
+    id: 9,
+    eventTime: '2026-10-06T07:50:20',
+    orderId: 'ORD-2026-108',
+    equipmentName: 'BLD-03',
+    equipmentType: 'Blending',
+    operationStatus: 'ABORT',
+    inCarrierId: 'CR-502',
+    outCarrierId: '-',
+    batchLot: 'LOT-BL-2610-033',
+    weight: 2.25,
+    eventUser: 'SYSTEM',
+    eventComment: 'A-108 모터 토크 과부하 감지로 조업 긴급 정지',
+  },
+  {
+    id: 10,
+    eventTime: '2026-10-05T18:30:00',
+    orderId: 'ORD-2026-111',
+    equipmentName: 'CRB-01',
+    equipmentType: 'Carburization',
+    operationStatus: 'COMPLETE',
+    inCarrierId: 'CST-0102',
+    outCarrierId: 'CST-0202',
+    batchLot: 'LOT-CB-2610-051',
+    weight: 2.95,
+    eventUser: 'OP_CRB_01',
+    eventComment: '진공 고온 탄화 합성 반응(1450°C) 정상 완료',
+  },
+  {
+    id: 11,
+    eventTime: '2026-10-05T16:15:20',
+    orderId: 'ORD-2026-113',
+    equipmentName: 'DEA-01',
+    equipmentType: 'Deagglomeration',
+    operationStatus: 'COMPLETE',
+    inCarrierId: 'CR-701',
+    outCarrierId: 'CR-702',
+    batchLot: 'LOT-DA-2610-061',
+    weight: 1.24,
+    eventUser: 'OP_DEA_01',
+    eventComment: '제트밀 초음속 기류 분말 해쇄 D50 1.2um 달성',
+  },
+  {
+    id: 12,
+    eventTime: '2026-10-05T14:00:10',
+    orderId: 'ORD-2026-114',
+    equipmentName: 'PCK-01',
+    equipmentType: 'Packing',
+    operationStatus: 'COMPLETE',
+    inCarrierId: 'CR-801',
+    outCarrierId: 'DRUM-PACK-01',
+    batchLot: 'LOT-PK-2610-071',
+    weight: 2.75,
+    eventUser: 'OP_PCK_01',
+    eventComment: '자동 진공 캔 및 드럼 완제품 출하 포장 완료',
+  },
+]
+
+/**
+ * 7. Order 이력 목록 조회 API (페이징 / 검색)
+ */
+export async function fetchOrderHistoryApi(params) {
+  try {
+    const res = await api.get('/production/order-history', { params: params })
+    if (res && (res.data || res.content || Array.isArray(res))) {
+      return res
+    }
+  } catch (err) {
+    console.debug('fetchOrderHistoryApi fallback to mock:', err)
+  }
+
+  let filtered = ORDER_HISTORIES_MOCK.slice()
+
+  if (params) {
+    if (params.orderId && String(params.orderId).trim() !== '') {
+      const q = String(params.orderId).toLowerCase().trim()
+      const temp = []
+      for (let i = 0; i < filtered.length; i++) {
+        const item = filtered[i]
+        if (
+          String(item.orderId).toLowerCase().indexOf(q) !== -1 ||
+          String(item.batchLot).toLowerCase().indexOf(q) !== -1
+        ) {
+          temp.push(item)
+        }
+      }
+      filtered = temp
+    }
+
+    if (params.equipmentName && params.equipmentName !== '전체') {
+      const eqp = String(params.equipmentName).trim()
+      const temp = []
+      for (let i = 0; i < filtered.length; i++) {
+        if (filtered[i].equipmentName === eqp) {
+          temp.push(filtered[i])
+        }
+      }
+      filtered = temp
+    }
+
+    if (params.operationStatus && params.operationStatus !== '전체') {
+      const st = String(params.operationStatus).trim()
+      const temp = []
+      for (let i = 0; i < filtered.length; i++) {
+        if (filtered[i].operationStatus === st) {
+          temp.push(filtered[i])
+        }
+      }
+      filtered = temp
+    }
+
+    if (params.carrierId && String(params.carrierId).trim() !== '') {
+      const cId = String(params.carrierId).toLowerCase().trim()
+      const temp = []
+      for (let i = 0; i < filtered.length; i++) {
+        const item = filtered[i]
+        if (
+          String(item.inCarrierId).toLowerCase().indexOf(cId) !== -1 ||
+          String(item.outCarrierId).toLowerCase().indexOf(cId) !== -1
+        ) {
+          temp.push(item)
+        }
+      }
+      filtered = temp
+    }
+
+    if (params.startDate) {
+      const start = new Date(params.startDate).getTime()
+      const temp = []
+      for (let i = 0; i < filtered.length; i++) {
+        const t = new Date(filtered[i].eventTime).getTime()
+        if (t >= start) {
+          temp.push(filtered[i])
+        }
+      }
+      filtered = temp
+    }
+
+    if (params.endDate) {
+      const end = new Date(params.endDate).getTime()
+      const temp = []
+      for (let i = 0; i < filtered.length; i++) {
+        const t = new Date(filtered[i].eventTime).getTime()
+        if (t <= end) {
+          temp.push(filtered[i])
+        }
+      }
+      filtered = temp
+    }
+  }
+
+  const page = (params && params.page) || 0
+  const size = (params && params.size) || 10
+  const start = page * size
+  const paginated = filtered.slice(start, start + size)
+
+  return {
+    content: paginated,
+    totalElements: filtered.length,
+    totalPages: Math.ceil(filtered.length / size),
+    page: page,
+    size: size,
+  }
+}
+
+

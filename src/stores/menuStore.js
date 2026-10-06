@@ -140,6 +140,10 @@ export const useMenuStore = defineStore('menu', function () {
       PROCESS_INFO: 'ProcessInfoView',
       PURGE_LOG: 'PurgeLogView',
       PROCESS_STATUS_HISTORY: 'ProcessStatusHistoryView',
+      INBOUND: 'InboundView',
+      OUTBOUND: 'OutboundView',
+      WAREHOUSE_INBOUND: 'InboundView',
+      WAREHOUSE_OUTBOUND: 'OutboundView',
     }
 
 

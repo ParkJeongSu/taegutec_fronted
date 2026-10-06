@@ -187,8 +187,15 @@ export const componentMap = {
     return import('@/views/Equipment/EquipmentHistoryView.vue')
   }),
 
+  // 8. WAREHOUSE (창고 입/출고)
+  InboundView: defineAsyncComponent(function () {
+    return import('@/views/Warehouse/InboundView.vue')
+  }),
+  OutboundView: defineAsyncComponent(function () {
+    return import('@/views/Warehouse/OutboundView.vue')
+  }),
 
-  // 기존 화면 (하위 호환 유지)
+
   ProcessStatusView: defineAsyncComponent(function () {
     return import('@/views/Production/ProcessStatusView.vue')
   }),

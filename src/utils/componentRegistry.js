@@ -179,6 +179,14 @@ export const componentMap = {
     return import('@/views/Production/OrderHistoryView.vue')
   }),
 
+  // 7. EQUIPMENT (설비)
+  EquipmentStatusView: defineAsyncComponent(function () {
+    return import('@/views/Equipment/EquipmentStatusView.vue')
+  }),
+  EquipmentHistoryView: defineAsyncComponent(function () {
+    return import('@/views/Equipment/EquipmentHistoryView.vue')
+  }),
+
 
   // 기존 화면 (하위 호환 유지)
   ProcessStatusView: defineAsyncComponent(function () {

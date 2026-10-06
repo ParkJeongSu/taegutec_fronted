@@ -134,11 +134,14 @@ export const useMenuStore = defineStore('menu', function () {
       PRODUCTION_START: 'ProductionStartView',
       PRODUCTION_END: 'ProductionEndView',
       ORDER_HISTORY: 'OrderHistoryView',
+      EQUIPMENT_STATUS: 'EquipmentStatusView',
+      EQUIPMENT_HISTORY: 'EquipmentHistoryView',
       PURGE_CONFIG: 'PurgeConfigView',
       PROCESS_INFO: 'ProcessInfoView',
       PURGE_LOG: 'PurgeLogView',
       PROCESS_STATUS_HISTORY: 'ProcessStatusHistoryView',
     }
+
 
 
 

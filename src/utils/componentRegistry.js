@@ -8,6 +8,9 @@ export const componentMap = {
   WarehouseOverviewView: defineAsyncComponent(function () {
     return import('@/views/Dashboard/WarehouseOverviewView.vue')
   }),
+  WarehousePowderOverviewView: defineAsyncComponent(function () {
+    return import('@/views/Dashboard/WarehousePowderOverviewView.vue')
+  }),
   WorkStation311View: defineAsyncComponent(function () {
     return import('@/views/Dashboard/WorkStation311View.vue')
   }),
@@ -204,7 +207,6 @@ export const componentMap = {
     return import('@/views/Warehouse/StockTakingView.vue')
   }),
 
-
   ProcessStatusView: defineAsyncComponent(function () {
     return import('@/views/Production/ProcessStatusView.vue')
   }),
@@ -224,4 +226,3 @@ export const componentMap = {
     return import('@/views/History/ProcessStatusHistoryView.vue')
   }),
 }
-

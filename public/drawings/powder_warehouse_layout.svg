@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1100" width="100%" height="100%">
+  <defs>
+    <style>
+      .bg { fill: #ffffff; }
+      .grid-line { stroke: #f1f5f9; stroke-width: 1; }
+      .stocker-rack { fill: none; stroke: #1e5a22; stroke-width: 2.2; }
+      .stocker-x { stroke: #1e5a22; stroke-width: 1.2; }
+      .guide-rail { stroke: #1e5a22; stroke-width: 1.5; stroke-dasharray: 6,4; }
+      .conveyor-rail { stroke: #334155; stroke-width: 3.5; stroke-dasharray: 4,3; fill: none; }
+      .conveyor-node { fill: #ffffff; stroke: #334155; stroke-width: 2.5; }
+      .station-port { fill: #ff8c00; stroke: #e07700; stroke-width: 1; rx: 3; ry: 3; }
+      .crane-body { fill: #1e5a22; rx: 6; ry: 6; }
+      .crane-dot { fill: #ffffff; }
+      .crane-guide-dash { stroke: #ffffff; stroke-width: 1; stroke-dasharray: 2,2; }
+      .zone-text { font-family: 'Pretendard', 'Segoe UI', sans-serif; font-size: 13px; font-weight: 700; fill: #475569; }
+      .port-label { font-family: 'Pretendard', 'Segoe UI', sans-serif; font-size: 11px; font-weight: 600; fill: #ffffff; text-anchor: middle; }
+    </style>
+  </defs>
+
+  <!-- 배경 캔버스 -->
+  <rect width="1600" height="1100" class="bg" />
+
+  <!-- ================= 1. 컨베이어 메인 이송 라인 (다크 슬레이트 점선 & 링 노드) ================= -->
+  <!-- 좌측 상단 입고/해포 라인에서 스토커 투입구로 연결 -->
+  <path d="M 100 110 L 440 110 L 440 200 L 1400 200" class="conveyor-rail" />
+  <path d="M 100 140 L 410 140 L 410 200" class="conveyor-rail" />
+  
+  <!-- 중앙 메인 믹싱/환원 공급 루프 -->
+  <path d="M 440 200 L 440 680 L 1400 680 L 1400 200" class="conveyor-rail" />
+  <path d="M 440 440 L 1400 440" class="conveyor-rail" />
+
+  <!-- 하부 배출/소결 공급 서브 라인 -->
+  <path d="M 580 680 L 580 920" class="conveyor-rail" />
+  <path d="M 860 680 L 860 920" class="conveyor-rail" />
+  <path d="M 1140 680 L 1140 920" class="conveyor-rail" />
+
+  <!-- 컨베이어 꺾임/분기 노드 링 -->
+  <circle cx="440" cy="110" r="9" class="conveyor-node" />
+  <circle cx="440" cy="200" r="9" class="conveyor-node" />
+  <circle cx="440" cy="440" r="9" class="conveyor-node" />
+  <circle cx="440" cy="680" r="9" class="conveyor-node" />
+  <circle cx="1400" cy="200" r="9" class="conveyor-node" />
+  <circle cx="1400" cy="440" r="9" class="conveyor-node" />
+  <circle cx="1400" cy="680" r="9" class="conveyor-node" />
+  <circle cx="580" cy="680" r="7" class="conveyor-node" />
+  <circle cx="860" cy="680" r="7" class="conveyor-node" />
+  <circle cx="1140" cy="680" r="7" class="conveyor-node" />
+
+  <!-- ================= 2. 작업 스테이션 / 투입·배출 포트 (오렌지 블록) ================= -->
+  <!-- 입고 / 해포 스테이션 -->
+  <rect x="70" y="95" width="55" height="28" class="station-port" />
+  <text x="97" y="113" class="port-label">IN-01</text>
+  
+  <rect x="70" y="125" width="55" height="28" class="station-port" />
+  <text x="97" y="143" class="port-label">DEBAG</text>
+
+  <!-- 메인 공정 공급 포트 (상/하단) -->
+  <rect x="620" y="175" width="50" height="24" class="station-port" />
+  <rect x="820" y="175" width="50" height="24" class="station-port" />
+  <rect x="1020" y="175" width="50" height="24" class="station-port" />
+  <rect x="1220" y="175" width="50" height="24" class="station-port" />
+
+  <rect x="620" y="415" width="50" height="24" class="station-port" />
+  <rect x="820" y="415" width="50" height="24" class="station-port" />
+  <rect x="1020" y="415" width="50" height="24" class="station-port" />
+  <rect x="1220" y="415" width="50" height="24" class="station-port" />
+
+  <!-- 배출/출하 포트 -->
+  <rect x="555" y="920" width="50" height="26" class="station-port" />
+  <rect x="835" y="920" width="50" height="26" class="station-port" />
+  <rect x="1115" y="920" width="50" height="26" class="station-port" />
+
+  <!-- ================= 3. 파우더 스토커 랙 (좌측 4개 베이) ================= -->
+  <!-- Bay 1 (WH-P1) -->
+  <g id="rack-powder-wh1">
+    <rect x="130" y="240" width="60" height="740" class="stocker-rack" />
+    <line x1="130" y1="240" x2="190" y2="280" class="stocker-x" />
+    <line x1="130" y1="280" x2="190" y2="240" class="stocker-x" />
+    <line x1="130" y1="940" x2="190" y2="980" class="stocker-x" />
+    <line x1="130" y1="980" x2="190" y2="940" class="stocker-x" />
+    <line x1="160" y1="280" x2="160" y2="940" class="guide-rail" />
+  </g>
+
+  <!-- Bay 2 (WH-P2) -->
+  <g id="rack-powder-wh2">
+    <rect x="205" y="240" width="60" height="740" class="stocker-rack" />
+    <line x1="205" y1="240" x2="265" y2="280" class="stocker-x" />
+    <line x1="205" y1="280" x2="265" y2="240" class="stocker-x" />
+    <line x1="205" y1="940" x2="265" y2="980" class="stocker-x" />
+    <line x1="205" y1="980" x2="265" y2="940" class="stocker-x" />
+    <line x1="235" y1="280" x2="235" y2="940" class="guide-rail" />
+  </g>
+
+  <!-- Bay 3 (WH-P3) -->
+  <g id="rack-powder-wh3">
+    <rect x="280" y="240" width="60" height="740" class="stocker-rack" />
+    <line x1="280" y1="240" x2="340" y2="280" class="stocker-x" />
+    <line x1="280" y1="280" x2="340" y2="240" class="stocker-x" />
+    <line x1="280" y1="940" x2="340" y2="980" class="stocker-x" />
+    <line x1="280" y1="980" x2="340" y2="940" class="stocker-x" />
+    <line x1="310" y1="280" x2="310" y2="940" class="guide-rail" />
+  </g>
+
+  <!-- Bay 4 (WH-P4) -->
+  <g id="rack-powder-wh4">
+    <rect x="355" y="240" width="60" height="740" class="stocker-rack" />
+    <line x1="355" y1="240" x2="415" y2="280" class="stocker-x" />
+    <line x1="355" y1="280" x2="415" y2="240" class="stocker-x" />
+    <line x1="355" y1="940" x2="415" y2="980" class="stocker-x" />
+    <line x1="355" y1="980" x2="415" y2="940" class="stocker-x" />
+    <line x1="385" y1="280" x2="385" y2="940" class="guide-rail" />
+  </g>
+
+  <!-- ================= 4. 실시간 이동 크레인 유닛 (Crane Unit g 태그) ================= -->
+  <!-- WH-P1 크레인 -->
+  <g id="crane-unit-wh-p1" transform="translate(142, 450)">
+    <rect x="0" y="0" width="36" height="36" class="crane-body" />
+    <circle cx="18" cy="18" r="4.5" class="crane-dot" />
+    <line x1="18" y1="4" x2="18" y2="32" class="crane-guide-dash" />
+  </g>
+
+  <!-- WH-P2 크레인 -->
+  <g id="crane-unit-wh-p2" transform="translate(217, 620)">
+    <rect x="0" y="0" width="36" height="36" class="crane-body" />
+    <circle cx="18" cy="18" r="4.5" class="crane-dot" />
+    <line x1="18" y1="4" x2="18" y2="32" class="crane-guide-dash" />
+  </g>
+
+  <!-- WH-P3 크레인 -->
+  <g id="crane-unit-wh-p3" transform="translate(292, 380)">
+    <rect x="0" y="0" width="36" height="36" class="crane-body" />
+    <circle cx="18" cy="18" r="4.5" class="crane-dot" />
+    <line x1="18" y1="4" x2="18" y2="32" class="crane-guide-dash" />
+  </g>
+
+  <!-- WH-P4 크레인 -->
+  <g id="crane-unit-wh-p4" transform="translate(367, 710)">
+    <rect x="0" y="0" width="36" height="36" class="crane-body" />
+    <circle cx="18" cy="18" r="4.5" class="crane-dot" />
+    <line x1="18" y1="4" x2="18" y2="32" class="crane-guide-dash" />
+  </g>
+
+  <!-- 구역 텍스트 라벨 -->
+  <text x="210" y="1030" class="zone-text">POWDER STOCKER (BAY 1~4)</text>
+  <text x="830" y="150" class="zone-text">MIXING &amp; REDUCTION BUFFER</text>
+  <text x="790" y="880" class="zone-text">DISCHARGE &amp; PACKING LINE</text>
+</svg>

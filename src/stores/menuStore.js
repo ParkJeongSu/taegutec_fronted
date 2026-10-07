@@ -144,6 +144,8 @@ export const useMenuStore = defineStore('menu', function () {
       OUTBOUND: 'OutboundView',
       WAREHOUSE_INBOUND: 'InboundView',
       WAREHOUSE_OUTBOUND: 'OutboundView',
+      WAREHOUSE_INSERT_OVERVIEW: 'WarehouseOverviewView',
+      WAREHOUSE_POWDER_OVERVIEW: 'WarehousePowderOverviewView',
       DEBAGGING: 'DebaggingView',
       DEBAG: 'DebaggingView',
       INVENTORY_STATUS: 'InventoryStatusView',
@@ -152,9 +154,6 @@ export const useMenuStore = defineStore('menu', function () {
       STOCK_TAKING: 'StockTakingView',
       STOCKTAKING: 'StockTakingView',
     }
-
-
-
 
     if (map[upper]) {
       return map[upper]

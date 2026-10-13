@@ -131,49 +131,49 @@
   <!-- 6. 포지션 노드 사각형들 (35200 ~ 35206) -->
   <g class="position-nodes">
     <!-- 포지션: 35200 (인입 버퍼) -->
-    <g id="pos-35200" class="tray-position tray-inbound clickable" transform="translate(278, 115)">
+    <g id="WH5-35200" class="tray-position tray-inbound clickable" transform="translate(278, 115)">
       <rect width="90" height="55" rx="4" class="tray-rect" />
       <text x="45" y="24" class="tray-title" text-anchor="middle">35200</text>
       <text x="45" y="42" class="tray-sub" text-anchor="middle">인입 버퍼</text>
     </g>
 
     <!-- 포지션: 35201 (입고 대기) -->
-    <g id="pos-35201" class="tray-position tray-inbound clickable" transform="translate(450, 115)">
+    <g id="352-35201" class="tray-position tray-inbound clickable" transform="translate(450, 115)">
       <rect width="90" height="55" rx="4" class="tray-rect" />
       <text x="45" y="24" class="tray-title" text-anchor="middle">35201</text>
       <text x="45" y="42" class="tray-sub" text-anchor="middle">입고 대기</text>
     </g>
 
     <!-- 포지션: 35202 (입고 처리) -->
-    <g id="pos-35202" class="tray-position clickable" transform="translate(565, 115)">
+    <g id="352-35202" class="tray-position clickable" transform="translate(565, 115)">
       <rect width="90" height="55" rx="4" class="tray-rect" />
       <text x="45" y="24" class="tray-title" text-anchor="middle">35202</text>
       <text x="45" y="42" class="tray-sub" text-anchor="middle">입고 처리</text>
     </g>
 
     <!-- 포지션: 35203 (중앙 작업/피킹) -->
-    <g id="pos-35203" class="tray-position tray-active clickable" transform="translate(565, 205)">
+    <g id="352-35203" class="tray-position tray-active clickable" transform="translate(565, 205)">
       <rect width="90" height="55" rx="4" class="tray-rect" />
       <text x="45" y="24" class="tray-title active-title" text-anchor="middle">35203</text>
       <text x="45" y="42" class="tray-sub active-sub" text-anchor="middle">작업/피킹</text>
     </g>
 
     <!-- 포지션: 35204 (출고 대기) -->
-    <g id="pos-35204" class="tray-position tray-outbound clickable" transform="translate(450, 295)">
+    <g id="352-35204" class="tray-position tray-outbound clickable" transform="translate(450, 295)">
       <rect width="90" height="55" rx="4" class="tray-rect" />
       <text x="45" y="24" class="tray-title" text-anchor="middle">35204</text>
       <text x="45" y="42" class="tray-sub" text-anchor="middle">출고 대기</text>
     </g>
 
     <!-- 포지션: 35205 (출고 버퍼) -->
-    <g id="pos-35205" class="tray-position clickable" transform="translate(565, 295)">
+    <g id="352-35205" class="tray-position clickable" transform="translate(565, 295)">
       <rect width="90" height="55" rx="4" class="tray-rect" />
       <text x="45" y="24" class="tray-title" text-anchor="middle">35205</text>
       <text x="45" y="42" class="tray-sub" text-anchor="middle">출고 버퍼</text>
     </g>
 
     <!-- 포지션: 35206 (배출 포트) -->
-    <g id="pos-35206" class="tray-position tray-outbound clickable" transform="translate(278, 295)">
+    <g id="WH5-35206" class="tray-position tray-outbound clickable" transform="translate(278, 295)">
       <rect width="90" height="55" rx="4" class="tray-rect" />
       <text x="45" y="24" class="tray-title" text-anchor="middle">35206</text>
       <text x="45" y="42" class="tray-sub" text-anchor="middle">배출 포트</text>

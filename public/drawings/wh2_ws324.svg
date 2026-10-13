@@ -42,7 +42,35 @@
       .legend-active { fill: #fef3c7; stroke: #f59e0b; }
       .legend-outbound { fill: #eff6ff; stroke: #3b82f6; }
       .legend-text { font-size: 10px; font-weight: 500; fill: #64748b; font-family: sans-serif; }
-    </style>
+    /* 실시간 트레이(Tray/Carrier) 렌더링 스타일 */
+    .tray-unit {
+      transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1.0);
+      will-change: transform;
+      cursor: pointer;
+    }
+    .tray-base {
+      fill: #1976D2;
+      stroke: #0D47A1;
+      stroke-width: 1.5;
+      rx: 6;
+      ry: 6;
+      filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.25));
+    }
+    .tray-inner {
+      fill: #2196F3;
+      rx: 3;
+      ry: 3;
+    }
+    .tray-label {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      fill: #FFFFFF;
+      text-anchor: middle;
+      dominant-baseline: central;
+      pointer-events: none;
+    }
+  </style>
     <pattern id="gridPattern" width="20" height="20" patternUnits="userSpaceOnUse">
       <path d="M 20 0 L 0 0 0 20" fill="none" class="grid-line" />
     </pattern>
@@ -159,5 +187,8 @@
 
     <rect x="230" y="0" width="14" height="14" rx="2" class="legend-outbound" />
     <text x="250" y="11" class="legend-text">출고</text>
+  </g>
+  <!-- SVG 본문 최하단에 트레이가 렌더링될 전용 레이어 그룹 추가 -->
+  <g id="tray-layer">
   </g>
 </svg>

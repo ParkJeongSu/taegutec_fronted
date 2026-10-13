@@ -15,7 +15,8 @@
               </v-chip>
             </div>
             <div class="text-caption text-medium-emphasis mt-1">
-              대구텍 분말(POWDER) 공정 설비별 ERP 오더 및 원자재/중간재 LOT 캐리어를 지정하여 수동 투입 조업을 시작합니다.
+              대구텍 분말(POWDER) 공정 설비별 ERP 오더 및 원자재/중간재 LOT 캐리어를 지정하여 수동
+              투입 조업을 시작합니다.
             </div>
           </div>
         </div>
@@ -93,7 +94,12 @@
                 <v-expansion-panel-title class="py-2 px-3">
                   <div class="d-flex align-center justify-space-between w-100 mr-2">
                     <div class="d-flex align-center">
-                      <v-icon :icon="group.icon || '$cubeOutline'" size="18" color="primary" class="mr-2" />
+                      <v-icon
+                        :icon="group.icon || '$cubeOutline'"
+                        size="18"
+                        color="primary"
+                        class="mr-2"
+                      />
                       <span class="font-weight-bold text-caption text-truncate">
                         {{ group.typeName }}
                       </span>
@@ -110,7 +116,10 @@
                       v-for="eqp in group.equipments"
                       :key="eqp.eqpId"
                       class="equipment-unit-card pa-2 mb-1 rounded cursor-pointer"
-                      :class="{ 'active-equipment-card': selectedEquipment && selectedEquipment.eqpId === eqp.eqpId }"
+                      :class="{
+                        'active-equipment-card':
+                          selectedEquipment && selectedEquipment.eqpId === eqp.eqpId,
+                      }"
                       v-on:click="onSelectEquipment(eqp)"
                     >
                       <div class="d-flex align-center justify-space-between mb-1">
@@ -118,7 +127,9 @@
                           <span class="font-weight-bold text-caption text-primary mr-1">
                             {{ eqp.eqpId }}
                           </span>
-                          <span class="text-caption text-high-emphasis text-truncate font-weight-medium eqp-name-label">
+                          <span
+                            class="text-caption text-high-emphasis text-truncate font-weight-medium eqp-name-label"
+                          >
                             {{ eqp.eqpName }}
                           </span>
                         </div>
@@ -132,7 +143,9 @@
                         </v-chip>
                       </div>
 
-                      <div class="d-flex align-center justify-space-between text-caption text-medium-emphasis">
+                      <div
+                        class="d-flex align-center justify-space-between text-caption text-medium-emphasis"
+                      >
                         <span class="text-truncate">
                           {{ eqp.currentOrder !== '-' ? eqp.currentOrder : '대기중' }}
                         </span>
@@ -153,7 +166,9 @@
         <v-card class="elevation-1 rounded-lg pa-4 mb-4 eqp-dashboard-card">
           <div v-if="!selectedEquipment" class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$robotIndustrial" size="36" color="disabled" class="mb-2" />
-            <div class="text-body-2 font-weight-medium">좌측 목록에서 작업 대상 설비를 선택해주세요.</div>
+            <div class="text-body-2 font-weight-medium">
+              좌측 목록에서 작업 대상 설비를 선택해주세요.
+            </div>
           </div>
 
           <div v-else>
@@ -165,19 +180,37 @@
                 </v-avatar>
                 <div>
                   <div class="d-flex align-center">
-                    <span class="text-subtitle-1 font-weight-bold mr-2">{{ selectedEquipment.eqpName }}</span>
-                    <v-chip size="small" color="primary" variant="flat" class="font-weight-bold mr-2">
+                    <span class="text-subtitle-1 font-weight-bold mr-2">{{
+                      selectedEquipment.eqpName
+                    }}</span>
+                    <v-chip
+                      size="small"
+                      color="primary"
+                      variant="flat"
+                      class="font-weight-bold mr-2"
+                    >
                       {{ selectedEquipment.eqpId }}
                     </v-chip>
-                    <v-chip size="small" color="secondary" variant="tonal" class="font-weight-medium mr-2">
+                    <v-chip
+                      size="small"
+                      color="secondary"
+                      variant="tonal"
+                      class="font-weight-medium mr-2"
+                    >
                       공정: {{ selectedEquipment.eqpType }}
                     </v-chip>
-                    <v-chip size="small" :color="getEqpStatusColor(selectedEquipment.status)" variant="flat" class="font-weight-bold">
+                    <v-chip
+                      size="small"
+                      :color="getEqpStatusColor(selectedEquipment.status)"
+                      variant="flat"
+                      class="font-weight-bold"
+                    >
                       운전 상태: {{ selectedEquipment.status }}
                     </v-chip>
                   </div>
                   <div class="text-caption text-medium-emphasis mt-1">
-                    {{ selectedEquipment.description }} (설비 설치 위치: {{ selectedEquipment.location || 'POWDER-1공장' }})
+                    {{ selectedEquipment.description }} (설비 설치 위치:
+                    {{ selectedEquipment.location || 'POWDER-1공장' }})
                   </div>
                 </div>
               </div>
@@ -186,7 +219,12 @@
                 <v-chip size="small" variant="outlined" color="primary" class="font-weight-medium">
                   현재 오더: {{ selectedEquipment.currentOrder }}
                 </v-chip>
-                <v-chip size="small" variant="outlined" color="secondary" class="ml-2 font-weight-medium">
+                <v-chip
+                  size="small"
+                  variant="outlined"
+                  color="secondary"
+                  class="ml-2 font-weight-medium"
+                >
                   현재 배치: {{ selectedEquipment.currentLot }}
                 </v-chip>
               </div>
@@ -239,7 +277,9 @@
         <v-row density="comfortable" class="flex-grow-1">
           <!-- ================= [우측 하단-좌측] 투입 가능 ERP 오더 목록 ================= -->
           <v-col cols="12" lg="6" class="d-flex flex-column">
-            <v-card class="elevation-1 rounded-lg pa-3 fill-height d-flex flex-column sub-table-card">
+            <v-card
+              class="elevation-1 rounded-lg pa-3 fill-height d-flex flex-column sub-table-card"
+            >
               <div class="panel-header mb-2">
                 <div class="d-flex align-center justify-space-between mb-2">
                   <div class="d-flex align-center">
@@ -262,7 +302,12 @@
                     class="mr-2"
                     v-on:keyup.enter="handleSearchOrders"
                   ></v-text-field>
-                  <v-btn color="primary" variant="tonal" size="small" v-on:click="handleSearchOrders">
+                  <v-btn
+                    color="primary"
+                    variant="tonal"
+                    size="small"
+                    v-on:click="handleSearchOrders"
+                  >
                     검색
                   </v-btn>
                 </div>
@@ -283,8 +328,14 @@
                 >
                   <template #[`item.selectRadio`]="{ item }">
                     <v-icon
-                      :icon="selectedOrder && selectedOrder.orderId === item.orderId ? '$checkCircle' : '$checkboxOff'"
-                      :color="selectedOrder && selectedOrder.orderId === item.orderId ? 'primary' : 'grey'"
+                      :icon="
+                        selectedOrder && selectedOrder.orderId === item.orderId
+                          ? '$checkCircle'
+                          : '$checkboxOff'
+                      "
+                      :color="
+                        selectedOrder && selectedOrder.orderId === item.orderId ? 'primary' : 'grey'
+                      "
                       size="18"
                     />
                   </template>
@@ -294,13 +345,21 @@
                   </template>
 
                   <template #[`item.targetWeight`]="{ item }">
-                    <span class="font-weight-medium">{{ Number(item.targetWeight).toFixed(2) }} t</span>
+                    <span class="font-weight-medium"
+                      >{{ Number(item.targetWeight).toFixed(2) }} t</span
+                    >
                   </template>
 
                   <template #[`item.status`]="{ item }">
                     <v-chip
                       size="x-small"
-                      :color="item.status === 'RELEASED' ? 'success' : item.status === 'READY' ? 'primary' : 'grey'"
+                      :color="
+                        item.status === 'RELEASED'
+                          ? 'success'
+                          : item.status === 'READY'
+                            ? 'primary'
+                            : 'grey'
+                      "
                       variant="flat"
                     >
                       {{ item.status }}
@@ -317,13 +376,23 @@
 
           <!-- ================= [우측 하단-우측] 투입 대상 LOT & Carrier 목록 ================= -->
           <v-col cols="12" lg="6" class="d-flex flex-column">
-            <v-card class="elevation-1 rounded-lg pa-3 fill-height d-flex flex-column sub-table-card">
+            <v-card
+              class="elevation-1 rounded-lg pa-3 fill-height d-flex flex-column sub-table-card"
+            >
               <div class="panel-header mb-2">
                 <div class="d-flex align-center justify-space-between mb-2">
                   <div class="d-flex align-center">
                     <v-icon icon="$packageVariant" size="18" color="secondary" class="mr-1" />
-                    <span class="text-subtitle-2 font-weight-bold">투입 대상 LOT &amp; Carrier 목록</span>
-                    <v-chip v-if="selectedOrder" size="x-small" color="primary" variant="tonal" class="ml-2">
+                    <span class="text-subtitle-2 font-weight-bold"
+                      >투입 대상 LOT &amp; Carrier 목록</span
+                    >
+                    <v-chip
+                      v-if="selectedOrder"
+                      size="x-small"
+                      color="primary"
+                      variant="tonal"
+                      class="ml-2"
+                    >
                       오더: {{ selectedOrder.orderId }}
                     </v-chip>
                   </div>
@@ -343,7 +412,12 @@
                     class="mr-2"
                     v-on:keyup.enter="handleSearchLots"
                   ></v-text-field>
-                  <v-btn color="secondary" variant="tonal" size="small" v-on:click="handleSearchLots">
+                  <v-btn
+                    color="secondary"
+                    variant="tonal"
+                    size="small"
+                    v-on:click="handleSearchLots"
+                  >
                     검색
                   </v-btn>
                 </div>
@@ -377,7 +451,13 @@
                   <template #[`item.status`]="{ item }">
                     <v-chip
                       size="x-small"
-                      :color="item.status === 'STOCK' ? 'success' : item.status === 'WIP' ? 'warning' : 'grey'"
+                      :color="
+                        item.status === 'STOCK'
+                          ? 'success'
+                          : item.status === 'WIP'
+                            ? 'warning'
+                            : 'grey'
+                      "
                       variant="flat"
                     >
                       {{ item.status }}
@@ -390,7 +470,6 @@
                     </v-chip>
                   </template>
                 </BaseDataTable>
-
               </div>
             </v-card>
           </v-col>
@@ -404,14 +483,22 @@
               <div class="summary-item mr-4 mb-2 mb-md-0">
                 <span class="text-caption text-medium-emphasis">선택 설비:</span>
                 <span class="font-weight-bold text-primary ml-1">
-                  {{ selectedEquipment ? '[' + selectedEquipment.eqpId + '] ' + selectedEquipment.eqpName : '설비 미선택' }}
+                  {{
+                    selectedEquipment
+                      ? '[' + selectedEquipment.eqpId + '] ' + selectedEquipment.eqpName
+                      : '설비 미선택'
+                  }}
                 </span>
               </div>
 
               <div class="summary-item mr-4 mb-2 mb-md-0">
                 <span class="text-caption text-medium-emphasis">선택 오더:</span>
                 <span class="font-weight-bold text-high-emphasis ml-1">
-                  {{ selectedOrder ? selectedOrder.orderId + ' (' + selectedOrder.itemName + ')' : '오더 미선택' }}
+                  {{
+                    selectedOrder
+                      ? selectedOrder.orderId + ' (' + selectedOrder.itemName + ')'
+                      : '오더 미선택'
+                  }}
                 </span>
               </div>
 
@@ -494,7 +581,9 @@ const selectedEquipment = ref(null)
 const equipmentSearchKeyword = ref('')
 const openedPanelIndexes = ref([0, 1, 2, 6, 7])
 
-const { loading: isEquipmentLoading, execute: executeFetchEquipments } = useApi(fetchEquipmentHierarchyApi)
+const { loading: isEquipmentLoading, execute: executeFetchEquipments } = useApi(
+  fetchEquipmentHierarchyApi,
+)
 
 // ==========================================
 // 2. ERP 오더 목록 관리 (useDataTable 연동)
@@ -677,11 +766,14 @@ function onSelectEquipment(eqp) {
 
   // 선택된 설비의 공정 타입에 맞춰 오더 및 LOT 목록 필터 재조회
   loadOrdersData({ applicableProcess: eqp.eqpType, orderId: orderSearchKeyword.value })
-  loadLotsData({ orderId: selectedOrder.value ? selectedOrder.value.orderId : null, searchKeyword: lotSearchKeyword.value })
+  loadLotsData({
+    orderId: selectedOrder.value ? selectedOrder.value.orderId : null,
+    searchKeyword: lotSearchKeyword.value,
+  })
 }
 
 function onOrderRowClick(event, row) {
-  const item = row && row.item ? (row.item.raw || row.item) : (row && row.raw ? row.raw : row)
+  const item = row && row.item ? row.item.raw || row.item : row && row.raw ? row.raw : row
   if (!item) return
 
   selectedOrder.value = item

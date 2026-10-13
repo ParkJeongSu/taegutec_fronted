@@ -48,7 +48,8 @@
               prepend-icon="$check"
               class="mr-2 font-weight-medium"
               v-on:click="toggleAllPolicies('Y')"
-            >{{ $t('views.settings.passwordPolicy.enableAll') }}</v-btn>
+              >{{ $t('views.settings.passwordPolicy.enableAll') }}</v-btn
+            >
 
             <v-btn
               variant="outlined"
@@ -57,7 +58,8 @@
               prepend-icon="$close"
               class="mr-2 font-weight-medium"
               v-on:click="toggleAllPolicies('N')"
-            >{{ $t('views.settings.passwordPolicy.disableAll') }}</v-btn>
+              >{{ $t('views.settings.passwordPolicy.disableAll') }}</v-btn
+            >
 
             <v-btn
               variant="outlined"
@@ -67,7 +69,8 @@
               class="mr-2 font-weight-medium"
               :disabled="isPolicyLoading || isSaving"
               v-on:click="loadPolicies"
-            >{{ $t('common.refresh') }}</v-btn>
+              >{{ $t('common.refresh') }}</v-btn
+            >
 
             <v-btn
               color="primary"
@@ -78,7 +81,8 @@
               :loading="isSaving"
               :disabled="isPolicyLoading"
               v-on:click="handleSave"
-            >{{ $t('views.settings.passwordPolicy.savePolicies') }}</v-btn>
+              >{{ $t('views.settings.passwordPolicy.savePolicies') }}</v-btn
+            >
           </div>
         </div>
       </div>
@@ -91,7 +95,9 @@
           <div class="d-flex align-center justify-space-between">
             <div>
               <div class="text-caption text-medium-emphasis font-weight-medium">전체 정책 항목</div>
-              <div class="text-h5 font-weight-bold mt-1 text-primary">{{ policyMetaList.length }}개</div>
+              <div class="text-h5 font-weight-bold mt-1 text-primary">
+                {{ policyMetaList.length }}개
+              </div>
             </div>
             <v-avatar color="primary" variant="tonal" size="40">
               <v-icon icon="$shieldCheck" size="22" color="primary" />
@@ -104,8 +110,12 @@
         <v-card variant="outlined" class="pa-3 rounded-lg stats-card bg-surface">
           <div class="d-flex align-center justify-space-between">
             <div>
-              <div class="text-caption text-medium-emphasis font-weight-medium">현재 적용 중인 정책</div>
-              <div class="text-h5 font-weight-bold mt-1 text-success">{{ activePolicyCount }}개</div>
+              <div class="text-caption text-medium-emphasis font-weight-medium">
+                현재 적용 중인 정책
+              </div>
+              <div class="text-h5 font-weight-bold mt-1 text-success">
+                {{ activePolicyCount }}개
+              </div>
             </div>
             <v-avatar color="success" variant="tonal" size="40">
               <v-icon icon="$check" size="22" color="success" />
@@ -119,7 +129,9 @@
           <div class="d-flex align-center justify-space-between">
             <div>
               <div class="text-caption text-medium-emphasis font-weight-medium">미적용 정책</div>
-              <div class="text-h5 font-weight-bold mt-1 text-grey-darken-1">{{ inactivePolicyCount }}개</div>
+              <div class="text-h5 font-weight-bold mt-1 text-grey-darken-1">
+                {{ inactivePolicyCount }}개
+              </div>
             </div>
             <v-avatar color="grey" variant="tonal" size="40">
               <v-icon icon="$close" size="22" color="grey-darken-1" />
@@ -146,12 +158,7 @@
       <v-divider class="mb-3"></v-divider>
 
       <!-- 로딩 진행바 -->
-      <v-progress-linear
-        v-if="isPolicyLoading"
-        indeterminate
-        color="primary"
-        class="mb-3"
-      />
+      <v-progress-linear v-if="isPolicyLoading" indeterminate color="primary" class="mb-3" />
 
       <!-- 10대 정책 리스트 -->
       <div class="policy-items-list">
@@ -185,15 +192,27 @@
 
             <!-- 정책 아이콘 아바타 -->
             <v-avatar
-              :color="policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y' ? meta.categoryColor : 'grey-lighten-2'"
-              :variant="policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y' ? 'tonal' : 'flat'"
+              :color="
+                policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y'
+                  ? meta.categoryColor
+                  : 'grey-lighten-2'
+              "
+              :variant="
+                policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y'
+                  ? 'tonal'
+                  : 'flat'
+              "
               size="38"
               class="mr-3 policy-icon-avatar"
             >
               <v-icon
                 :icon="meta.icon"
                 size="20"
-                :color="policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y' ? meta.categoryColor : 'grey-darken-1'"
+                :color="
+                  policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y'
+                    ? meta.categoryColor
+                    : 'grey-darken-1'
+                "
               />
             </v-avatar>
 
@@ -203,7 +222,12 @@
                 <span class="policy-title font-weight-bold text-body-1 mr-2">
                   {{ meta.title }}
                 </span>
-                <v-chip size="x-small" :color="meta.categoryColor" variant="tonal" class="mr-2 font-weight-medium">
+                <v-chip
+                  size="x-small"
+                  :color="meta.categoryColor"
+                  variant="tonal"
+                  class="mr-2 font-weight-medium"
+                >
                   {{ meta.category }}
                 </v-chip>
                 <code class="policy-key-code text-caption">{{ meta.key }}</code>
@@ -218,22 +242,40 @@
           <div class="d-flex align-center policy-right-status" v-on:click.stop>
             <div class="default-val-box text-right mr-4 d-none d-md-block">
               <div class="text-caption text-disabled">기본 권장값</div>
-              <div class="text-caption font-weight-medium text-high-emphasis">{{ meta.defaultValue }}</div>
+              <div class="text-caption font-weight-medium text-high-emphasis">
+                {{ meta.defaultValue }}
+              </div>
             </div>
 
             <!-- 상태 뱃지 -->
             <v-chip
               size="small"
-              :color="policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y' ? 'success' : 'grey'"
-              :variant="policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y' ? 'flat' : 'outlined'"
+              :color="
+                policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y'
+                  ? 'success'
+                  : 'grey'
+              "
+              :variant="
+                policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y'
+                  ? 'flat'
+                  : 'outlined'
+              "
               class="status-chip font-weight-bold"
             >
               <v-icon
-                :icon="policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y' ? '$check' : '$close'"
+                :icon="
+                  policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y'
+                    ? '$check'
+                    : '$close'
+                "
                 start
                 size="14"
               />
-              {{ policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y' ? '적용 중' : '미적용' }}
+              {{
+                policyStateMap[meta.key] && policyStateMap[meta.key].isActive === 'Y'
+                  ? '적용 중'
+                  : '미적용'
+              }}
             </v-chip>
           </div>
         </div>
@@ -261,12 +303,7 @@
     </v-card>
 
     <!-- 스낵바 알림 -->
-    <v-snackbar
-      v-model="snackbar.show"
-      :color="snackbar.color"
-      :timeout="3000"
-      location="top"
-    >
+    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000" location="top">
       <div class="d-flex align-center">
         <v-icon :icon="snackbar.icon" class="mr-2" size="20" />
         <span>{{ snackbar.text }}</span>
@@ -370,7 +407,8 @@ const policyMetaList = [
     category: '수명주기 관리',
     categoryColor: 'info',
     icon: '$clockOutline',
-    description: '비밀번호 변경 후 무분별한 잦은 재변경을 방지하기 위해 최소 대기 기간을 설정합니다.',
+    description:
+      '비밀번호 변경 후 무분별한 잦은 재변경을 방지하기 위해 최소 대기 기간을 설정합니다.',
     defaultValue: '1일 경과 후 변경 가능',
   },
   {
@@ -472,7 +510,8 @@ async function loadPolicies() {
         const item = list[i]
         if (item && item.policyName && policyStateMap[item.policyName]) {
           policyStateMap[item.policyName].id = item.id || null
-          policyStateMap[item.policyName].isActive = item.isActive === 'Y' || item.isActive === true ? 'Y' : 'N'
+          policyStateMap[item.policyName].isActive =
+            item.isActive === 'Y' || item.isActive === true ? 'Y' : 'N'
           if (item.policyValue !== undefined) {
             policyStateMap[item.policyName].policyValue = item.policyValue
           }
@@ -577,10 +616,16 @@ async function handleSave() {
     }
 
     if (errorCount === 0) {
-      showToast('[' + selectedFactory.value + '] 공장의 10대 패스워드 정책이 성공적으로 저장되었습니다.', 'success')
+      showToast(
+        '[' + selectedFactory.value + '] 공장의 10대 패스워드 정책이 성공적으로 저장되었습니다.',
+        'success',
+      )
       await loadPolicies()
     } else {
-      showToast(successCount + '건 저장 완료, ' + errorCount + '건 저장 실패. 재시도 해주세요.', 'warning')
+      showToast(
+        successCount + '건 저장 완료, ' + errorCount + '건 저장 실패. 재시도 해주세요.',
+        'warning',
+      )
     }
   } catch (generalErr) {
     console.error('General error in handleSave:', generalErr)

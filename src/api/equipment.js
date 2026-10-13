@@ -46,7 +46,8 @@ export const EQUIPMENT_DETAIL_MOCK = {
     utilizationRate: 95.8,
     runningHours: '22h 10m',
     stopHours: '1h 50m',
-    maintenanceMemo: '로터리 킬른 환원로 1호기 열교환기 점검 완료. H2 가스 누설 센서 정상 작동 확인.',
+    maintenanceMemo:
+      '로터리 킬른 환원로 1호기 열교환기 점검 완료. H2 가스 누설 센서 정상 작동 확인.',
     alarms: [],
     recipeSV: [
       { paramName: '1구역 환원 온도', sv: '750.0', tolerance: '±10.0', unit: '°C' },
@@ -57,10 +58,34 @@ export const EQUIPMENT_DETAIL_MOCK = {
       { paramName: '로터리 회전 속도', sv: '8.0', tolerance: '±0.5', unit: 'rpm' },
     ],
     recipePV: [
-      { paramName: '1구역 환원 온도', pv: '748.5', deviation: '-1.5', status: 'NORMAL', unit: '°C' },
-      { paramName: '2구역 중심 온도', pv: '864.2', deviation: '-0.8', status: 'NORMAL', unit: '°C' },
-      { paramName: '3구역 냉각 온도', pv: '452.1', deviation: '+2.1', status: 'NORMAL', unit: '°C' },
-      { paramName: 'H2 가스 공급 유량', pv: '124.8', deviation: '-0.2', status: 'NORMAL', unit: 'Nm³/h' },
+      {
+        paramName: '1구역 환원 온도',
+        pv: '748.5',
+        deviation: '-1.5',
+        status: 'NORMAL',
+        unit: '°C',
+      },
+      {
+        paramName: '2구역 중심 온도',
+        pv: '864.2',
+        deviation: '-0.8',
+        status: 'NORMAL',
+        unit: '°C',
+      },
+      {
+        paramName: '3구역 냉각 온도',
+        pv: '452.1',
+        deviation: '+2.1',
+        status: 'NORMAL',
+        unit: '°C',
+      },
+      {
+        paramName: 'H2 가스 공급 유량',
+        pv: '124.8',
+        deviation: '-0.2',
+        status: 'NORMAL',
+        unit: 'Nm³/h',
+      },
       { paramName: '노내 챔버 압력', pv: '0.25', deviation: '0.00', status: 'NORMAL', unit: 'MPa' },
       { paramName: '로터리 회전 속도', pv: '8.0', deviation: '0.0', status: 'NORMAL', unit: 'rpm' },
     ],
@@ -92,7 +117,13 @@ export const EQUIPMENT_DETAIL_MOCK = {
       { paramName: '노내 압력', sv: '0.25', tolerance: '±0.05', unit: 'MPa' },
     ],
     recipePV: [
-      { paramName: '노내 환원 온도', pv: '915.2', deviation: '+15.2', status: 'WARNING', unit: '°C' },
+      {
+        paramName: '노내 환원 온도',
+        pv: '915.2',
+        deviation: '+15.2',
+        status: 'WARNING',
+        unit: '°C',
+      },
       { paramName: 'H2 공급 유량', pv: '45.0', deviation: '-75.0', status: 'ALARM', unit: 'Nm³/h' },
       { paramName: '노내 압력', pv: '0.42', deviation: '+0.17', status: 'ALARM', unit: 'MPa' },
     ],
@@ -101,7 +132,8 @@ export const EQUIPMENT_DETAIL_MOCK = {
     utilizationRate: 88.4,
     runningHours: '18h 45m',
     stopHours: '5h 15m',
-    maintenanceMemo: '고전단 어트리터 믹서 1호기 임펠러 및 베어링 윤활 완료. 습식 밀링 4시간 배치 진행 중.',
+    maintenanceMemo:
+      '고전단 어트리터 믹서 1호기 임펠러 및 베어링 윤활 완료. 습식 밀링 4시간 배치 진행 중.',
     alarms: [],
     recipeSV: [
       { paramName: '교반 모터 RPM', sv: '180', tolerance: '±5', unit: 'rpm' },
@@ -112,7 +144,13 @@ export const EQUIPMENT_DETAIL_MOCK = {
     recipePV: [
       { paramName: '교반 모터 RPM', pv: '180', deviation: '0', status: 'NORMAL', unit: 'rpm' },
       { paramName: '냉각 자켓 온도', pv: '38.5', deviation: '+3.5', status: 'WARNING', unit: '°C' },
-      { paramName: '냉각수 공급 압력', pv: '3.2', deviation: '+0.2', status: 'NORMAL', unit: 'bar' },
+      {
+        paramName: '냉각수 공급 압력',
+        pv: '3.2',
+        deviation: '+0.2',
+        status: 'NORMAL',
+        unit: 'bar',
+      },
       { paramName: '모터 토크 부하율', pv: '84', deviation: '-1', status: 'NORMAL', unit: '%' },
     ],
   },

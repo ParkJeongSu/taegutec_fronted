@@ -44,8 +44,17 @@
           {{ $t('common.refreshRemaining', { sec: remainingTime }) }}
         </v-chip>
       </div>
-      <v-btn color="primary" prepend-icon="$plus" class="mr-2" v-on:click="onAddProcess">{{ $t('common.create') }}</v-btn>
-      <v-btn color="secondary" variant="tonal" prepend-icon="$refresh" class="mr-2" v-on:click="manualSearch">{{ $t('common.refresh') }}</v-btn>
+      <v-btn color="primary" prepend-icon="$plus" class="mr-2" v-on:click="onAddProcess">{{
+        $t('common.create')
+      }}</v-btn>
+      <v-btn
+        color="secondary"
+        variant="tonal"
+        prepend-icon="$refresh"
+        class="mr-2"
+        v-on:click="manualSearch"
+        >{{ $t('common.refresh') }}</v-btn
+      >
       <v-divider vertical class="mx-2"></v-divider>
       <v-btn color="success" prepend-icon="$fileExcel">{{ $t('common.exportOutput') }}</v-btn>
     </template>
@@ -260,7 +269,7 @@ function onAddProcess() {
 
 // 행(Row) 클릭 시 수정 모드로 우측 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   if (itemData) {
     panelStore.openPanel(markRaw(ProcessStatusForm), {
       mode: 'UPDATE',

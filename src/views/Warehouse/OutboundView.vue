@@ -15,7 +15,8 @@
               </v-chip>
             </div>
             <div class="text-caption text-medium-emphasis mt-1">
-              공정(혼합, 환원, 도핑 등) 투입 요청에 맞춰 창고에 보관 중인 컨테이너 캐리어를 선별하고 WCS 반송 출고 명령을 발행합니다.
+              공정(혼합, 환원, 도핑 등) 투입 요청에 맞춰 창고에 보관 중인 컨테이너 캐리어를 선별하고
+              WCS 반송 출고 명령을 발행합니다.
             </div>
           </div>
         </div>
@@ -45,7 +46,9 @@
     <v-row class="split-view-row" density="comfortable">
       <!-- ================= [좌측 패널] ERP 출고 오더 카드 리스트 (너비 약 35%) ================= -->
       <v-col cols="12" md="4" class="d-flex flex-column">
-        <v-card class="elevation-1 rounded-lg pa-4 fill-height d-flex flex-column outbound-order-panel">
+        <v-card
+          class="elevation-1 rounded-lg pa-4 fill-height d-flex flex-column outbound-order-panel"
+        >
           <div class="panel-header mb-3">
             <div class="d-flex align-center justify-space-between mb-2">
               <div class="d-flex align-center">
@@ -78,8 +81,12 @@
               class="w-100"
             >
               <v-btn value="ALL" size="small" class="flex-grow-1 font-weight-medium">전체</v-btn>
-              <v-btn value="EMERGENCY" size="small" class="flex-grow-1 font-weight-bold text-error">긴급 출고</v-btn>
-              <v-btn value="NORMAL" size="small" class="flex-grow-1 font-weight-medium">일반 출고</v-btn>
+              <v-btn value="EMERGENCY" size="small" class="flex-grow-1 font-weight-bold text-error"
+                >긴급 출고</v-btn
+              >
+              <v-btn value="NORMAL" size="small" class="flex-grow-1 font-weight-medium"
+                >일반 출고</v-btn
+              >
             </v-btn-toggle>
           </div>
 
@@ -91,7 +98,10 @@
               <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
             </div>
 
-            <div v-else-if="filteredOrders.length === 0" class="text-center py-12 text-medium-emphasis">
+            <div
+              v-else-if="filteredOrders.length === 0"
+              class="text-center py-12 text-medium-emphasis"
+            >
               <v-icon icon="$trayArrowUp" size="36" color="disabled" class="mb-2" />
               <div class="text-caption">조건에 해당하는 출고 오더가 없습니다.</div>
             </div>
@@ -101,7 +111,9 @@
                 v-for="order in filteredOrders"
                 :key="order.orderId"
                 class="outbound-order-card pa-3 mb-2 rounded-lg cursor-pointer"
-                :class="{ 'active-order-card': selectedOrder && selectedOrder.orderId === order.orderId }"
+                :class="{
+                  'active-order-card': selectedOrder && selectedOrder.orderId === order.orderId,
+                }"
                 v-on:click="onSelectOrder(order)"
               >
                 <!-- 카드 상단: 오더번호 및 긴급도 칩 -->
@@ -135,9 +147,15 @@
                 </div>
 
                 <!-- 카드 하단: 요청 수량 및 납기 -->
-                <div class="d-flex align-center justify-space-between text-caption text-medium-emphasis pt-1 border-top">
+                <div
+                  class="d-flex align-center justify-space-between text-caption text-medium-emphasis pt-1 border-top"
+                >
                   <span>
-                    요청: <strong class="text-primary">{{ order.requestedContainers }}대</strong> ({{ order.requestedWeight.toFixed(1) }} t)
+                    요청:
+                    <strong class="text-primary">{{ order.requestedContainers }}대</strong> ({{
+                      order.requestedWeight.toFixed(1)
+                    }}
+                    t)
                   </span>
                   <span>{{ order.requester }}</span>
                 </div>
@@ -153,7 +171,9 @@
         <v-card class="elevation-1 rounded-lg pa-4 mb-3 order-summary-banner bg-surface">
           <div v-if="!selectedOrder" class="text-center py-4 text-medium-emphasis">
             <v-icon icon="$transitTransfer" size="32" color="disabled" class="mb-1" />
-            <div class="text-body-2 font-weight-medium">좌측 목록에서 출고 처리할 오더를 선택해주세요.</div>
+            <div class="text-body-2 font-weight-medium">
+              좌측 목록에서 출고 처리할 오더를 선택해주세요.
+            </div>
           </div>
 
           <div v-else>
@@ -164,16 +184,29 @@
                 </v-avatar>
                 <div>
                   <div class="d-flex align-center flex-wrap">
-                    <span class="text-subtitle-1 font-weight-bold text-high-emphasis mr-2">{{ selectedOrder.destinationProcess }}</span>
-                    <v-chip size="small" color="primary" variant="flat" class="font-weight-bold mr-2">
+                    <span class="text-subtitle-1 font-weight-bold text-high-emphasis mr-2">{{
+                      selectedOrder.destinationProcess
+                    }}</span>
+                    <v-chip
+                      size="small"
+                      color="primary"
+                      variant="flat"
+                      class="font-weight-bold mr-2"
+                    >
                       {{ selectedOrder.orderId }}
                     </v-chip>
-                    <v-chip size="small" color="secondary" variant="tonal" class="font-weight-medium">
+                    <v-chip
+                      size="small"
+                      color="secondary"
+                      variant="tonal"
+                      class="font-weight-medium"
+                    >
                       요구 LOT: {{ selectedOrder.requiredLot }}
                     </v-chip>
                   </div>
                   <div class="text-caption text-medium-emphasis mt-1">
-                    품목: [{{ selectedOrder.itemCode }}] {{ selectedOrder.itemName }} | 도착 포트: {{ selectedOrder.destinationPort }}
+                    품목: [{{ selectedOrder.itemCode }}] {{ selectedOrder.itemName }} | 도착 포트:
+                    {{ selectedOrder.destinationPort }}
                   </div>
                 </div>
               </div>
@@ -181,8 +214,14 @@
               <!-- 충족 중량 표시 -->
               <div class="text-end mt-2 mt-sm-0">
                 <div class="text-caption text-medium-emphasis">출고 충족률</div>
-                <div class="text-subtitle-2 font-weight-bold" :class="isFulfillmentComplete ? 'text-success' : 'text-primary'">
-                  {{ selectedTotalWeight.toFixed(2) }} t / {{ selectedOrder.requestedWeight.toFixed(2) }} t ({{ fulfillmentRate.toFixed(0) }}%)
+                <div
+                  class="text-subtitle-2 font-weight-bold"
+                  :class="isFulfillmentComplete ? 'text-success' : 'text-primary'"
+                >
+                  {{ selectedTotalWeight.toFixed(2) }} t /
+                  {{ selectedOrder.requestedWeight.toFixed(2) }} t ({{
+                    fulfillmentRate.toFixed(0)
+                  }}%)
                 </div>
               </div>
             </div>
@@ -198,13 +237,23 @@
         </v-card>
 
         <!-- 본문 창고 보관 캐리어 재고 테이블 카드 -->
-        <v-card class="elevation-1 rounded-lg pa-4 flex-grow-1 d-flex flex-column carriers-table-card">
+        <v-card
+          class="elevation-1 rounded-lg pa-4 flex-grow-1 d-flex flex-column carriers-table-card"
+        >
           <div class="panel-header mb-3">
             <div class="d-flex flex-wrap align-center justify-space-between">
               <div class="d-flex align-center mb-2 mb-sm-0">
                 <v-icon icon="$packageVariant" size="18" color="primary" class="mr-1" />
-                <span class="text-subtitle-2 font-weight-bold">창고 보관 출고 가능 캐리어 (Container) 목록</span>
-                <v-chip v-if="selectedOrder" size="x-small" color="primary" variant="tonal" class="ml-2">
+                <span class="text-subtitle-2 font-weight-bold"
+                  >창고 보관 출고 가능 캐리어 (Container) 목록</span
+                >
+                <v-chip
+                  v-if="selectedOrder"
+                  size="x-small"
+                  color="primary"
+                  variant="tonal"
+                  class="ml-2"
+                >
                   품목: {{ selectedOrder.itemCode }}
                 </v-chip>
               </div>
@@ -221,7 +270,12 @@
                   class="mr-2 carrier-search-field"
                   v-on:keyup.enter="handleSearchCarriers"
                 ></v-text-field>
-                <v-btn color="primary" variant="tonal" size="small" v-on:click="handleSearchCarriers">
+                <v-btn
+                  color="primary"
+                  variant="tonal"
+                  size="small"
+                  v-on:click="handleSearchCarriers"
+                >
                   검색
                 </v-btn>
               </div>
@@ -248,7 +302,12 @@
 
               <!-- 보관 위치 -->
               <template #[`item.location`]="{ item }">
-                <v-chip size="x-small" variant="outlined" color="primary" class="font-weight-medium">
+                <v-chip
+                  size="x-small"
+                  variant="outlined"
+                  color="primary"
+                  class="font-weight-medium"
+                >
                   {{ item.location }}
                 </v-chip>
               </template>
@@ -260,7 +319,9 @@
 
               <!-- Batch LOT -->
               <template #[`item.batchLot`]="{ item }">
-                <span class="text-caption font-weight-bold text-high-emphasis">{{ item.batchLot }}</span>
+                <span class="text-caption font-weight-bold text-high-emphasis">{{
+                  item.batchLot
+                }}</span>
               </template>
 
               <!-- 중량 -->
@@ -277,7 +338,13 @@
               <template #[`item.status`]="{ item }">
                 <v-chip
                   size="x-small"
-                  :color="item.status === 'STORED' ? 'success' : item.status === 'AVAILABLE' ? 'primary' : 'warning'"
+                  :color="
+                    item.status === 'STORED'
+                      ? 'success'
+                      : item.status === 'AVAILABLE'
+                        ? 'primary'
+                        : 'warning'
+                  "
                   variant="flat"
                 >
                   {{ item.status }}
@@ -371,7 +438,9 @@ const confirmMessage = ref('')
 const snackbar = reactive({ show: false, message: '', color: 'success' })
 
 const { loading: isOrdersLoading, execute: executeFetchOrders } = useApi(fetchOutboundOrdersApi)
-const { loading: isDispatching, execute: executeDispatchOutbound } = useApi(dispatchOutboundCarriersApi)
+const { loading: isDispatching, execute: executeDispatchOutbound } = useApi(
+  dispatchOutboundCarriersApi,
+)
 
 // ==========================================
 // 2. BaseDataTable / useDataTable 연동

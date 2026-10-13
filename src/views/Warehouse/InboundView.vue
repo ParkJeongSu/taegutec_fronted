@@ -15,7 +15,8 @@
               </v-chip>
             </div>
             <div class="text-caption text-medium-emphasis mt-1">
-              대구텍 분말(POWDER) 공정용 원자재(WO3, Co, TiC 등) FIBC Bag의 실측 중량을 검수하고 WCS 창고 자동 적재 지시를 수행합니다.
+              대구텍 분말(POWDER) 공정용 원자재(WO3, Co, TiC 등) FIBC Bag의 실측 중량을 검수하고 WCS
+              창고 자동 적재 지시를 수행합니다.
             </div>
           </div>
         </div>
@@ -45,7 +46,9 @@
     <v-row class="split-view-row" density="comfortable">
       <!-- ================= [좌측 패널] ERP 입고 오더 카드 리스트 (너비 약 35%) ================= -->
       <v-col cols="12" md="4" class="d-flex flex-column">
-        <v-card class="elevation-1 rounded-lg pa-4 fill-height d-flex flex-column inbound-order-panel">
+        <v-card
+          class="elevation-1 rounded-lg pa-4 fill-height d-flex flex-column inbound-order-panel"
+        >
           <div class="panel-header mb-3">
             <div class="d-flex align-center justify-space-between mb-2">
               <div class="d-flex align-center">
@@ -79,7 +82,9 @@
             >
               <v-btn value="ALL" size="small" class="flex-grow-1 font-weight-medium">전체</v-btn>
               <v-btn value="READY" size="small" class="flex-grow-1 font-weight-medium">대기</v-btn>
-              <v-btn value="IN_PROGRESS" size="small" class="flex-grow-1 font-weight-medium">진행 중</v-btn>
+              <v-btn value="IN_PROGRESS" size="small" class="flex-grow-1 font-weight-medium"
+                >진행 중</v-btn
+              >
             </v-btn-toggle>
           </div>
 
@@ -91,7 +96,10 @@
               <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
             </div>
 
-            <div v-else-if="filteredOrders.length === 0" class="text-center py-12 text-medium-emphasis">
+            <div
+              v-else-if="filteredOrders.length === 0"
+              class="text-center py-12 text-medium-emphasis"
+            >
               <v-icon icon="$trayArrowDown" size="36" color="disabled" class="mb-2" />
               <div class="text-caption">조건에 해당하는 입고 오더가 없습니다.</div>
             </div>
@@ -101,7 +109,9 @@
                 v-for="order in filteredOrders"
                 :key="order.orderId"
                 class="inbound-order-card pa-3 mb-2 rounded-lg cursor-pointer"
-                :class="{ 'active-order-card': selectedOrder && selectedOrder.orderId === order.orderId }"
+                :class="{
+                  'active-order-card': selectedOrder && selectedOrder.orderId === order.orderId,
+                }"
                 v-on:click="onSelectOrder(order)"
               >
                 <!-- 카드 상단: 오더번호 및 상태 칩 -->
@@ -136,9 +146,12 @@
                   class="mb-2"
                 ></v-progress-linear>
 
-                <div class="d-flex align-center justify-space-between text-caption text-medium-emphasis">
+                <div
+                  class="d-flex align-center justify-space-between text-caption text-medium-emphasis"
+                >
                   <span>
-                    실적: <strong class="text-primary">{{ order.processedBagCount }}</strong> / {{ order.totalBagCount }} Bags
+                    실적: <strong class="text-primary">{{ order.processedBagCount }}</strong> /
+                    {{ order.totalBagCount }} Bags
                   </span>
                   <span class="font-weight-bold text-high-emphasis">
                     {{ order.totalPlannedWeight.toFixed(1) }} t
@@ -156,7 +169,9 @@
         <v-card class="elevation-1 rounded-lg pa-4 mb-3 order-summary-banner bg-surface">
           <div v-if="!selectedOrder" class="text-center py-4 text-medium-emphasis">
             <v-icon icon="$trayArrowDown" size="32" color="disabled" class="mb-1" />
-            <div class="text-body-2 font-weight-medium">좌측 목록에서 입고 처리할 ERP 오더를 선택해주세요.</div>
+            <div class="text-body-2 font-weight-medium">
+              좌측 목록에서 입고 처리할 ERP 오더를 선택해주세요.
+            </div>
           </div>
 
           <div v-else class="d-flex flex-wrap align-center justify-space-between">
@@ -166,7 +181,9 @@
               </v-avatar>
               <div>
                 <div class="d-flex align-center flex-wrap">
-                  <span class="text-subtitle-1 font-weight-bold text-high-emphasis mr-2">{{ selectedOrder.itemName }}</span>
+                  <span class="text-subtitle-1 font-weight-bold text-high-emphasis mr-2">{{
+                    selectedOrder.itemName
+                  }}</span>
                   <v-chip size="small" color="primary" variant="flat" class="font-weight-bold mr-2">
                     {{ selectedOrder.orderId }}
                   </v-chip>
@@ -175,7 +192,8 @@
                   </v-chip>
                 </div>
                 <div class="text-caption text-medium-emphasis mt-1">
-                  공급처: {{ selectedOrder.supplier }} | 대상 보관 존: {{ selectedOrder.targetZone }}
+                  공급처: {{ selectedOrder.supplier }} | 대상 보관 존:
+                  {{ selectedOrder.targetZone }}
                 </div>
               </div>
             </div>
@@ -195,12 +213,16 @@
         </v-card>
 
         <!-- 본문 실측 및 입고 등록 폼 -->
-        <v-card class="elevation-1 rounded-lg pa-4 flex-grow-1 d-flex flex-column inbound-form-card">
+        <v-card
+          class="elevation-1 rounded-lg pa-4 flex-grow-1 d-flex flex-column inbound-form-card"
+        >
           <div class="panel-header mb-3">
             <div class="d-flex align-center justify-space-between">
               <div class="d-flex align-center">
                 <v-icon icon="$pencil" size="18" color="primary" class="mr-1" />
-                <span class="text-subtitle-2 font-weight-bold">현장 실측 정보 및 WCS 입고 등록</span>
+                <span class="text-subtitle-2 font-weight-bold"
+                  >현장 실측 정보 및 WCS 입고 등록</span
+                >
               </div>
               <v-chip
                 v-if="selectedOrder && weightDeviation !== null"
@@ -235,7 +257,9 @@
               <!-- 2. Pallet ID -->
               <v-col cols="12" sm="6">
                 <div class="d-flex align-center justify-space-between mb-1">
-                  <span class="text-caption font-weight-bold text-high-emphasis">Pallet ID (팔레트 번호) *</span>
+                  <span class="text-caption font-weight-bold text-high-emphasis"
+                    >Pallet ID (팔레트 번호) *</span
+                  >
                   <span class="text-caption text-medium-emphasis">바코드 스캔 대응</span>
                 </div>
                 <v-text-field
@@ -253,7 +277,9 @@
               <!-- 3. FIBC Bag ID -->
               <v-col cols="12" sm="6">
                 <div class="d-flex align-center justify-space-between mb-1">
-                  <span class="text-caption font-weight-bold text-high-emphasis">FIBC Bag ID (백 식별번호) *</span>
+                  <span class="text-caption font-weight-bold text-high-emphasis"
+                    >FIBC Bag ID (백 식별번호) *</span
+                  >
                   <span class="text-caption text-medium-emphasis">바코드 스캔 대응</span>
                 </div>
                 <v-text-field
@@ -304,8 +330,14 @@
               <!-- 6. 현장 실측 중량 (Actual Weight) -->
               <v-col cols="12" sm="6">
                 <div class="d-flex align-center justify-space-between mb-1">
-                  <span class="text-caption font-weight-bold text-primary">현장 실측 중량 (t) *</span>
-                  <span v-if="weightDeviation !== null" class="text-caption" :class="isDeviationNormal ? 'text-success' : 'text-warning'">
+                  <span class="text-caption font-weight-bold text-primary"
+                    >현장 실측 중량 (t) *</span
+                  >
+                  <span
+                    v-if="weightDeviation !== null"
+                    class="text-caption"
+                    :class="isDeviationNormal ? 'text-success' : 'text-warning'"
+                  >
                     오차: {{ weightDeviation > 0 ? '+' : '' }}{{ weightDeviation.toFixed(3) }} t
                   </span>
                 </div>
@@ -413,13 +445,7 @@ const selectedOrder = ref(null)
 const orderSearchKeyword = ref('')
 const statusFilter = ref('ALL')
 
-const portOptions = [
-  'IN_PORT_01',
-  'IN_PORT_02',
-  'DOCK_A',
-  'DOCK_B',
-  'MANUAL_IN_01',
-]
+const portOptions = ['IN_PORT_01', 'IN_PORT_02', 'DOCK_A', 'DOCK_B', 'MANUAL_IN_01']
 
 const formData = reactive({
   inboundPort: 'IN_PORT_01',
@@ -538,7 +564,11 @@ function generateNextBagIdentifiers(order) {
   const nextSeq = (order ? order.processedBagCount : 0) + 1
   const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
   formData.palletId = 'PLT-' + dateStr + '-' + String(nextSeq).padStart(3, '0')
-  formData.fibcBagId = 'BAG-' + (order ? order.itemCode.split('-')[1] || 'WP' : 'WP') + '-' + (Math.floor(Math.random() * 8000) + 1000)
+  formData.fibcBagId =
+    'BAG-' +
+    (order ? order.itemCode.split('-')[1] || 'WP' : 'WP') +
+    '-' +
+    (Math.floor(Math.random() * 8000) + 1000)
   formData.rawLotId = order ? order.rawLotId : ''
   formData.inboundPort = order ? order.defaultPort || 'IN_PORT_01' : 'IN_PORT_01'
   // 실측 중량 기본값 (계획 중량 + 약간의 오차)

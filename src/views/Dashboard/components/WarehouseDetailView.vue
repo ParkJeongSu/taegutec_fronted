@@ -30,12 +30,20 @@
 
         <v-row density="compact" class="mt-1">
           <v-col cols="6">
-            <div class="info-label text-caption text-medium-emphasis">{{ $t('table.factoryName') }}</div>
-            <div class="info-value font-weight-medium text-body-2">{{ detailData.factoryName || '-' }}</div>
+            <div class="info-label text-caption text-medium-emphasis">
+              {{ $t('table.factoryName') }}
+            </div>
+            <div class="info-value font-weight-medium text-body-2">
+              {{ detailData.factoryName || '-' }}
+            </div>
           </v-col>
           <v-col cols="6">
-            <div class="info-label text-caption text-medium-emphasis">{{ $t('table.stockerCode') }}</div>
-            <div class="info-value font-weight-medium text-body-2">{{ detailData.stockerName || '-' }}</div>
+            <div class="info-label text-caption text-medium-emphasis">
+              {{ $t('table.stockerCode') }}
+            </div>
+            <div class="info-value font-weight-medium text-body-2">
+              {{ detailData.stockerName || '-' }}
+            </div>
           </v-col>
         </v-row>
       </v-card>
@@ -47,7 +55,10 @@
             <v-icon icon="$packageVariant" size="20" color="primary" class="mr-2" />
             <span class="text-subtitle-2 font-weight-bold">쉘프 적재 현황</span>
           </div>
-          <span class="text-subtitle-2 font-weight-bold" :class="getRateTextColor(detailData.occupancyRate)">
+          <span
+            class="text-subtitle-2 font-weight-bold"
+            :class="getRateTextColor(detailData.occupancyRate)"
+          >
             {{ detailData.occupancyRate || 0 }}%
           </span>
         </div>
@@ -73,7 +84,9 @@
           </v-col>
           <v-col cols="4">
             <div class="pa-2 rounded bg-blue-lighten-5">
-              <div class="text-caption text-primary font-weight-medium">{{ $t('table.useShelfCount') }}</div>
+              <div class="text-caption text-primary font-weight-medium">
+                {{ $t('table.useShelfCount') }}
+              </div>
               <div class="text-h6 font-weight-bold text-primary">
                 {{ formatNumber(detailData.useShelfCount) }}
               </div>
@@ -99,9 +112,15 @@
 
         <v-row density="comfortable">
           <v-col cols="6">
-            <div class="info-label text-caption text-medium-emphasis">{{ $t('table.equipmentStatus') }}</div>
+            <div class="info-label text-caption text-medium-emphasis">
+              {{ $t('table.equipmentStatus') }}
+            </div>
             <div class="info-value font-weight-medium text-body-2">
-              <v-chip size="x-small" :color="getStatusColor(detailData.stockerStatus)" variant="flat">
+              <v-chip
+                size="x-small"
+                :color="getStatusColor(detailData.stockerStatus)"
+                variant="flat"
+              >
                 {{ detailData.stockerStatus || 'IDLE' }}
               </v-chip>
             </div>
@@ -110,25 +129,35 @@
           <v-col cols="6">
             <div class="info-label text-caption text-medium-emphasis">통신 상태</div>
             <div class="info-value font-weight-medium text-body-2">
-              <v-chip size="x-small" color="success" variant="tonal">
-                ONLINE
-              </v-chip>
+              <v-chip size="x-small" color="success" variant="tonal"> ONLINE </v-chip>
             </div>
           </v-col>
 
           <v-col cols="6">
-            <div class="info-label text-caption text-medium-emphasis">{{ $t('table.eventUser') }}</div>
-            <div class="info-value font-weight-medium text-body-2">{{ detailData.eventUser || 'SYSTEM' }}</div>
+            <div class="info-label text-caption text-medium-emphasis">
+              {{ $t('table.eventUser') }}
+            </div>
+            <div class="info-value font-weight-medium text-body-2">
+              {{ detailData.eventUser || 'SYSTEM' }}
+            </div>
           </v-col>
 
           <v-col cols="6">
-            <div class="info-label text-caption text-medium-emphasis">{{ $t('table.eventTime') }}</div>
-            <div class="info-value font-weight-medium text-caption">{{ detailData.eventTime || detailData.updateTime || '-' }}</div>
+            <div class="info-label text-caption text-medium-emphasis">
+              {{ $t('table.eventTime') }}
+            </div>
+            <div class="info-value font-weight-medium text-caption">
+              {{ detailData.eventTime || detailData.updateTime || '-' }}
+            </div>
           </v-col>
 
           <v-col cols="12" v-if="detailData.eventComment || detailData.description">
-            <div class="info-label text-caption text-medium-emphasis">{{ $t('common.comment') }}</div>
-            <div class="info-value text-body-2 text-medium-emphasis pa-2 bg-grey-lighten-4 rounded mt-1">
+            <div class="info-label text-caption text-medium-emphasis">
+              {{ $t('common.comment') }}
+            </div>
+            <div
+              class="info-value text-body-2 text-medium-emphasis pa-2 bg-grey-lighten-4 rounded mt-1"
+            >
               {{ detailData.eventComment || detailData.description }}
             </div>
           </v-col>

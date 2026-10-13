@@ -7,7 +7,10 @@ import axiosInstance from '@/api/index'
  * @returns {Promise<Object>} API 응답 데이터 (List<UserGroupMenuAuthResponse>)
  */
 export function fetchAuthsByGroupIdApi(userGroupId) {
-  const targetId = typeof userGroupId === 'object' && userGroupId !== null ? (userGroupId.id || userGroupId.userGroupId) : userGroupId
+  const targetId =
+    typeof userGroupId === 'object' && userGroupId !== null
+      ? userGroupId.id || userGroupId.userGroupId
+      : userGroupId
   const url = '/v1/mng/user-group-menu-auth/by-group/' + encodeURIComponent(targetId)
   return axiosInstance.get(url)
 }

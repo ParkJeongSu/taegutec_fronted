@@ -21,7 +21,9 @@
           <tr>
             <td>Line-A</td>
             <td>1,200</td>
-            <td><v-chip size="small" color="success">{{ $t('common.normal') }}</v-chip></td>
+            <td>
+              <v-chip size="small" color="success">{{ $t('common.normal') }}</v-chip>
+            </td>
           </tr>
         </tbody>
       </v-table>

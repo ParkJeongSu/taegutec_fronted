@@ -16,12 +16,20 @@ export function fetchWcsAlternativeStorageZonesApi(params) {
  * @param {string} alternativeZoneName
  * @param {number|string} priority
  */
-export function fetchWcsAlternativeStorageZoneByIdApi(factoryName, sourceZoneName, alternativeZoneName, priority) {
+export function fetchWcsAlternativeStorageZoneByIdApi(
+  factoryName,
+  sourceZoneName,
+  alternativeZoneName,
+  priority,
+) {
   const path =
     '/v1/wcs/alternative-storage-zone/' +
-    encodeURIComponent(factoryName) + '/' +
-    encodeURIComponent(sourceZoneName) + '/' +
-    encodeURIComponent(alternativeZoneName) + '/' +
+    encodeURIComponent(factoryName) +
+    '/' +
+    encodeURIComponent(sourceZoneName) +
+    '/' +
+    encodeURIComponent(alternativeZoneName) +
+    '/' +
     priority
   return axiosInstance.get(path)
 }
@@ -34,7 +42,8 @@ export function fetchWcsAlternativeStorageZoneByIdApi(factoryName, sourceZoneNam
 export function fetchWcsAlternativeStorageZonesBySourceZoneApi(factoryName, sourceZoneName) {
   const path =
     '/v1/wcs/alternative-storage-zone/by-source-zone/' +
-    encodeURIComponent(factoryName) + '/' +
+    encodeURIComponent(factoryName) +
+    '/' +
     encodeURIComponent(sourceZoneName)
   return axiosInstance.get(path)
 }
@@ -55,12 +64,21 @@ export function createWcsAlternativeStorageZoneApi(payload) {
  * @param {number|string} priority
  * @param {Object} payload
  */
-export function updateWcsAlternativeStorageZoneApi(factoryName, sourceZoneName, alternativeZoneName, priority, payload) {
+export function updateWcsAlternativeStorageZoneApi(
+  factoryName,
+  sourceZoneName,
+  alternativeZoneName,
+  priority,
+  payload,
+) {
   const path =
     '/v1/wcs/alternative-storage-zone/' +
-    encodeURIComponent(factoryName) + '/' +
-    encodeURIComponent(sourceZoneName) + '/' +
-    encodeURIComponent(alternativeZoneName) + '/' +
+    encodeURIComponent(factoryName) +
+    '/' +
+    encodeURIComponent(sourceZoneName) +
+    '/' +
+    encodeURIComponent(alternativeZoneName) +
+    '/' +
     priority
   return axiosInstance.put(path, payload)
 }
@@ -72,12 +90,20 @@ export function updateWcsAlternativeStorageZoneApi(factoryName, sourceZoneName, 
  * @param {string} alternativeZoneName
  * @param {number|string} priority
  */
-export function deleteWcsAlternativeStorageZoneApi(factoryName, sourceZoneName, alternativeZoneName, priority) {
+export function deleteWcsAlternativeStorageZoneApi(
+  factoryName,
+  sourceZoneName,
+  alternativeZoneName,
+  priority,
+) {
   const path =
     '/v1/wcs/alternative-storage-zone/' +
-    encodeURIComponent(factoryName) + '/' +
-    encodeURIComponent(sourceZoneName) + '/' +
-    encodeURIComponent(alternativeZoneName) + '/' +
+    encodeURIComponent(factoryName) +
+    '/' +
+    encodeURIComponent(sourceZoneName) +
+    '/' +
+    encodeURIComponent(alternativeZoneName) +
+    '/' +
     priority
   return axiosInstance.delete(path)
 }

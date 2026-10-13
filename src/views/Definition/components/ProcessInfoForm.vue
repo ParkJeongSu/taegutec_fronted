@@ -147,12 +147,7 @@
       </v-btn>
 
       <!-- 저장 / 수정 실행 버튼 -->
-      <v-btn
-        color="primary"
-        variant="elevated"
-        :loading="isSaving"
-        v-on:click="onHandleSave"
-      >
+      <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave">
         {{ isCreateMode ? $t('common.save') : $t('common.edit') }}
       </v-btn>
     </v-card-actions>
@@ -233,7 +228,7 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.port = isCreateMode.value ? null : (newVal.port != null ? Number(newVal.port) : null)
+      formData.port = isCreateMode.value ? null : newVal.port != null ? Number(newVal.port) : null
       formData.systemName = newVal.systemName || ''
       formData.fileName = newVal.fileName || ''
       formData.processGroupName = newVal.processGroupName || ''
@@ -299,8 +294,7 @@ async function onHandleSave() {
   } catch (error) {
     console.error('Save process info failed:', error)
     const errorMsg =
-      (error.response && error.response.data && error.response.data.message) ||
-      t('common.saveFail')
+      (error.response && error.response.data && error.response.data.message) || t('common.saveFail')
     alert(errorMsg)
   }
 }

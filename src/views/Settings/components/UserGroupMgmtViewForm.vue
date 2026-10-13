@@ -70,7 +70,9 @@
 
     <!-- 하단 액션 버튼 영역 -->
     <v-card-actions class="pa-4 action-buttons-container">
-      <v-btn variant="outlined" color="secondary" v-on:click="onClose"> {{ $t('common.cancel') }} </v-btn>
+      <v-btn variant="outlined" color="secondary" v-on:click="onClose">
+        {{ $t('common.cancel') }}
+      </v-btn>
 
       <v-spacer></v-spacer>
 
@@ -82,7 +84,8 @@
         :loading="isDeleting"
         class="mr-2"
         v-on:click="onOpenDeleteDialog"
-      >{{ $t('common.delete') }}</v-btn>
+        >{{ $t('common.delete') }}</v-btn
+      >
 
       <!-- 저장 / 수정 실행 버튼 -->
       <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave">
@@ -164,9 +167,11 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      currentId.value = isCreateMode.value ? null : (newVal.id || null)
+      currentId.value = isCreateMode.value ? null : newVal.id || null
       formData.factoryName = newVal.factoryName || newVal.plant || 'INSERT'
-      formData.userGroupName = isCreateMode.value ? '' : (newVal.userGroupName || newVal.groupName || '')
+      formData.userGroupName = isCreateMode.value
+        ? ''
+        : newVal.userGroupName || newVal.groupName || ''
       formData.description = newVal.description || ''
       formData.useState = newVal.useState || (newVal.useYn === 'N' ? 'UNUSE' : 'USE')
       formData.eventComment = newVal.eventComment || ''
@@ -228,8 +233,7 @@ async function onHandleSave() {
   } catch (error) {
     console.error('Save user group failed:', error)
     const errorMsg =
-      (error.response && error.response.data && error.response.data.message) ||
-      t('common.saveFail')
+      (error.response && error.response.data && error.response.data.message) || t('common.saveFail')
     alert(errorMsg)
   }
 }

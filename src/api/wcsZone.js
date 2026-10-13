@@ -18,10 +18,7 @@ export function fetchWcsZonesApi(params) {
  */
 export function fetchWcsZoneDetailApi(factoryName, zoneName) {
   const path =
-    '/v1/wcs/zone/' +
-    encodeURIComponent(factoryName) +
-    '/' +
-    encodeURIComponent(zoneName)
+    '/v1/wcs/zone/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(zoneName)
   return axiosInstance.get(path)
 }
 
@@ -63,10 +60,7 @@ export function createWcsZoneApi(data) {
  */
 export function updateWcsZoneApi(factoryName, zoneName, data) {
   const path =
-    '/v1/wcs/zone/' +
-    encodeURIComponent(factoryName) +
-    '/' +
-    encodeURIComponent(zoneName)
+    '/v1/wcs/zone/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(zoneName)
   return axiosInstance.put(path, data)
 }
 
@@ -80,10 +74,7 @@ export function updateWcsZoneApi(factoryName, zoneName, data) {
  */
 export function deleteWcsZoneApi(factoryName, zoneName, eventUser, eventComment) {
   const path =
-    '/v1/wcs/zone/' +
-    encodeURIComponent(factoryName) +
-    '/' +
-    encodeURIComponent(zoneName)
+    '/v1/wcs/zone/' + encodeURIComponent(factoryName) + '/' + encodeURIComponent(zoneName)
   const params = {}
   if (eventUser) {
     params.eventUser = eventUser

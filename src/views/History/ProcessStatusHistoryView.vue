@@ -49,7 +49,9 @@
 
     <!-- [슬롯 2] 상단 액션 버튼 -->
     <template v-slot:actions>
-      <v-btn color="primary" prepend-icon="$refresh" v-on:click="onSearch">{{ $t('common.refresh') }}</v-btn>
+      <v-btn color="primary" prepend-icon="$refresh" v-on:click="onSearch">{{
+        $t('common.refresh')
+      }}</v-btn>
       <v-divider vertical class="mx-2"></v-divider>
       <v-btn color="success" prepend-icon="$fileExcel">{{ $t('common.exportOutput') }}</v-btn>
     </template>
@@ -160,7 +162,7 @@ function onUpdateOptions(options) {
 }
 
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   if (itemData) {
     panelStore.openPanel(markRaw(ProcessStatusHistoryViewForm), {
       mode: 'UPDATE',

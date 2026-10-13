@@ -56,7 +56,9 @@
           {{ $t('common.refreshRemaining', { sec: remainingTime }) }}
         </v-chip>
       </div>
-      <v-btn color="primary" prepend-icon="$refresh" v-on:click="manualSearch">{{ $t('common.refresh') }}</v-btn>
+      <v-btn color="primary" prepend-icon="$refresh" v-on:click="manualSearch">{{
+        $t('common.refresh')
+      }}</v-btn>
       <v-divider vertical class="mx-2"></v-divider>
       <v-btn color="success" prepend-icon="$fileExcel">{{ $t('common.exportOutput') }}</v-btn>
     </template>
@@ -69,7 +71,11 @@
           <v-card variant="outlined" class="pa-2">
             <div class="d-flex align-center justify-between mb-2 pa-2">
               <span class="text-subtitle-1 font-weight-bold text-success">
-                {{ $t('views.production.processStatus.runningGroupTitle', { count: runningItems.length }) }}
+                {{
+                  $t('views.production.processStatus.runningGroupTitle', {
+                    count: runningItems.length,
+                  })
+                }}
               </span>
               <v-btn
                 color="error"
@@ -120,7 +126,11 @@
           <v-card variant="outlined" class="pa-2">
             <div class="d-flex align-center justify-between mb-2 pa-2">
               <span class="text-subtitle-1 font-weight-bold text-error">
-                {{ $t('views.production.processStatus.stoppedGroupTitle', { count: stoppedItems.length }) }}
+                {{
+                  $t('views.production.processStatus.stoppedGroupTitle', {
+                    count: stoppedItems.length,
+                  })
+                }}
               </span>
               <v-btn
                 color="success"
@@ -426,7 +436,7 @@ function onSearch() {
 }
 
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   if (itemData) {
     panelStore.openPanel(markRaw(ProcessStatusForm), {
       mode: 'UPDATE',

@@ -5,7 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$accountGroup" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.settings.userGroup.title') }}</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.settings.userGroup.title')
+          }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.settings.userGroup.breadcrumb') }}
           </v-chip>
@@ -19,7 +21,8 @@
             prepend-icon="$plus"
             class="font-weight-bold mr-2"
             v-on:click="onAddUserGroup"
-          >{{ $t('common.create') }}</v-btn>
+            >{{ $t('common.create') }}</v-btn
+          >
           <v-btn
             color="secondary"
             variant="tonal"
@@ -28,7 +31,8 @@
             class="font-weight-medium"
             :loading="loading"
             v-on:click="onSearch"
-          >{{ $t('common.refresh') }}</v-btn>
+            >{{ $t('common.refresh') }}</v-btn
+          >
         </div>
       </div>
 
@@ -83,13 +87,15 @@
               size="small"
               class="mr-2 font-weight-medium"
               v-on:click="onSearch"
-            >{{ $t('common.search') }}</v-btn>
+              >{{ $t('common.search') }}</v-btn
+            >
             <v-btn
               variant="outlined"
               size="small"
               class="font-weight-medium"
               v-on:click="onReset"
-            >{{ $t('common.reset') }}</v-btn>
+              >{{ $t('common.reset') }}</v-btn
+            >
           </v-col>
         </v-row>
       </div>

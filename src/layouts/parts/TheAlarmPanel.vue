@@ -53,7 +53,7 @@
       <template v-if="alarmStore.latestAlarms.length > 0">
         <div
           v-for="(alarm, index) in alarmStore.latestAlarms"
-          :key="alarm.alarmId || (alarm.alarmCode + '_' + index)"
+          :key="alarm.alarmId || alarm.alarmCode + '_' + index"
           class="alarm-card pa-3 mb-2 rounded-lg"
           :class="getAlarmLevelClass(alarm.alarmLevel)"
         >
@@ -107,9 +107,7 @@
               <v-icon icon="$clockOutline" size="14" class="mr-1" />
               <span>{{ formatDateTime(alarm.timestamp) }}</span>
             </div>
-            <span v-if="index === 0" class="new-tag font-weight-bold text-error">
-              ● LATEST
-            </span>
+            <span v-if="index === 0" class="new-tag font-weight-bold text-error"> ● LATEST </span>
           </div>
         </div>
       </template>
@@ -207,7 +205,9 @@ onUnmounted(function () {
 .alarm-card {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  transition: transform 0.2s ease, background-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .alarm-card:hover {

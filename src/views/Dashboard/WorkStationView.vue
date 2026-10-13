@@ -5,17 +5,31 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$robotIndustrial" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.dashboard.wsMonitoringTitle') }}</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.dashboard.wsMonitoringTitle')
+          }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.dashboard.wsMonitoringBreadcrumb') }}
           </v-chip>
         </div>
 
         <div class="d-flex align-center gap-2">
-          <v-btn color="primary" variant="flat" size="small" prepend-icon="$refresh" v-on:click="handleSearch">
+          <v-btn
+            color="primary"
+            variant="flat"
+            size="small"
+            prepend-icon="$refresh"
+            v-on:click="handleSearch"
+          >
             {{ $t('common.refresh') }}
           </v-btn>
-          <v-btn color="secondary" variant="tonal" size="small" prepend-icon="$fileExport" v-on:click="handleExport">
+          <v-btn
+            color="secondary"
+            variant="tonal"
+            size="small"
+            prepend-icon="$fileExport"
+            v-on:click="handleExport"
+          >
             {{ $t('common.export') }}
           </v-btn>
         </div>
@@ -49,7 +63,13 @@
             ></v-select>
           </v-col>
           <v-col cols="12" sm="4" md="3" class="d-flex align-center">
-            <v-btn color="primary" variant="flat" size="small" class="mr-2" v-on:click="handleSearch">
+            <v-btn
+              color="primary"
+              variant="flat"
+              size="small"
+              class="mr-2"
+              v-on:click="handleSearch"
+            >
               {{ $t('common.search') }}
             </v-btn>
             <v-btn variant="outlined" size="small" v-on:click="handleReset">
@@ -192,7 +212,7 @@ function handleExport() {
 
 // 행(Row) 클릭 시 오더/작업 상세 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   if (itemData) {
     panelStore.openPanel(markRaw(WorkStationOrderDetailView), {
       mode: 'VIEW',

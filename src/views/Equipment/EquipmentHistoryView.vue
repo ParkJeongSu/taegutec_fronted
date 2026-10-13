@@ -148,7 +148,12 @@
               {{ item.previousStatus }}
             </v-chip>
             <v-icon icon="$chevronRight" size="14" color="grey" class="mx-1" />
-            <v-chip size="x-small" :color="getStatusColor(item.currentStatus)" variant="flat" class="font-weight-bold">
+            <v-chip
+              size="x-small"
+              :color="getStatusColor(item.currentStatus)"
+              variant="flat"
+              class="font-weight-bold"
+            >
               {{ item.currentStatus }}
             </v-chip>
           </div>
@@ -156,7 +161,14 @@
 
         <!-- 5. 이벤트 / 알람 코드 -->
         <template #[`item.eventCode`]="{ item }">
-          <span class="font-weight-bold" :class="item.eventCode.indexOf('E-') === 0 || item.eventCode.indexOf('A-') === 0 ? 'text-error' : 'text-primary'">
+          <span
+            class="font-weight-bold"
+            :class="
+              item.eventCode.indexOf('E-') === 0 || item.eventCode.indexOf('A-') === 0
+                ? 'text-error'
+                : 'text-primary'
+            "
+          >
             {{ item.eventCode }}
           </span>
         </template>
@@ -250,7 +262,13 @@ const headers = [
   { title: '발생 일시', key: 'eventTime', width: '150px', align: 'start' },
   { title: '설비명', key: 'equipmentName', width: '110px', align: 'center' },
   { title: '설비 타입', key: 'equipmentType', width: '120px', align: 'start' },
-  { title: '상태 전이 (이전 ➔ 현재)', key: 'statusChange', width: '180px', align: 'center', sortable: false },
+  {
+    title: '상태 전이 (이전 ➔ 현재)',
+    key: 'statusChange',
+    width: '180px',
+    align: 'center',
+    sortable: false,
+  },
   { title: '이벤트/알람 코드', key: 'eventCode', width: '130px', align: 'start' },
   { title: '상세 내용', key: 'eventDescription', align: 'start' },
   { title: '확인 여부', key: 'acknowledgedState', width: '95px', align: 'center' },

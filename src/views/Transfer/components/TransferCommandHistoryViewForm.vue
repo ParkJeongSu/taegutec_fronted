@@ -197,12 +197,7 @@
       </v-btn>
 
       <!-- 저장 / 수정 실행 버튼 -->
-      <v-btn
-        color="primary"
-        variant="elevated"
-        :loading="isSaving"
-        v-on:click="onHandleSave"
-      >
+      <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave">
         {{ isCreateMode ? $t('common.save') : $t('common.edit') }}
       </v-btn>
     </v-card-actions>
@@ -313,7 +308,7 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.transferCommandName = isCreateMode.value ? '' : (newVal.transferCommandName || '')
+      formData.transferCommandName = isCreateMode.value ? '' : newVal.transferCommandName || ''
       formData.carrierName = newVal.carrierName || ''
       formData.commandStatus = newVal.commandStatus || 'INIT'
       formData.orderType = newVal.orderType || 'STK_TO_WS'
@@ -370,7 +365,8 @@ async function onHandleSave() {
       target: formData.target || undefined,
       currentEquipmentName: formData.currentEquipmentName || undefined,
       targetEquipmentName: formData.targetEquipmentName || undefined,
-      subCommandJobNo: formData.subCommandJobNo != null ? Number(formData.subCommandJobNo) : undefined,
+      subCommandJobNo:
+        formData.subCommandJobNo != null ? Number(formData.subCommandJobNo) : undefined,
       subCommandStatus: formData.subCommandStatus || undefined,
       jobStartTime: formData.jobStartTime || undefined,
       jobCompletedTime: formData.jobCompletedTime || undefined,
@@ -393,8 +389,7 @@ async function onHandleSave() {
   } catch (error) {
     console.error('Save transfer command failed:', error)
     const errorMsg =
-      (error.response && error.response.data && error.response.data.message) ||
-      t('common.saveFail')
+      (error.response && error.response.data && error.response.data.message) || t('common.saveFail')
     alert(errorMsg)
   }
 }

@@ -11,19 +11,35 @@
           ></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-select v-model="formData.isActive" :items="['Y', 'N']" :label="$t('views.definition.purgeConfig.form.isActive')"></v-select>
+          <v-select
+            v-model="formData.isActive"
+            :items="['Y', 'N']"
+            :label="$t('views.definition.purgeConfig.form.isActive')"
+          ></v-select>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.dbName" :label="$t('views.definition.purgeConfig.form.dbName')"></v-text-field>
+          <v-text-field
+            v-model="formData.dbName"
+            :label="$t('views.definition.purgeConfig.form.dbName')"
+          ></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.schemaName" :label="$t('views.definition.purgeConfig.form.schemaName')"></v-text-field>
+          <v-text-field
+            v-model="formData.schemaName"
+            :label="$t('views.definition.purgeConfig.form.schemaName')"
+          ></v-text-field>
         </v-col>
         <v-col cols="12">
-          <v-text-field v-model="formData.tableName" :label="$t('views.definition.purgeConfig.form.tableName')"></v-text-field>
+          <v-text-field
+            v-model="formData.tableName"
+            :label="$t('views.definition.purgeConfig.form.tableName')"
+          ></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.targetColumnName" :label="$t('views.definition.purgeConfig.form.targetColumn')"></v-text-field>
+          <v-text-field
+            v-model="formData.targetColumnName"
+            :label="$t('views.definition.purgeConfig.form.targetColumn')"
+          ></v-text-field>
         </v-col>
         <v-col cols="6">
           <v-select
@@ -33,13 +49,23 @@
           ></v-select>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.operator" :label="$t('views.definition.purgeConfig.form.operator')"></v-text-field>
+          <v-text-field
+            v-model="formData.operator"
+            :label="$t('views.definition.purgeConfig.form.operator')"
+          ></v-text-field>
         </v-col>
         <v-col cols="6">
-          <v-text-field v-model="formData.compValue" :label="$t('views.definition.purgeConfig.form.compValue')"></v-text-field>
+          <v-text-field
+            v-model="formData.compValue"
+            :label="$t('views.definition.purgeConfig.form.compValue')"
+          ></v-text-field>
         </v-col>
         <v-col cols="4">
-          <v-text-field v-model="formData.batchSize" :label="$t('views.definition.purgeConfig.form.batchSize')" type="number"></v-text-field>
+          <v-text-field
+            v-model="formData.batchSize"
+            :label="$t('views.definition.purgeConfig.form.batchSize')"
+            type="number"
+          ></v-text-field>
         </v-col>
         <v-col cols="4">
           <v-text-field
@@ -49,7 +75,11 @@
           ></v-text-field>
         </v-col>
         <v-col cols="4">
-          <v-text-field v-model="formData.delayMs" :label="$t('views.definition.purgeConfig.form.delayMs')" type="number"></v-text-field>
+          <v-text-field
+            v-model="formData.delayMs"
+            :label="$t('views.definition.purgeConfig.form.delayMs')"
+            type="number"
+          ></v-text-field>
         </v-col>
       </v-row>
     </v-form>
@@ -57,7 +87,9 @@
     <v-divider></v-divider>
     <v-card-actions class="pa-4">
       <v-spacer></v-spacer>
-      <v-btn variant="outlined" color="secondary" v-on:click="panelStore.closePanel">{{ $t('common.close') }}</v-btn>
+      <v-btn variant="outlined" color="secondary" v-on:click="panelStore.closePanel">{{
+        $t('common.close')
+      }}</v-btn>
       <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave">
         {{ $t('common.save') }}
       </v-btn>

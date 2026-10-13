@@ -250,8 +250,7 @@ async function handleLogin() {
       // 4. 메인 업무 화면으로 이동
       router.push('/')
     } else {
-      errorMessage.value =
-        (res && res.message) || t('views.auth.loginFailedCheck')
+      errorMessage.value = (res && res.message) || t('views.auth.loginFailedCheck')
     }
   } catch (error) {
     console.error('Login error:', error)

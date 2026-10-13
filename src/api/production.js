@@ -1513,5 +1513,3 @@ export async function fetchOrderHistoryApi(params) {
     size: size,
   }
 }
-
-

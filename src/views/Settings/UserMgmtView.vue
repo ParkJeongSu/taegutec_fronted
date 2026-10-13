@@ -5,7 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$accountGroup" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.settings.userMgmt.title') }}</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.settings.userMgmt.title')
+          }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.settings.userMgmt.breadcrumb') }}
           </v-chip>
@@ -19,7 +21,8 @@
             prepend-icon="$plus"
             class="font-weight-bold mr-2"
             v-on:click="onAddUser"
-          >{{ $t('common.create') }}</v-btn>
+            >{{ $t('common.create') }}</v-btn
+          >
           <v-btn
             color="secondary"
             variant="tonal"
@@ -28,7 +31,8 @@
             class="font-weight-medium"
             :loading="loading"
             v-on:click="handleSearch"
-          >{{ $t('common.refresh') }}</v-btn>
+            >{{ $t('common.refresh') }}</v-btn
+          >
         </div>
       </div>
 
@@ -83,13 +87,15 @@
               size="small"
               class="mr-2 font-weight-medium"
               v-on:click="handleSearch"
-            >{{ $t('common.search') }}</v-btn>
+              >{{ $t('common.search') }}</v-btn
+            >
             <v-btn
               variant="outlined"
               size="small"
               class="font-weight-medium"
               v-on:click="handleReset"
-            >{{ $t('common.reset') }}</v-btn>
+              >{{ $t('common.reset') }}</v-btn
+            >
           </v-col>
         </v-row>
       </div>
@@ -165,8 +171,7 @@ const headers = computed(() => [
 ])
 
 // 1. 역할 분리 아키텍처: 목록 조회 영역은 useDataTable 컴포저블 전담
-const { items, totalItems, loading, options, loadData, updateOptions } =
-  useDataTable(fetchUsersApi)
+const { items, totalItems, loading, options, loadData, updateOptions } = useDataTable(fetchUsersApi)
 
 function getSanitizedParams() {
   const params = {}
@@ -236,7 +241,7 @@ function onAddUser() {
 
 // 행(Row) 클릭 시 수정 모드로 우측 패널 오픈 (id 포함 데이터 전달)
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   panelStore.openPanel(markRaw(UserMgmtViewForm), {
     mode: 'UPDATE',
     data: itemData,

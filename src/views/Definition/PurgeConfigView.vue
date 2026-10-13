@@ -21,8 +21,12 @@
     </template>
 
     <template v-slot:actions>
-      <v-btn color="primary" prepend-icon="$plus" class="mr-2" v-on:click="onAdd">{{ $t('common.create') }}</v-btn>
-      <v-btn color="error" prepend-icon="$delete" v-on:click="onOpenDelete">{{ $t('common.delete') }}</v-btn>
+      <v-btn color="primary" prepend-icon="$plus" class="mr-2" v-on:click="onAdd">{{
+        $t('common.create')
+      }}</v-btn>
+      <v-btn color="error" prepend-icon="$delete" v-on:click="onOpenDelete">{{
+        $t('common.delete')
+      }}</v-btn>
     </template>
 
     <template v-slot:table>
@@ -103,7 +107,7 @@ function onAdd() {
 }
 
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   if (itemData) {
     panelStore.openPanel(markRaw(PurgeConfigForm), {
       mode: 'UPDATE',

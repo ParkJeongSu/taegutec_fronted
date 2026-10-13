@@ -58,82 +58,94 @@
           <!-- 공통 SVG 도면 뷰어 컴포넌트 -->
           <div class="flex-grow-1 d-flex">
             <!-- 1. 템플릿 영역: SvgDrawingViewer에 tray-list 바인딩 추가 -->
-              <!-- SvgDrawingViewer에 v-on:dblclick-tray 바인딩 추가 -->
-<SvgDrawingViewer
-  :src="drawingSrc"
-  :crane-pos="cranePos"
-  :tray-list="trayList"
-  v-on:click-position="handlePositionClick"
-  v-on:dblclick-tray="handleTrayDblClick"
-/>
+            <!-- SvgDrawingViewer에 v-on:dblclick-tray 바인딩 추가 -->
+            <SvgDrawingViewer
+              :src="drawingSrc"
+              :crane-pos="cranePos"
+              :tray-list="trayList"
+              v-on:click-position="handlePositionClick"
+              v-on:dblclick-tray="handleTrayDblClick"
+            />
 
-<!-- 캐리어(트레이) 상세 정보 팝업 다이얼로그 -->
-<v-dialog v-model="trayDetailDialogVisible" max-width="480">
-  <v-card class="rounded-lg pa-4">
-    <v-card-title class="d-flex align-center justify-space-between pb-2">
-      <div class="d-flex align-center">
-        <v-avatar color="primary" variant="tonal" size="36" class="mr-2">
-          <v-icon icon="$cubeOutline" color="primary" size="20"></v-icon>
-        </v-avatar>
-        <span class="text-subtitle-1 font-weight-bold">캐리어(Tray) 상세 정보</span>
-      </div>
-      <v-btn icon="$close" variant="text" size="small" v-on:click="trayDetailDialogVisible = false"></v-btn>
-    </v-card-title>
+            <!-- 캐리어(트레이) 상세 정보 팝업 다이얼로그 -->
+            <v-dialog v-model="trayDetailDialogVisible" max-width="480">
+              <v-card class="rounded-lg pa-4">
+                <v-card-title class="d-flex align-center justify-space-between pb-2">
+                  <div class="d-flex align-center">
+                    <v-avatar color="primary" variant="tonal" size="36" class="mr-2">
+                      <v-icon icon="$cubeOutline" color="primary" size="20"></v-icon>
+                    </v-avatar>
+                    <span class="text-subtitle-1 font-weight-bold">캐리어(Tray) 상세 정보</span>
+                  </div>
+                  <v-btn
+                    icon="$close"
+                    variant="text"
+                    size="small"
+                    v-on:click="trayDetailDialogVisible = false"
+                  ></v-btn>
+                </v-card-title>
 
-    <v-divider class="mb-3"></v-divider>
+                <v-divider class="mb-3"></v-divider>
 
-    <v-card-text class="pa-0" v-if="selectedTrayDetail">
-      <v-table density="compact" class="tray-detail-table border rounded">
-        <tbody>
-          <tr>
-            <th class="info-header">캐리어 명</th>
-            <td class="font-weight-bold text-primary">{{ selectedTrayDetail.carrierName }}</td>
-          </tr>
-          <tr>
-            <th class="info-header">캐리어 타입</th>
-            <td>
-              <v-chip size="x-small" color="secondary" variant="tonal">
-                {{ selectedTrayDetail.carrierType }}
-              </v-chip>
-            </td>
-          </tr>
-          <tr>
-            <th class="info-header">오더 ID</th>
-            <td class="font-weight-bold">{{ selectedTrayDetail.orderId }}</td>
-          </tr>
-          <tr>
-            <th class="info-header">적재 중량</th>
-            <td>{{ selectedTrayDetail.weightKg }} kg</td>
-          </tr>
-          <tr>
-            <th class="info-header">현재 위치</th>
-            <td>
-              <v-chip size="x-small" color="primary" variant="flat">
-                {{ selectedTrayDetail.currentPosition }}
-              </v-chip>
-            </td>
-          </tr>
-          <tr>
-            <th class="info-header">상태</th>
-            <td>
-              <v-chip size="x-small" color="success" variant="flat">
-                {{ selectedTrayDetail.status }}
-              </v-chip>
-            </td>
-          </tr>
-        </tbody>
-      </v-table>
-    </v-card-text>
+                <v-card-text class="pa-0" v-if="selectedTrayDetail">
+                  <v-table density="compact" class="tray-detail-table border rounded">
+                    <tbody>
+                      <tr>
+                        <th class="info-header">캐리어 명</th>
+                        <td class="font-weight-bold text-primary">
+                          {{ selectedTrayDetail.carrierName }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th class="info-header">캐리어 타입</th>
+                        <td>
+                          <v-chip size="x-small" color="secondary" variant="tonal">
+                            {{ selectedTrayDetail.carrierType }}
+                          </v-chip>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th class="info-header">오더 ID</th>
+                        <td class="font-weight-bold">{{ selectedTrayDetail.orderId }}</td>
+                      </tr>
+                      <tr>
+                        <th class="info-header">적재 중량</th>
+                        <td>{{ selectedTrayDetail.weightKg }} kg</td>
+                      </tr>
+                      <tr>
+                        <th class="info-header">현재 위치</th>
+                        <td>
+                          <v-chip size="x-small" color="primary" variant="flat">
+                            {{ selectedTrayDetail.currentPosition }}
+                          </v-chip>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th class="info-header">상태</th>
+                        <td>
+                          <v-chip size="x-small" color="success" variant="flat">
+                            {{ selectedTrayDetail.status }}
+                          </v-chip>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </v-table>
+                </v-card-text>
 
-    <v-divider class="mt-4 mb-2"></v-divider>
+                <v-divider class="mt-4 mb-2"></v-divider>
 
-    <v-card-actions class="pa-0 d-flex justify-end">
-      <v-btn color="primary" variant="tonal" size="small" v-on:click="trayDetailDialogVisible = false">
-        확인
-      </v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
+                <v-card-actions class="pa-0 d-flex justify-end">
+                  <v-btn
+                    color="primary"
+                    variant="tonal"
+                    size="small"
+                    v-on:click="trayDetailDialogVisible = false"
+                  >
+                    확인
+                  </v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
           </div>
         </v-card>
       </v-col>
@@ -181,7 +193,7 @@
               v-on:click:row="onRowClick"
             >
               <!-- 상태 컬럼 커스텀 슬롯 -->
-              <template #['item.transportType']="{ item }">
+              <template #[`item.transportType`]="{ item }">
                 <v-chip
                   :color="item.transportType === 'O' ? 'success' : 'primary'"
                   size="x-small"
@@ -191,7 +203,7 @@
                   {{ item.transportType === 'O' ? '출고 (OUT)' : '입고 (IN)' }}
                 </v-chip>
               </template>
-              <template #['item.transportStatus']="{ item }">
+              <template #[`item.transportStatus`]="{ item }">
                 <v-chip
                   :color="getStatusColor(item.transportStatus)"
                   size="x-small"
@@ -222,7 +234,7 @@
               v-on:click:row="onRowClick"
             >
               <!-- 상태 컬럼 커스텀 슬롯 -->
-              <template #['item.transportType']="{ item }">
+              <template #[`item.transportType`]="{ item }">
                 <v-chip
                   :color="item.transportType === 'O' ? 'success' : 'primary'"
                   size="x-small"
@@ -232,7 +244,7 @@
                   {{ item.transportType === 'O' ? '출고 (OUT)' : '입고 (IN)' }}
                 </v-chip>
               </template>
-              <template #['item.transportStatus']="{ item }">
+              <template #[`item.transportStatus`]="{ item }">
                 <v-chip
                   :color="getStatusColor(item.transportStatus)"
                   size="x-small"
@@ -297,9 +309,9 @@ function handleCraneMovement(payload) {
     return
   }
   if (typeof payload.x === 'number' && typeof payload.y === 'number') {
-    let calculated_y = payload.y;
+    let calculated_y = payload.y
     if (payload.y > 450) {
-      calculated_y = calculated_y / 2;
+      calculated_y = calculated_y / 2
     }
     cranePos.value = {
       x: cranePos.value.x,
@@ -376,19 +388,74 @@ const isLoading = ref(false)
 // 7. 오더 테이블 컬럼 정의
 const orderHeaders = computed(function () {
   return [
-    { title: t('table.orderNo') || '오더 번호', key: 'transportOrderId', align: 'start', minWidth: '110px' },
+    {
+      title: t('table.orderNo') || '오더 번호',
+      key: 'transportOrderId',
+      align: 'start',
+      minWidth: '110px',
+    },
     { title: t('table.idocId') || 'IDoc ID', key: 'idocId', align: 'start', minWidth: '110px' },
-    { title: t('table.trayId') || '트레이 ID', key: 'carrierName', align: 'start', minWidth: '100px' },
-    { title: t('table.transportType') || '구분', key: 'transportType', align: 'center', minWidth: '80px' },
-    { title: t('table.status') || '상태', key: 'transportStatus', align: 'center', minWidth: '100px' },
-    { title: t('table.carrierType') || '트레이 타입', key: 'carrierType', align: 'center', minWidth: '100px' },
+    {
+      title: t('table.trayId') || '트레이 ID',
+      key: 'carrierName',
+      align: 'start',
+      minWidth: '100px',
+    },
+    {
+      title: t('table.transportType') || '구분',
+      key: 'transportType',
+      align: 'center',
+      minWidth: '80px',
+    },
+    {
+      title: t('table.status') || '상태',
+      key: 'transportStatus',
+      align: 'center',
+      minWidth: '100px',
+    },
+    {
+      title: t('table.carrierType') || '트레이 타입',
+      key: 'carrierType',
+      align: 'center',
+      minWidth: '100px',
+    },
     { title: t('table.galId') || 'GAL ID', key: 'galId', align: 'center', minWidth: '90px' },
-    { title: t('table.galWarehouse') || '창고', key: 'galWarehouse', align: 'center', minWidth: '90px' },
-    { title: t('table.locationId') || '컨베이어', key: 'locationId', align: 'center', minWidth: '100px' },
-    { title: t('table.workStationId') || '워크스테이션', key: 'workStationId', align: 'center', minWidth: '110px' },
-    { title: t('table.requestedZoneName') || '요청 존', key: 'requestedZoneName', align: 'center', minWidth: '90px' },
-    { title: t('table.travelProfile') || '주행 프로파일', key: 'travelProfile', align: 'center', minWidth: '110px' },
-    { title: t('table.createTime') || '생성 일시', key: 'createTime', align: 'center', minWidth: '160px' },
+    {
+      title: t('table.galWarehouse') || '창고',
+      key: 'galWarehouse',
+      align: 'center',
+      minWidth: '90px',
+    },
+    {
+      title: t('table.locationId') || '컨베이어',
+      key: 'locationId',
+      align: 'center',
+      minWidth: '100px',
+    },
+    {
+      title: t('table.workStationId') || '워크스테이션',
+      key: 'workStationId',
+      align: 'center',
+      minWidth: '110px',
+    },
+    {
+      title: t('table.requestedZoneName') || '요청 존',
+      key: 'requestedZoneName',
+      align: 'center',
+      minWidth: '90px',
+    },
+    {
+      title: t('table.travelProfile') || '주행 프로파일',
+      key: 'travelProfile',
+      align: 'center',
+      minWidth: '110px',
+    },
+    {
+      title: t('table.createTime') || '생성 일시',
+      key: 'createTime',
+      align: 'center',
+      minWidth: '160px',
+    },
   ]
 })
 
@@ -404,11 +471,19 @@ function mapTransportOrderItem(item) {
   }
   return {
     ...item,
-    transportOrderId: item.transportOrderId || item.orderNo || item.transportOrderNo || item.orderId || (item.id != null ? String(item.id) : '-'),
+    transportOrderId:
+      item.transportOrderId ||
+      item.orderNo ||
+      item.transportOrderNo ||
+      item.orderId ||
+      (item.id != null ? String(item.id) : '-'),
     idocId: item.idocId || item.idoc || '-',
-    carrierName: item.carrierName || item.trayId || item.carrierId || item.palletId || item.trayNo || '-',
-    transportType: item.transportType || (item.orderType && item.orderType.startsWith('WS_TO') ? 'O' : 'I'),
-    transportStatus: item.transportStatus || item.status || item.orderStatus || item.state || 'IDLE',
+    carrierName:
+      item.carrierName || item.trayId || item.carrierId || item.palletId || item.trayNo || '-',
+    transportType:
+      item.transportType || (item.orderType && item.orderType.startsWith('WS_TO') ? 'O' : 'I'),
+    transportStatus:
+      item.transportStatus || item.status || item.orderStatus || item.state || 'IDLE',
     carrierType: item.carrierType || item.trayType || item.type || 'TBD',
     galId: item.galId || '-',
     galWarehouse: item.galWarehouse || '-',
@@ -416,7 +491,13 @@ function mapTransportOrderItem(item) {
     workStationId: item.workStationId || item.wsNo || wsNo || '-',
     requestedZoneName: item.requestedZoneName || item.targetZone || item.zone || '-',
     travelProfile: item.travelProfile || item.profile || '-',
-    createTime: item.createTime || item.timestamp || item.createdTime || item.createdAt || item.createDt || '-',
+    createTime:
+      item.createTime ||
+      item.timestamp ||
+      item.createdTime ||
+      item.createdAt ||
+      item.createDt ||
+      '-',
   }
 }
 
@@ -429,7 +510,16 @@ async function fetchInboundOrders() {
       limit: 10,
     }
     const res = await fetchRecentTransportOrdersApi(params)
-    const rawList = (res && res.content) ? res.content : (res && res.data && res.data.content) ? res.data.content : (Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []))
+    const rawList =
+      res && res.content
+        ? res.content
+        : res && res.data && res.data.content
+          ? res.data.content
+          : Array.isArray(res)
+            ? res
+            : res && Array.isArray(res.data)
+              ? res.data
+              : []
     const list = []
     for (let i = 0; i < rawList.length; i++) {
       list.push(mapTransportOrderItem(rawList[i]))
@@ -450,7 +540,16 @@ async function fetchOutboundOrders() {
       limit: 10,
     }
     const res = await fetchRecentTransportOrdersApi(params)
-    const rawList = (res && res.content) ? res.content : (res && res.data && res.data.content) ? res.data.content : (Array.isArray(res) ? res : (res && Array.isArray(res.data) ? res.data : []))
+    const rawList =
+      res && res.content
+        ? res.content
+        : res && res.data && res.data.content
+          ? res.data.content
+          : Array.isArray(res)
+            ? res
+            : res && Array.isArray(res.data)
+              ? res.data
+              : []
     const list = []
     for (let i = 0; i < rawList.length; i++) {
       list.push(mapTransportOrderItem(rawList[i]))
@@ -476,10 +575,24 @@ async function handleRefreshOrders() {
 function getStatusColor(status) {
   if (!status) return 'default'
   const s = String(status).toUpperCase()
-  if (s === '진행중' || s === 'STARTED' || s === 'PROCESSING' || s === 'RUNNING' || s === 'IN_PROGRESS' || s === 'EXECUTING') {
+  if (
+    s === '진행중' ||
+    s === 'STARTED' ||
+    s === 'PROCESSING' ||
+    s === 'RUNNING' ||
+    s === 'IN_PROGRESS' ||
+    s === 'EXECUTING'
+  ) {
     return 'primary'
   }
-  if (s === '대기' || s === 'INIT' || s === 'WAITING' || s === 'PENDING' || s === 'READY' || s === 'REQUESTED') {
+  if (
+    s === '대기' ||
+    s === 'INIT' ||
+    s === 'WAITING' ||
+    s === 'PENDING' ||
+    s === 'READY' ||
+    s === 'REQUESTED'
+  ) {
     return 'warning'
   }
   if (s === '완료' || s === 'COMPLETED' || s === 'DONE' || s === 'SUCCESS') {
@@ -499,7 +612,7 @@ function handlePositionClick(posId) {
 
 // 15. 행(Row) 클릭 시 반송 오더 상세 정보 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? (row.item.raw || row.item) : row
+  const itemData = row && row.item ? row.item.raw || row.item : row
   if (itemData) {
     panelStore.openPanel(markRaw(WorkStationOrderDetailView), {
       mode: 'VIEW',

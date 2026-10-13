@@ -7,7 +7,8 @@ import axios from 'axios'
  * @returns {Promise<Object>} API 응답 데이터 (권한 목록 배열 또는 DTO)
  */
 export async function fetchMenuAuthsByGroupApi(userGroupId) {
-  const targetId = typeof userGroupId === 'object' && userGroupId !== null ? userGroupId.id : userGroupId
+  const targetId =
+    typeof userGroupId === 'object' && userGroupId !== null ? userGroupId.id : userGroupId
   const url = '/wcs-web/api/v1/mng/user-group-menu-auth/by-group/' + encodeURIComponent(targetId)
   const response = await axios.get(url)
   return response.data

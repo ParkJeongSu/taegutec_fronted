@@ -15,7 +15,8 @@
               </v-chip>
             </div>
             <div class="text-caption text-medium-emphasis mt-1">
-              정기/수시 재고 실사 오더에 따라 대상 캐리어를 측정 포트로 반송하고, 현장 실측 중량(Actual Weight)과 전산 중량의 편차를 보정 처리합니다.
+              정기/수시 재고 실사 오더에 따라 대상 캐리어를 측정 포트로 반송하고, 현장 실측
+              중량(Actual Weight)과 전산 중량의 편차를 보정 처리합니다.
             </div>
           </div>
         </div>
@@ -45,7 +46,9 @@
     <v-row class="split-view-row" density="comfortable">
       <!-- ================= [좌측 패널] 재고 실사 오더 카드 리스트 (너비 약 35%) ================= -->
       <v-col cols="12" md="4" class="d-flex flex-column">
-        <v-card class="elevation-1 rounded-lg pa-4 fill-height d-flex flex-column stocktaking-order-panel">
+        <v-card
+          class="elevation-1 rounded-lg pa-4 fill-height d-flex flex-column stocktaking-order-panel"
+        >
           <div class="panel-header mb-3">
             <div class="d-flex align-center justify-space-between mb-2">
               <div class="d-flex align-center">
@@ -79,8 +82,12 @@
             >
               <v-btn value="ALL" size="small" class="flex-grow-1 font-weight-medium">전체</v-btn>
               <v-btn value="READY" size="small" class="flex-grow-1 font-weight-medium">대기</v-btn>
-              <v-btn value="IN_PROGRESS" size="small" class="flex-grow-1 font-weight-medium">진행 중</v-btn>
-              <v-btn value="COMPLETED" size="small" class="flex-grow-1 font-weight-medium">완료</v-btn>
+              <v-btn value="IN_PROGRESS" size="small" class="flex-grow-1 font-weight-medium"
+                >진행 중</v-btn
+              >
+              <v-btn value="COMPLETED" size="small" class="flex-grow-1 font-weight-medium"
+                >완료</v-btn
+              >
             </v-btn-toggle>
           </div>
 
@@ -92,7 +99,10 @@
               <v-progress-circular indeterminate color="primary" size="32"></v-progress-circular>
             </div>
 
-            <div v-else-if="filteredOrders.length === 0" class="text-center py-12 text-medium-emphasis">
+            <div
+              v-else-if="filteredOrders.length === 0"
+              class="text-center py-12 text-medium-emphasis"
+            >
               <v-icon icon="$clipboardCheckOutline" size="36" color="disabled" class="mb-2" />
               <div class="text-caption">조건에 해당하는 실사 오더가 없습니다.</div>
             </div>
@@ -102,7 +112,9 @@
                 v-for="order in filteredOrders"
                 :key="order.orderId"
                 class="stocktaking-order-card pa-3 mb-2 rounded-lg cursor-pointer"
-                :class="{ 'active-order-card': selectedOrder && selectedOrder.orderId === order.orderId }"
+                :class="{
+                  'active-order-card': selectedOrder && selectedOrder.orderId === order.orderId,
+                }"
                 v-on:click="onSelectOrder(order)"
               >
                 <!-- 카드 상단: 실사 Order ID 및 상태 칩 -->
@@ -112,11 +124,23 @@
                   </span>
                   <v-chip
                     size="x-small"
-                    :color="order.status === 'READY' ? 'primary' : order.status === 'IN_PROGRESS' ? 'warning' : 'success'"
+                    :color="
+                      order.status === 'READY'
+                        ? 'primary'
+                        : order.status === 'IN_PROGRESS'
+                          ? 'warning'
+                          : 'success'
+                    "
                     variant="flat"
                     class="font-weight-bold"
                   >
-                    {{ order.status === 'READY' ? '대기' : order.status === 'IN_PROGRESS' ? '진행 중' : '완료' }}
+                    {{
+                      order.status === 'READY'
+                        ? '대기'
+                        : order.status === 'IN_PROGRESS'
+                          ? '진행 중'
+                          : '완료'
+                    }}
                   </v-chip>
                 </div>
 
@@ -144,9 +168,12 @@
                   class="mb-2"
                 ></v-progress-linear>
 
-                <div class="d-flex align-center justify-space-between text-caption text-medium-emphasis">
+                <div
+                  class="d-flex align-center justify-space-between text-caption text-medium-emphasis"
+                >
                   <span>
-                    실사 진행: <strong class="text-primary">{{ order.completedCarriers }}</strong> / {{ order.totalCarriers }}대
+                    실사 진행: <strong class="text-primary">{{ order.completedCarriers }}</strong> /
+                    {{ order.totalCarriers }}대
                   </span>
                   <span>담당: {{ order.auditor }}</span>
                 </div>
@@ -162,7 +189,9 @@
         <v-card class="elevation-1 rounded-lg pa-4 mb-3 order-summary-banner bg-surface">
           <div v-if="!selectedOrder" class="text-center py-4 text-medium-emphasis">
             <v-icon icon="$clipboardCheckOutline" size="32" color="disabled" class="mb-1" />
-            <div class="text-body-2 font-weight-medium">좌측 목록에서 진행할 재고 실사 오더를 선택해주세요.</div>
+            <div class="text-body-2 font-weight-medium">
+              좌측 목록에서 진행할 재고 실사 오더를 선택해주세요.
+            </div>
           </div>
 
           <div v-else class="d-flex flex-wrap align-center justify-space-between">
@@ -172,7 +201,9 @@
               </v-avatar>
               <div>
                 <div class="d-flex align-center flex-wrap">
-                  <span class="text-subtitle-1 font-weight-bold text-high-emphasis mr-2">{{ selectedOrder.targetZone }}</span>
+                  <span class="text-subtitle-1 font-weight-bold text-high-emphasis mr-2">{{
+                    selectedOrder.targetZone
+                  }}</span>
                   <v-chip size="small" color="primary" variant="flat" class="font-weight-bold mr-2">
                     {{ selectedOrder.orderId }}
                   </v-chip>
@@ -181,7 +212,8 @@
                   </v-chip>
                 </div>
                 <div class="text-caption text-medium-emphasis mt-1">
-                  품목: [{{ selectedOrder.itemCode }}] {{ selectedOrder.itemName }} | 실사 예정일: {{ selectedOrder.plannedDate }}
+                  품목: [{{ selectedOrder.itemCode }}] {{ selectedOrder.itemName }} | 실사 예정일:
+                  {{ selectedOrder.plannedDate }}
                 </div>
               </div>
             </div>
@@ -190,7 +222,11 @@
               <div class="text-end mr-3">
                 <div class="text-caption text-medium-emphasis">실사 완료율</div>
                 <div class="text-subtitle-2 font-weight-bold text-primary">
-                  {{ selectedOrder.completedCarriers }} / {{ selectedOrder.totalCarriers }}대 ({{ ((selectedOrder.completedCarriers / selectedOrder.totalCarriers) * 100).toFixed(0) }}%)
+                  {{ selectedOrder.completedCarriers }} / {{ selectedOrder.totalCarriers }}대 ({{
+                    ((selectedOrder.completedCarriers / selectedOrder.totalCarriers) * 100).toFixed(
+                      0,
+                    )
+                  }}%)
                 </div>
               </div>
               <v-chip size="small" color="primary" variant="outlined" class="font-weight-bold">
@@ -201,13 +237,20 @@
         </v-card>
 
         <!-- 본문 실사 대상 캐리어 데이터 테이블 -->
-        <v-card class="elevation-1 rounded-lg pa-4 flex-grow-1 d-flex flex-column stocktaking-table-card">
+        <v-card
+          class="elevation-1 rounded-lg pa-4 flex-grow-1 d-flex flex-column stocktaking-table-card"
+        >
           <div class="panel-header mb-3">
             <div class="d-flex flex-wrap align-center justify-space-between">
               <div class="d-flex align-center mb-2 mb-sm-0">
                 <v-icon icon="$packageVariant" size="18" color="primary" class="mr-1" />
                 <span class="text-subtitle-2 font-weight-bold">실사 대상 캐리어 목록</span>
-                <v-chip size="x-small" color="primary" variant="tonal" class="ml-2 font-weight-bold">
+                <v-chip
+                  size="x-small"
+                  color="primary"
+                  variant="tonal"
+                  class="ml-2 font-weight-bold"
+                >
                   {{ carrierList.length }}대
                 </v-chip>
               </div>
@@ -224,7 +267,12 @@
                   class="mr-2 carrier-search-field"
                   v-on:keyup.enter="handleSearchCarriers"
                 ></v-text-field>
-                <v-btn color="primary" variant="tonal" size="small" v-on:click="handleSearchCarriers">
+                <v-btn
+                  color="primary"
+                  variant="tonal"
+                  size="small"
+                  v-on:click="handleSearchCarriers"
+                >
                   검색
                 </v-btn>
               </div>
@@ -250,19 +298,28 @@
 
               <!-- 보관 위치 -->
               <template #[`item.location`]="{ item }">
-                <v-chip size="x-small" variant="outlined" color="primary" class="font-weight-medium">
+                <v-chip
+                  size="x-small"
+                  variant="outlined"
+                  color="primary"
+                  class="font-weight-medium"
+                >
                   {{ item.location }}
                 </v-chip>
               </template>
 
               <!-- 품목명 -->
               <template #[`item.itemName`]="{ item }">
-                <span class="text-caption font-weight-medium text-truncate">{{ item.itemName }}</span>
+                <span class="text-caption font-weight-medium text-truncate">{{
+                  item.itemName
+                }}</span>
               </template>
 
               <!-- LOT ID -->
               <template #[`item.lotId`]="{ item }">
-                <span class="text-caption font-weight-bold text-high-emphasis">{{ item.lotId }}</span>
+                <span class="text-caption font-weight-bold text-high-emphasis">{{
+                  item.lotId
+                }}</span>
               </template>
 
               <!-- 전산 등록 중량 (Book Weight) -->
@@ -283,7 +340,13 @@
                 <span
                   v-if="item.diffWeight !== null"
                   class="font-weight-bold"
-                  :class="item.diffWeight < 0 ? 'text-error' : item.diffWeight > 0 ? 'text-warning' : 'text-success'"
+                  :class="
+                    item.diffWeight < 0
+                      ? 'text-error'
+                      : item.diffWeight > 0
+                        ? 'text-warning'
+                        : 'text-success'
+                  "
                 >
                   {{ item.diffWeight > 0 ? '+' : '' }}{{ item.diffWeight }} kg
                 </span>
@@ -294,11 +357,23 @@
               <template #[`item.status`]="{ item }">
                 <v-chip
                   size="x-small"
-                  :color="item.status === 'READY' ? 'primary' : item.status === 'MOVING' ? 'warning' : 'success'"
+                  :color="
+                    item.status === 'READY'
+                      ? 'primary'
+                      : item.status === 'MOVING'
+                        ? 'warning'
+                        : 'success'
+                  "
                   variant="flat"
                   class="font-weight-bold"
                 >
-                  {{ item.status === 'READY' ? '대기' : item.status === 'MOVING' ? '반송 중' : '실사 완료' }}
+                  {{
+                    item.status === 'READY'
+                      ? '대기'
+                      : item.status === 'MOVING'
+                        ? '반송 중'
+                        : '실사 완료'
+                  }}
                 </v-chip>
               </template>
             </BaseDataTable>
@@ -351,19 +426,30 @@
         <v-card-title class="pa-4 bg-success text-white d-flex align-center justify-space-between">
           <div class="d-flex align-center">
             <v-icon icon="$scaleBalance" class="mr-2" />
-            <span class="text-subtitle-1 font-weight-bold">재고 실사 실측 중량 검증 및 전산 보정</span>
+            <span class="text-subtitle-1 font-weight-bold"
+              >재고 실사 실측 중량 검증 및 전산 보정</span
+            >
           </div>
-          <v-btn icon="$close" variant="text" size="small" color="white" v-on:click="adjustDialog = false"></v-btn>
+          <v-btn
+            icon="$close"
+            variant="text"
+            size="small"
+            color="white"
+            v-on:click="adjustDialog = false"
+          ></v-btn>
         </v-card-title>
 
         <v-card-text class="pa-4">
           <div v-if="targetCarrier" class="pa-3 bg-surface-variant rounded mb-3">
             <div class="d-flex justify-space-between align-center mb-1">
               <span class="font-weight-bold text-primary">{{ targetCarrier.carrierId }}</span>
-              <v-chip size="x-small" color="secondary" variant="flat">{{ targetCarrier.location }}</v-chip>
+              <v-chip size="x-small" color="secondary" variant="flat">{{
+                targetCarrier.location
+              }}</v-chip>
             </div>
             <div class="text-caption text-high-emphasis">
-              [{{ targetCarrier.itemCode }}] {{ targetCarrier.itemName }} (LOT: {{ targetCarrier.lotId }})
+              [{{ targetCarrier.itemCode }}] {{ targetCarrier.itemName }} (LOT:
+              {{ targetCarrier.lotId }})
             </div>
           </div>
 
@@ -405,8 +491,9 @@
                 <div class="d-flex justify-space-between align-center">
                   <span>중량 편차 (오차):</span>
                   <strong class="text-subtitle-2">
-                    {{ calculatedDiff > 0 ? '+' : '' }}{{ calculatedDiff }} kg
-                    ({{ calculatedDiffPct }}%)
+                    {{ calculatedDiff > 0 ? '+' : '' }}{{ calculatedDiff }} kg ({{
+                      calculatedDiffPct
+                    }}%)
                   </strong>
                 </div>
               </v-alert>
@@ -539,7 +626,9 @@ const carrierHeaders = [
 ]
 
 const { loading: isOrdersLoading, execute: executeFetchOrders } = useApi(fetchStockTakingOrdersApi)
-const { loading: isCarriersLoading, execute: executeFetchCarriers } = useApi(fetchStockTakingCarriersApi)
+const { loading: isCarriersLoading, execute: executeFetchCarriers } = useApi(
+  fetchStockTakingCarriersApi,
+)
 const { loading: isTransferring, execute: executeTransfer } = useApi(requestStockTakingTransferApi)
 const { loading: isAdjusting, execute: executeAdjust } = useApi(completeStockTakingAdjustmentApi)
 

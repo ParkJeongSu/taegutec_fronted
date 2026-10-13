@@ -92,7 +92,11 @@ export function useDataTable(fetchApi) {
         totalItems.value = extractTotalElements(response, response.content.length)
       } else if (response && response.data && Array.isArray(response.data.content)) {
         items.value = response.data.content
-        totalItems.value = extractTotalElements(response.data, response.data.content.length, response)
+        totalItems.value = extractTotalElements(
+          response.data,
+          response.data.content.length,
+          response,
+        )
       } else if (response && response.data && Array.isArray(response.data)) {
         items.value = response.data
         totalItems.value = extractTotalElements(response, response.data.length, response.data)

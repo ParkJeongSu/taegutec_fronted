@@ -15,7 +15,8 @@
               </v-chip>
             </div>
             <div class="text-caption text-medium-emphasis mt-1">
-              창고(WH1~WH4) 및 자동 창고 스토커에 보관 중인 분말 용기(Container), Pallet, FIBC Bag의 실시간 재고 현황을 모니터링합니다.
+              창고(WH1~WH4) 및 자동 창고 스토커에 보관 중인 분말 용기(Container), Pallet, FIBC Bag의
+              실시간 재고 현황을 모니터링합니다.
             </div>
           </div>
         </div>
@@ -178,11 +179,19 @@
         <template #[`item.status`]="{ item }">
           <v-chip
             size="x-small"
-            :color="item.status === 'STOCK' ? 'success' : item.status === 'WIP' ? 'warning' : 'error'"
+            :color="
+              item.status === 'STOCK' ? 'success' : item.status === 'WIP' ? 'warning' : 'error'
+            "
             variant="flat"
             class="font-weight-bold"
           >
-            {{ item.status === 'STOCK' ? '정상보관' : item.status === 'WIP' ? '이동/WIP' : '보류(Hold)' }}
+            {{
+              item.status === 'STOCK'
+                ? '정상보관'
+                : item.status === 'WIP'
+                  ? '이동/WIP'
+                  : '보류(Hold)'
+            }}
           </v-chip>
         </template>
 
@@ -224,7 +233,13 @@
             <v-icon icon="$robotIndustrial" class="mr-2" />
             <span class="text-subtitle-1 font-weight-bold">캐리어 / 재고 상세 정보</span>
           </div>
-          <v-btn icon="$close" variant="text" size="small" color="white" v-on:click="detailDialog = false"></v-btn>
+          <v-btn
+            icon="$close"
+            variant="text"
+            size="small"
+            color="white"
+            v-on:click="detailDialog = false"
+          ></v-btn>
         </v-card-title>
 
         <v-card-text class="pa-4">
@@ -234,23 +249,46 @@
 
           <div v-else-if="carrierDetail">
             <!-- 상단 헤더 요약 -->
-            <div class="d-flex align-center justify-space-between pa-3 bg-surface-variant rounded mb-3">
+            <div
+              class="d-flex align-center justify-space-between pa-3 bg-surface-variant rounded mb-3"
+            >
               <div class="d-flex align-center">
-                <v-avatar color="primary" variant="flat" size="36" class="mr-2 text-white font-weight-bold">
+                <v-avatar
+                  color="primary"
+                  variant="flat"
+                  size="36"
+                  class="mr-2 text-white font-weight-bold"
+                >
                   {{ carrierDetail.materialType ? carrierDetail.materialType.charAt(0) : 'C' }}
                 </v-avatar>
                 <div>
-                  <div class="font-weight-bold text-subtitle-2 text-primary">{{ carrierDetail.carrierId }}</div>
-                  <div class="text-caption text-medium-emphasis">구분: {{ carrierDetail.materialType }}</div>
+                  <div class="font-weight-bold text-subtitle-2 text-primary">
+                    {{ carrierDetail.carrierId }}
+                  </div>
+                  <div class="text-caption text-medium-emphasis">
+                    구분: {{ carrierDetail.materialType }}
+                  </div>
                 </div>
               </div>
               <v-chip
                 size="small"
-                :color="carrierDetail.status === 'STOCK' ? 'success' : carrierDetail.status === 'WIP' ? 'warning' : 'error'"
+                :color="
+                  carrierDetail.status === 'STOCK'
+                    ? 'success'
+                    : carrierDetail.status === 'WIP'
+                      ? 'warning'
+                      : 'error'
+                "
                 variant="flat"
                 class="font-weight-bold"
               >
-                {{ carrierDetail.status === 'STOCK' ? '정상 보관' : carrierDetail.status === 'WIP' ? '이동 중/WIP' : '보류(Hold)' }}
+                {{
+                  carrierDetail.status === 'STOCK'
+                    ? '정상 보관'
+                    : carrierDetail.status === 'WIP'
+                      ? '이동 중/WIP'
+                      : '보류(Hold)'
+                }}
               </v-chip>
             </div>
 
@@ -258,15 +296,21 @@
             <v-row density="compact" class="detail-info-grid">
               <v-col cols="6">
                 <div class="detail-label">보관 창고 / 위치</div>
-                <div class="detail-value">{{ carrierDetail.warehouse }} / {{ carrierDetail.location }}</div>
+                <div class="detail-value">
+                  {{ carrierDetail.warehouse }} / {{ carrierDetail.location }}
+                </div>
               </v-col>
               <v-col cols="6">
                 <div class="detail-label">적재 중량</div>
-                <div class="detail-value text-primary font-weight-bold">{{ Number(carrierDetail.weight).toFixed(2) }} t</div>
+                <div class="detail-value text-primary font-weight-bold">
+                  {{ Number(carrierDetail.weight).toFixed(2) }} t
+                </div>
               </v-col>
               <v-col cols="12">
                 <div class="detail-label">품목 코드 / 명칭</div>
-                <div class="detail-value font-weight-medium">[{{ carrierDetail.itemCode }}] {{ carrierDetail.itemName }}</div>
+                <div class="detail-value font-weight-medium">
+                  [{{ carrierDetail.itemCode }}] {{ carrierDetail.itemName }}
+                </div>
               </v-col>
               <v-col cols="6">
                 <div class="detail-label">재고 LOT ID</div>
@@ -294,7 +338,9 @@
               </v-col>
               <v-col cols="12">
                 <div class="detail-label">최근 발생 이벤트</div>
-                <div class="detail-value text-high-emphasis">{{ carrierDetail.lastEvent || '-' }}</div>
+                <div class="detail-value text-high-emphasis">
+                  {{ carrierDetail.lastEvent || '-' }}
+                </div>
               </v-col>
             </v-row>
           </div>
@@ -302,7 +348,12 @@
 
         <v-divider></v-divider>
         <v-card-actions class="pa-4 d-flex justify-end">
-          <v-btn color="primary" variant="flat" class="font-weight-bold px-6" v-on:click="detailDialog = false">
+          <v-btn
+            color="primary"
+            variant="flat"
+            class="font-weight-bold px-6"
+            v-on:click="detailDialog = false"
+          >
             {{ $t('common.close') }}
           </v-btn>
         </v-card-actions>
@@ -349,12 +400,7 @@ const warehouseOptions = [
   { title: '창고 4 (WH4)', value: 'WH4' },
 ]
 
-const materialTypeOptions = [
-  'ALL',
-  'Container',
-  'Pallet',
-  'FIBC Bag',
-]
+const materialTypeOptions = ['ALL', 'Container', 'Pallet', 'FIBC Bag']
 
 const tableHeaders = [
   { title: 'Carrier ID', key: 'carrierId', align: 'start', sortable: true },

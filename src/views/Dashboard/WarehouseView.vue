@@ -5,7 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$packageVariant" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.dashboard.warehouseTitle') }}</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.dashboard.warehouseTitle')
+          }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.dashboard.warehouseBreadcrumb') }}
           </v-chip>
@@ -75,7 +77,9 @@
             >
               {{ $t('common.search') }}
             </v-btn>
-            <v-btn variant="outlined" size="small" v-on:click="handleReset"> {{ $t('common.reset') }} </v-btn>
+            <v-btn variant="outlined" size="small" v-on:click="handleReset">
+              {{ $t('common.reset') }}
+            </v-btn>
           </v-col>
         </v-row>
       </div>
@@ -168,7 +172,13 @@ const headers = computed(function () {
     { title: t('table.totalShelfCount'), key: 'totalShelfCount', align: 'end', sortable: true },
     { title: t('table.useShelfCount'), key: 'useShelfCount', align: 'end', sortable: true },
     { title: t('table.emptyShelfCount'), key: 'emptyShelfCount', align: 'end', sortable: true },
-    { title: t('table.occupancyRate'), key: 'occupancyRate', align: 'center', width: '160px', sortable: false },
+    {
+      title: t('table.occupancyRate'),
+      key: 'occupancyRate',
+      align: 'center',
+      width: '160px',
+      sortable: false,
+    },
     { title: t('table.equipmentStatus'), key: 'stockerStatus', align: 'center', sortable: true },
   ]
 })
@@ -265,7 +275,7 @@ function handleExport() {
 
 // 행(Row) 클릭 시 스토커 상세 정보 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   if (itemData) {
     panelStore.openPanel(markRaw(WarehouseDetailView), {
       mode: 'VIEW',

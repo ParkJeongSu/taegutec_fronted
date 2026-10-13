@@ -5,7 +5,9 @@
       <div class="d-flex flex-wrap align-center justify-space-between mb-4">
         <div class="d-flex align-center mb-2 mb-sm-0">
           <v-icon icon="$alarmPanel" size="24" color="primary" class="mr-2" />
-          <span class="text-h6 font-weight-bold text-high-emphasis">{{ $t('views.modeling.alarmDef.title') }}</span>
+          <span class="text-h6 font-weight-bold text-high-emphasis">{{
+            $t('views.modeling.alarmDef.title')
+          }}</span>
           <v-chip size="small" color="primary" variant="tonal" class="ml-3 font-weight-medium">
             {{ $t('views.modeling.alarmDef.breadcrumb') }}
           </v-chip>
@@ -74,7 +76,13 @@
             ></v-select>
           </v-col>
           <v-col cols="12" sm="4" md="3" class="d-flex align-center">
-            <v-btn color="primary" variant="flat" size="small" class="mr-2" v-on:click="handleSearch">
+            <v-btn
+              color="primary"
+              variant="flat"
+              size="small"
+              class="mr-2"
+              v-on:click="handleSearch"
+            >
               {{ $t('common.search') }}
             </v-btn>
             <v-btn variant="outlined" size="small" v-on:click="handleReset">
@@ -95,7 +103,12 @@
         v-on:click:row="onRowClick"
       >
         <template #[`item.severity`]="{ item }">
-          <v-chip :color="getSeverityColor(item.severity)" size="x-small" variant="flat" class="font-weight-bold">
+          <v-chip
+            :color="getSeverityColor(item.severity)"
+            size="x-small"
+            variant="flat"
+            class="font-weight-bold"
+          >
             {{ item.severity }}
           </v-chip>
         </template>
@@ -172,11 +185,11 @@ const filteredItems = computed(function () {
   return items.value.filter(function (item) {
     const matchKeyword =
       !searchKeyword.value ||
-      (item.alarmCode && item.alarmCode.toLowerCase().includes(searchKeyword.value.toLowerCase())) ||
+      (item.alarmCode &&
+        item.alarmCode.toLowerCase().includes(searchKeyword.value.toLowerCase())) ||
       (item.alarmName && item.alarmName.toLowerCase().includes(searchKeyword.value.toLowerCase()))
 
-    const matchStatus =
-      statusFilter.value === '전체' || item.severity === statusFilter.value
+    const matchStatus = statusFilter.value === '전체' || item.severity === statusFilter.value
 
     return matchKeyword && matchStatus
   })
@@ -238,7 +251,7 @@ function onAddAlarmDef() {
 
 // 행(Row) 클릭 시 수정 모드로 우측 슬라이드 패널 오픈
 function onRowClick(event, row) {
-  const itemData = (row && row.item) ? row.item : row
+  const itemData = row && row.item ? row.item : row
   panelStore.openPanel(markRaw(AlarmDefViewForm), {
     mode: 'UPDATE',
     data: itemData,

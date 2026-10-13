@@ -16,12 +16,20 @@ export function fetchWcsSubTransferRulesApi(params) {
  * @param {string} moduleName
  * @param {number|string} routeLinkId
  */
-export function fetchWcsSubTransferRuleByIdApi(factoryName, equipmentName, moduleName, routeLinkId) {
+export function fetchWcsSubTransferRuleByIdApi(
+  factoryName,
+  equipmentName,
+  moduleName,
+  routeLinkId,
+) {
   const path =
     '/v1/wcs/sub-transfer-rule/' +
-    encodeURIComponent(factoryName) + '/' +
-    encodeURIComponent(equipmentName) + '/' +
-    encodeURIComponent(moduleName) + '/' +
+    encodeURIComponent(factoryName) +
+    '/' +
+    encodeURIComponent(equipmentName) +
+    '/' +
+    encodeURIComponent(moduleName) +
+    '/' +
     routeLinkId
   return axiosInstance.get(path)
 }
@@ -34,7 +42,8 @@ export function fetchWcsSubTransferRuleByIdApi(factoryName, equipmentName, modul
 export function fetchWcsSubTransferRulesByEquipmentApi(factoryName, equipmentName) {
   const path =
     '/v1/wcs/sub-transfer-rule/by-equipment/' +
-    encodeURIComponent(factoryName) + '/' +
+    encodeURIComponent(factoryName) +
+    '/' +
     encodeURIComponent(equipmentName)
   return axiosInstance.get(path)
 }
@@ -55,12 +64,21 @@ export function createWcsSubTransferRuleApi(payload) {
  * @param {number|string} routeLinkId
  * @param {Object} payload
  */
-export function updateWcsSubTransferRuleApi(factoryName, equipmentName, moduleName, routeLinkId, payload) {
+export function updateWcsSubTransferRuleApi(
+  factoryName,
+  equipmentName,
+  moduleName,
+  routeLinkId,
+  payload,
+) {
   const path =
     '/v1/wcs/sub-transfer-rule/' +
-    encodeURIComponent(factoryName) + '/' +
-    encodeURIComponent(equipmentName) + '/' +
-    encodeURIComponent(moduleName) + '/' +
+    encodeURIComponent(factoryName) +
+    '/' +
+    encodeURIComponent(equipmentName) +
+    '/' +
+    encodeURIComponent(moduleName) +
+    '/' +
     routeLinkId
   return axiosInstance.put(path, payload)
 }
@@ -75,9 +93,12 @@ export function updateWcsSubTransferRuleApi(factoryName, equipmentName, moduleNa
 export function deleteWcsSubTransferRuleApi(factoryName, equipmentName, moduleName, routeLinkId) {
   const path =
     '/v1/wcs/sub-transfer-rule/' +
-    encodeURIComponent(factoryName) + '/' +
-    encodeURIComponent(equipmentName) + '/' +
-    encodeURIComponent(moduleName) + '/' +
+    encodeURIComponent(factoryName) +
+    '/' +
+    encodeURIComponent(equipmentName) +
+    '/' +
+    encodeURIComponent(moduleName) +
+    '/' +
     routeLinkId
   return axiosInstance.delete(path)
 }

@@ -15,7 +15,8 @@
               </v-chip>
             </div>
             <div class="text-caption text-medium-emphasis mt-1">
-              가공 진행 중인 설비의 공정을 완료하고, 최종 생산 LOT 번호, 실적 중량, 회수 용기 및 수율 정보를 등록합니다.
+              가공 진행 중인 설비의 공정을 완료하고, 최종 생산 LOT 번호, 실적 중량, 회수 용기 및
+              수율 정보를 등록합니다.
             </div>
           </div>
         </div>
@@ -73,8 +74,12 @@
               variant="outlined"
               class="w-100"
             >
-              <v-btn :value="false" size="small" class="flex-grow-1 font-weight-medium">전체 설비</v-btn>
-              <v-btn :value="true" size="small" class="flex-grow-1 font-weight-bold" color="success">가동 중 설비만</v-btn>
+              <v-btn :value="false" size="small" class="flex-grow-1 font-weight-medium"
+                >전체 설비</v-btn
+              >
+              <v-btn :value="true" size="small" class="flex-grow-1 font-weight-bold" color="success"
+                >가동 중 설비만</v-btn
+              >
             </v-btn-toggle>
           </div>
 
@@ -102,7 +107,12 @@
                 <v-expansion-panel-title class="py-2 px-3">
                   <div class="d-flex align-center justify-space-between w-100 mr-2">
                     <div class="d-flex align-center">
-                      <v-icon :icon="group.icon || '$cubeOutline'" size="18" color="primary" class="mr-2" />
+                      <v-icon
+                        :icon="group.icon || '$cubeOutline'"
+                        size="18"
+                        color="primary"
+                        class="mr-2"
+                      />
                       <span class="font-weight-bold text-caption text-truncate">
                         {{ group.typeName }}
                       </span>
@@ -119,7 +129,10 @@
                       v-for="eqp in group.equipments"
                       :key="eqp.eqpId"
                       class="equipment-unit-card pa-2 mb-1 rounded cursor-pointer"
-                      :class="{ 'active-equipment-card': selectedEquipment && selectedEquipment.eqpId === eqp.eqpId }"
+                      :class="{
+                        'active-equipment-card':
+                          selectedEquipment && selectedEquipment.eqpId === eqp.eqpId,
+                      }"
                       v-on:click="onSelectEquipment(eqp)"
                     >
                       <div class="d-flex align-center justify-space-between mb-1">
@@ -127,7 +140,9 @@
                           <span class="font-weight-bold text-caption text-primary mr-1">
                             {{ eqp.eqpId }}
                           </span>
-                          <span class="text-caption text-high-emphasis text-truncate font-weight-medium eqp-name-label">
+                          <span
+                            class="text-caption text-high-emphasis text-truncate font-weight-medium eqp-name-label"
+                          >
                             {{ eqp.eqpName }}
                           </span>
                         </div>
@@ -141,7 +156,9 @@
                         </v-chip>
                       </div>
 
-                      <div class="d-flex align-center justify-space-between text-caption text-medium-emphasis">
+                      <div
+                        class="d-flex align-center justify-space-between text-caption text-medium-emphasis"
+                      >
                         <span class="text-truncate">
                           {{ eqp.currentOrder !== '-' ? eqp.currentOrder : '가동 대기' }}
                         </span>
@@ -162,7 +179,9 @@
         <v-card class="elevation-1 rounded-lg pa-4 mb-4 eqp-dashboard-card">
           <div v-if="!selectedEquipment" class="text-center py-6 text-medium-emphasis">
             <v-icon icon="$robotIndustrial" size="36" color="disabled" class="mb-2" />
-            <div class="text-body-2 font-weight-medium">좌측 목록에서 조업 완료할 설비를 선택해주세요.</div>
+            <div class="text-body-2 font-weight-medium">
+              좌측 목록에서 조업 완료할 설비를 선택해주세요.
+            </div>
           </div>
 
           <div v-else>
@@ -174,19 +193,37 @@
                 </v-avatar>
                 <div>
                   <div class="d-flex align-center">
-                    <span class="text-subtitle-1 font-weight-bold mr-2">{{ selectedEquipment.eqpName }}</span>
-                    <v-chip size="small" color="primary" variant="flat" class="font-weight-bold mr-2">
+                    <span class="text-subtitle-1 font-weight-bold mr-2">{{
+                      selectedEquipment.eqpName
+                    }}</span>
+                    <v-chip
+                      size="small"
+                      color="primary"
+                      variant="flat"
+                      class="font-weight-bold mr-2"
+                    >
                       {{ selectedEquipment.eqpId }}
                     </v-chip>
-                    <v-chip size="small" color="secondary" variant="tonal" class="font-weight-medium mr-2">
+                    <v-chip
+                      size="small"
+                      color="secondary"
+                      variant="tonal"
+                      class="font-weight-medium mr-2"
+                    >
                       공정: {{ selectedEquipment.eqpType }}
                     </v-chip>
-                    <v-chip size="small" :color="getEqpStatusColor(selectedEquipment.status)" variant="flat" class="font-weight-bold">
+                    <v-chip
+                      size="small"
+                      :color="getEqpStatusColor(selectedEquipment.status)"
+                      variant="flat"
+                      class="font-weight-bold"
+                    >
                       운전 상태: {{ selectedEquipment.status }}
                     </v-chip>
                   </div>
                   <div class="text-caption text-medium-emphasis mt-1">
-                    {{ selectedEquipment.description }} (설비 설치 위치: {{ selectedEquipment.location || 'POWDER-1공장' }})
+                    {{ selectedEquipment.description }} (설비 설치 위치:
+                    {{ selectedEquipment.location || 'POWDER-1공장' }})
                   </div>
                 </div>
               </div>
@@ -195,7 +232,12 @@
                 <v-chip size="small" variant="flat" color="primary" class="font-weight-bold">
                   완료 대상 오더: {{ selectedEquipment.currentOrder }}
                 </v-chip>
-                <v-chip size="small" variant="outlined" color="success" class="ml-2 font-weight-bold">
+                <v-chip
+                  size="small"
+                  variant="outlined"
+                  color="success"
+                  class="ml-2 font-weight-bold"
+                >
                   투입 배치: {{ selectedEquipment.currentLot }}
                 </v-chip>
               </div>
@@ -248,19 +290,24 @@
         <v-row density="comfortable" class="flex-grow-1">
           <!-- ================= [우측 하단-좌측] 현재 설비 투입 LOT 목록 ================= -->
           <v-col cols="12" lg="5" class="d-flex flex-column">
-            <v-card class="elevation-1 rounded-lg pa-3 fill-height d-flex flex-column sub-table-card">
+            <v-card
+              class="elevation-1 rounded-lg pa-3 fill-height d-flex flex-column sub-table-card"
+            >
               <div class="panel-header mb-2">
                 <div class="d-flex align-center justify-space-between mb-1">
                   <div class="d-flex align-center">
                     <v-icon icon="$table" size="18" color="primary" class="mr-1" />
-                    <span class="text-subtitle-2 font-weight-bold">현재 투입 LOT &amp; Carrier</span>
+                    <span class="text-subtitle-2 font-weight-bold"
+                      >현재 투입 LOT &amp; Carrier</span
+                    >
                   </div>
                   <v-chip size="x-small" color="primary" variant="flat">
                     {{ currentEqpLotList.length }}건
                   </v-chip>
                 </div>
                 <div class="text-caption text-medium-emphasis">
-                  오더: {{ selectedEquipment ? selectedEquipment.currentOrder : '-' }} | 투입 총량: {{ inputTotalWeight.toFixed(2) }} t
+                  오더: {{ selectedEquipment ? selectedEquipment.currentOrder : '-' }} | 투입 총량:
+                  {{ inputTotalWeight.toFixed(2) }} t
                 </div>
               </div>
 
@@ -290,31 +337,42 @@
                   <template #[`item.status`]="{ item }">
                     <v-chip
                       size="x-small"
-                      :color="item.status === 'WIP' || item.status === 'RUN' ? 'warning' : 'success'"
+                      :color="
+                        item.status === 'WIP' || item.status === 'RUN' ? 'warning' : 'success'
+                      "
                       variant="flat"
                     >
                       {{ item.status }}
                     </v-chip>
                   </template>
                 </BaseDataTable>
-
               </div>
             </v-card>
           </v-col>
 
           <!-- ================= [우측 하단-우측] 실적 등록 및 완료 입력 폼 ================= -->
           <v-col cols="12" lg="7" class="d-flex flex-column">
-            <v-card class="elevation-1 rounded-lg pa-4 fill-height d-flex flex-column performance-form-card">
+            <v-card
+              class="elevation-1 rounded-lg pa-4 fill-height d-flex flex-column performance-form-card"
+            >
               <div class="panel-header mb-3">
                 <div class="d-flex align-center justify-space-between mb-1">
                   <div class="d-flex align-center">
                     <v-icon icon="$contentSave" size="18" color="success" class="mr-1" />
-                    <span class="text-subtitle-2 font-weight-bold">생산 실적 및 회수 정보 등록</span>
+                    <span class="text-subtitle-2 font-weight-bold"
+                      >생산 실적 및 회수 정보 등록</span
+                    >
                   </div>
                   <v-chip
                     v-if="calculatedYield > 0"
                     size="small"
-                    :color="calculatedYield >= 95 ? 'success' : calculatedYield >= 85 ? 'warning' : 'error'"
+                    :color="
+                      calculatedYield >= 95
+                        ? 'success'
+                        : calculatedYield >= 85
+                          ? 'warning'
+                          : 'error'
+                    "
                     variant="flat"
                     class="font-weight-bold"
                   >
@@ -370,7 +428,9 @@
 
                   <!-- 4. 보관 적재 위치 / 포트 -->
                   <v-col cols="12" sm="6">
-                    <div class="text-caption font-weight-bold mb-1">입고 적재 위치 (Shelf / Port) *</div>
+                    <div class="text-caption font-weight-bold mb-1">
+                      입고 적재 위치 (Shelf / Port) *
+                    </div>
                     <v-select
                       v-model="performanceForm.targetLocation"
                       :items="locationOptions"
@@ -458,21 +518,33 @@
               <div class="summary-item mr-4 mb-2 mb-md-0">
                 <span class="text-caption text-medium-emphasis">완료 대상 설비:</span>
                 <span class="font-weight-bold text-success ml-1">
-                  {{ selectedEquipment ? '[' + selectedEquipment.eqpId + '] ' + selectedEquipment.eqpName : '설비 미선택' }}
+                  {{
+                    selectedEquipment
+                      ? '[' + selectedEquipment.eqpId + '] ' + selectedEquipment.eqpName
+                      : '설비 미선택'
+                  }}
                 </span>
               </div>
 
               <div class="summary-item mr-4 mb-2 mb-md-0">
                 <span class="text-caption text-medium-emphasis">오더 / 배치:</span>
                 <span class="font-weight-bold text-high-emphasis ml-1">
-                  {{ selectedEquipment ? selectedEquipment.currentOrder + ' / ' + selectedEquipment.currentLot : '-' }}
+                  {{
+                    selectedEquipment
+                      ? selectedEquipment.currentOrder + ' / ' + selectedEquipment.currentLot
+                      : '-'
+                  }}
                 </span>
               </div>
 
               <div class="summary-item mr-4 mb-2 mb-md-0">
                 <span class="text-caption text-medium-emphasis">등록 실적:</span>
                 <span class="font-weight-bold text-primary ml-1">
-                  {{ performanceForm.actualWeight > 0 ? performanceForm.actualWeight + ' t' : '미입력' }}
+                  {{
+                    performanceForm.actualWeight > 0
+                      ? performanceForm.actualWeight + ' t'
+                      : '미입력'
+                  }}
                 </span>
                 <span v-if="calculatedYield > 0" class="text-caption text-medium-emphasis ml-1">
                   (수율 {{ calculatedYield.toFixed(1) }}%)
@@ -547,7 +619,9 @@ const equipmentSearchKeyword = ref('')
 const filterOnlyRunning = ref(false)
 const openedPanelIndexes = ref([0, 1, 2, 6, 7])
 
-const { loading: isEquipmentLoading, execute: executeFetchEquipments } = useApi(fetchEquipmentHierarchyApi)
+const { loading: isEquipmentLoading, execute: executeFetchEquipments } = useApi(
+  fetchEquipmentHierarchyApi,
+)
 
 // ==========================================
 // 2. 현재 투입 LOT 목록 관리 (useDataTable 연동)
@@ -803,7 +877,8 @@ function onRefreshAll() {
   loadEquipmentTree()
   if (selectedEquipment.value) {
     loadLotsData({
-      orderId: selectedEquipment.value.currentOrder !== '-' ? selectedEquipment.value.currentOrder : null,
+      orderId:
+        selectedEquipment.value.currentOrder !== '-' ? selectedEquipment.value.currentOrder : null,
     })
   }
 }
@@ -866,7 +941,11 @@ async function onConfirmEnd() {
     }
 
     showNotification(
-      '[' + selectedEquipment.value.eqpId + '] 조업 완료 및 생산 실적(' + performanceForm.actualWeight + 't)이 성공적으로 등록되었습니다.',
+      '[' +
+        selectedEquipment.value.eqpId +
+        '] 조업 완료 및 생산 실적(' +
+        performanceForm.actualWeight +
+        't)이 성공적으로 등록되었습니다.',
       'success',
     )
 

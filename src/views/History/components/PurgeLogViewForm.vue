@@ -134,12 +134,7 @@
       </v-btn>
 
       <!-- 저장 / 수정 실행 버튼 -->
-      <v-btn
-        color="primary"
-        variant="elevated"
-        :loading="isSaving"
-        v-on:click="onHandleSave"
-      >
+      <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave">
         {{ isCreateMode ? $t('common.save') : $t('common.edit') }}
       </v-btn>
     </v-card-actions>
@@ -209,9 +204,9 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.id = isCreateMode.value ? null : (newVal.id != null ? Number(newVal.id) : null)
+      formData.id = isCreateMode.value ? null : newVal.id != null ? Number(newVal.id) : null
       formData.purgeConfigId = newVal.purgeConfigId != null ? Number(newVal.purgeConfigId) : null
-      formData.batchId = isCreateMode.value ? '' : (newVal.batchId || '')
+      formData.batchId = isCreateMode.value ? '' : newVal.batchId || ''
       formData.tableName = newVal.tableName || ''
       formData.startDateTime = newVal.startDateTime || ''
       formData.endDateTime = newVal.endDateTime || ''

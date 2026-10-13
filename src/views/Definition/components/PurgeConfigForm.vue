@@ -169,12 +169,7 @@
       </v-btn>
 
       <!-- 저장 / 수정 실행 버튼 -->
-      <v-btn
-        color="primary"
-        variant="elevated"
-        :loading="isSaving"
-        v-on:click="onHandleSave"
-      >
+      <v-btn color="primary" variant="elevated" :loading="isSaving" v-on:click="onHandleSave">
         {{ isCreateMode ? $t('common.save') : $t('common.edit') }}
       </v-btn>
     </v-card-actions>
@@ -264,10 +259,10 @@ watch(
   },
   function (newVal) {
     if (newVal) {
-      formData.id = isCreateMode.value ? null : (newVal.id != null ? Number(newVal.id) : null)
+      formData.id = isCreateMode.value ? null : newVal.id != null ? Number(newVal.id) : null
       formData.dbName = newVal.dbName || ''
       formData.schemaName = newVal.schemaName || 'dbo'
-      formData.tableName = isCreateMode.value ? '' : (newVal.tableName || '')
+      formData.tableName = isCreateMode.value ? '' : newVal.tableName || ''
       formData.targetColumnName = newVal.targetColumnName || ''
       formData.dataType = newVal.dataType || 'DATE'
       formData.operator = newVal.operator || '<'
@@ -334,8 +329,7 @@ async function onHandleSave() {
   } catch (error) {
     console.error('Save purge config failed:', error)
     const errorMsg =
-      (error.response && error.response.data && error.response.data.message) ||
-      t('common.saveFail')
+      (error.response && error.response.data && error.response.data.message) || t('common.saveFail')
     alert(errorMsg)
   }
 }

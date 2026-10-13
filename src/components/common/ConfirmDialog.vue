@@ -10,7 +10,9 @@
       <v-card-actions class="pt-4">
         <v-spacer></v-spacer>
         <v-btn variant="text" v-on:click="onCancel">{{ cancelText || $t('common.cancel') }}</v-btn>
-        <v-btn :color="confirmColor" variant="elevated" v-on:click="onConfirm">{{ confirmText || $t('common.delete') }}</v-btn>
+        <v-btn :color="confirmColor" variant="elevated" v-on:click="onConfirm">{{
+          confirmText || $t('common.delete')
+        }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

@@ -43,7 +43,7 @@ const props = defineProps({
       return { x: 200, y: 190 }
     },
   },
-  // 트레이 목록: [{ carrierName: 'TRAY_01', positionId: 'pos-31101', state: 'MOVING' }]
+  // 트레이 목록: [{ carrierName: 'TRAY_01', positionId: 'WH1-31303', state: 'MOVING' }]
   trayList: {
     type: Array,
     default: function () {
@@ -59,33 +59,35 @@ const isLoading = ref(false)
 const hasError = ref(false)
 const errorMessage = ref('')
 
-// pos 노드 ID별 중심 좌표 맵: { "pos-31101": { x: 420, y: 180 }, ... }
+// 물리 노드 ID(equipmentName-portName)별 중심 좌표 맵: { "WH1-31303": { x: 323, y: 142 }, ... }
 const nodeCoordsMap = {}
 
-// 1. SVG 내의 pos- 노드 중심 좌표 자동 추출
+// 1. SVG 내의 포지션 노드(.tray-position) 중심 좌표 추출
 function cacheNodePositions() {
   if (!containerRef.value) return
   const svg = containerRef.value.querySelector('svg')
   if (!svg) return
 
-  const posElements = svg.querySelectorAll('[id^="pos-"]')
-  const svgCTM = svg.getScreenCTM() // SVG 루트의 기준 CTM
+  // .tray-position 클래스를 가진 모든 노드 선택 (id="WH1-31303", id="313-31301" 등)
+  const posElements = svg.querySelectorAll('.tray-position')
+  const svgCTM = svg.getScreenCTM()
   if (!svgCTM) return
 
   for (let i = 0; i < posElements.length; i++) {
     const el = posElements[i]
+    if (!el.id) continue
+
     try {
-      // 1. 해당 엘리먼트의 로컬 바운딩 박스
+      // 1. 해당 엘리먼트의 로컬 바운딩 박스 중심
       const bbox = el.getBBox()
       const localCenterX = bbox.x + bbox.width / 2
       const localCenterY = bbox.y + bbox.height / 2
 
-      // 2. SVG 루트 기준의 실제 절대 좌표로 변환 (부모 <g>의 transform 전부 합산)
+      // 2. SVG 루트 기준의 실제 절대 좌표로 변환 (부모 <g>의 transform 반영)
       const pt = svg.createSVGPoint()
       pt.x = localCenterX
       pt.y = localCenterY
 
-      // 엘리먼트의 변환 행렬을 거친 뒤 SVG 루트 좌표계로 매핑
       const elCTM = el.getScreenCTM()
       if (elCTM) {
         const screenPt = pt.matrixTransform(elCTM)
@@ -137,24 +139,21 @@ function updateTrayPositions(trays) {
     if (!tray || !tray.carrierName || !tray.positionId) continue
 
     const targetCoord = nodeCoordsMap[tray.positionId]
-    if (!targetCoord) continue // 등록되지 않은 노드면 패스
+    if (!targetCoord) continue
 
     activeTrayIds[tray.carrierName] = true
     let trayEl = trayLayer.querySelector('#tray-' + tray.carrierName)
 
-    // 신규 트레이 엘리먼트 생성
     if (!trayEl) {
       trayEl = createTraySvgElement(tray.carrierName)
       trayLayer.appendChild(trayEl)
-      // 생성 직후 첫 위치 세팅 (애니메이션 없이 즉시 배치)
       trayEl.setAttribute('transform', 'translate(' + targetCoord.x + ', ' + targetCoord.y + ')')
     } else {
-      // 이미 존재하는 트레이는 translate만 갱신 -> CSS transition에 의해 부드럽게 이동
       trayEl.setAttribute('transform', 'translate(' + targetCoord.x + ', ' + targetCoord.y + ')')
     }
   }
 
-  // 메시지에서 사라진 트레이(작업 완료/반출) 엘리먼트 자동 제거
+  // 제거된 트레이 엘리먼트 정리
   const allExistingTrays = trayLayer.querySelectorAll('.tray-unit')
   for (let j = 0; j < allExistingTrays.length; j++) {
     const el = allExistingTrays[j]
@@ -172,7 +171,7 @@ function createTraySvgElement(carrierName) {
   g.setAttribute('class', 'tray-unit')
   g.setAttribute('data-carrier', carrierName)
 
-  // 1. 트레이 베이스 (너비 68 x 높이 46, 중심 기준 -34, -23)
+  // 1. 트레이 베이스 (너비 68 x 높이 46)
   const base = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
   base.setAttribute('x', '-34')
   base.setAttribute('y', '-23')
@@ -188,7 +187,7 @@ function createTraySvgElement(carrierName) {
   inner.setAttribute('height', '36')
   inner.setAttribute('class', 'tray-inner')
 
-  // 3. 트레이 캐리어 라벨
+  // 3. 트레이 라벨
   const text = document.createElementNS('http://www.w3.org/2000/svg', 'text')
   text.setAttribute('x', '0')
   text.setAttribute('y', '0')
@@ -202,7 +201,7 @@ function createTraySvgElement(carrierName) {
   return g
 }
 
-// 트레이(Carrier) 더블클릭 감지 핸들러
+// 트레이 더블클릭 핸들러
 function handleContainerDblClick(event) {
   if (!containerRef.value) return
   let target = event.target
@@ -218,20 +217,22 @@ function handleContainerDblClick(event) {
   }
 }
 
-// 4. 클릭 이벤트 위임
+// 포지션 노드 클릭 핸들러 (.tray-position 감지)
 function handleContainerClick(event) {
   if (!containerRef.value) return
   let target = event.target
   while (target && target !== containerRef.value) {
-    if (target.id && target.id.indexOf('pos-') === 0) {
-      emit('click-position', target.id)
+    if (target.classList && target.classList.contains('tray-position')) {
+      if (target.id) {
+        emit('click-position', target.id)
+      }
       break
     }
     target = target.parentElement
   }
 }
 
-// 5. SVG 비동기 로드
+// SVG 로드
 async function loadSvg(url) {
   if (!url) return
   isLoading.value = true
@@ -263,7 +264,7 @@ async function loadSvg(url) {
 onMounted(function () {
   if (containerRef.value) {
     containerRef.value.addEventListener('click', handleContainerClick)
-    containerRef.value.addEventListener('dblclick', handleContainerDblClick) // 👈 추가
+    containerRef.value.addEventListener('dblclick', handleContainerDblClick)
   }
   loadSvg(props.src)
 })
@@ -271,7 +272,7 @@ onMounted(function () {
 onBeforeUnmount(function () {
   if (containerRef.value) {
     containerRef.value.removeEventListener('click', handleContainerClick)
-    containerRef.value.removeEventListener('dblclick', handleContainerDblClick) // 👈 추가
+    containerRef.value.removeEventListener('dblclick', handleContainerDblClick)
   }
 })
 
@@ -294,7 +295,6 @@ watch(
   { deep: true },
 )
 
-// 트레이 목록 변경(웹소켓 수신) 시 실시간 위치 갱신
 watch(
   function () {
     return props.trayList
@@ -353,7 +353,7 @@ watch(
   will-change: transform;
 }
 
-/* 트레이 이동 애니메이션 (컨베이어 속도에 맞게 0.7초 보간) */
+/* 트레이 이동 애니메이션 */
 :deep(.tray-unit) {
   transition: transform 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
   will-change: transform;
@@ -361,24 +361,28 @@ watch(
 }
 
 /* 트레이 외형 스타일링 */
-:deep(.tray-body) {
-  fill: #2563eb;
-  stroke: #1d4ed8;
+:deep(.tray-base) {
+  fill: #1976d2;
+  stroke: #0d47a1;
   stroke-width: 1.5;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  rx: 6;
+  ry: 6;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.25));
 }
 
-:deep(.tray-unit:hover .tray-body) {
-  fill: #1d4ed8;
+:deep(.tray-inner) {
+  fill: #2196f3;
+  rx: 3;
+  ry: 3;
 }
 
 :deep(.tray-label) {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   fill: #ffffff;
   text-anchor: middle;
-  dominant-baseline: middle;
+  dominant-baseline: central;
   pointer-events: none;
 }
 </style>

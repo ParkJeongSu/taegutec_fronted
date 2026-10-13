@@ -57,11 +57,83 @@
 
           <!-- 공통 SVG 도면 뷰어 컴포넌트 -->
           <div class="flex-grow-1 d-flex">
-            <SvgDrawingViewer
-              :src="drawingSrc"
-              :crane-pos="cranePos"
-              v-on:click-position="handlePositionClick"
-            />
+            <!-- 1. 템플릿 영역: SvgDrawingViewer에 tray-list 바인딩 추가 -->
+              <!-- SvgDrawingViewer에 v-on:dblclick-tray 바인딩 추가 -->
+<SvgDrawingViewer
+  :src="drawingSrc"
+  :crane-pos="cranePos"
+  :tray-list="trayList"
+  v-on:click-position="handlePositionClick"
+  v-on:dblclick-tray="handleTrayDblClick"
+/>
+
+<!-- 캐리어(트레이) 상세 정보 팝업 다이얼로그 -->
+<v-dialog v-model="trayDetailDialogVisible" max-width="480">
+  <v-card class="rounded-lg pa-4">
+    <v-card-title class="d-flex align-center justify-space-between pb-2">
+      <div class="d-flex align-center">
+        <v-avatar color="primary" variant="tonal" size="36" class="mr-2">
+          <v-icon icon="$cubeOutline" color="primary" size="20"></v-icon>
+        </v-avatar>
+        <span class="text-subtitle-1 font-weight-bold">캐리어(Tray) 상세 정보</span>
+      </div>
+      <v-btn icon="$close" variant="text" size="small" v-on:click="trayDetailDialogVisible = false"></v-btn>
+    </v-card-title>
+
+    <v-divider class="mb-3"></v-divider>
+
+    <v-card-text class="pa-0" v-if="selectedTrayDetail">
+      <v-table density="compact" class="tray-detail-table border rounded">
+        <tbody>
+          <tr>
+            <th class="info-header">캐리어 명</th>
+            <td class="font-weight-bold text-primary">{{ selectedTrayDetail.carrierName }}</td>
+          </tr>
+          <tr>
+            <th class="info-header">캐리어 타입</th>
+            <td>
+              <v-chip size="x-small" color="secondary" variant="tonal">
+                {{ selectedTrayDetail.carrierType }}
+              </v-chip>
+            </td>
+          </tr>
+          <tr>
+            <th class="info-header">오더 ID</th>
+            <td class="font-weight-bold">{{ selectedTrayDetail.orderId }}</td>
+          </tr>
+          <tr>
+            <th class="info-header">적재 중량</th>
+            <td>{{ selectedTrayDetail.weightKg }} kg</td>
+          </tr>
+          <tr>
+            <th class="info-header">현재 위치</th>
+            <td>
+              <v-chip size="x-small" color="primary" variant="flat">
+                {{ selectedTrayDetail.currentPosition }}
+              </v-chip>
+            </td>
+          </tr>
+          <tr>
+            <th class="info-header">상태</th>
+            <td>
+              <v-chip size="x-small" color="success" variant="flat">
+                {{ selectedTrayDetail.status }}
+              </v-chip>
+            </td>
+          </tr>
+        </tbody>
+      </v-table>
+    </v-card-text>
+
+    <v-divider class="mt-4 mb-2"></v-divider>
+
+    <v-card-actions class="pa-0 d-flex justify-end">
+      <v-btn color="primary" variant="tonal" size="small" v-on:click="trayDetailDialogVisible = false">
+        확인
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
           </div>
         </v-card>
       </v-col>
@@ -211,6 +283,14 @@ const { isConnected, connectionStatusText, subscribe, unsubscribe } = useStompSo
 // 2. 크레인 실시간 위치 좌표 (반응형 상태)
 const cranePos = ref({ x: 200, y: 190 })
 
+// [추가] 실시간 컨베이어 상의 트레이 목록 관리 상태
+// 형태: [{ carrierName: 'TRAY-01', positionId: 'pos-31101', state: 'MOVING' }]
+const trayList = ref([])
+
+// 캐리어 상세 팝업 상태 정의
+const trayDetailDialogVisible = ref(false)
+const selectedTrayDetail = ref(null)
+
 // 3. 실시간 크레인 좌표 수신 핸들러
 function handleCraneMovement(payload) {
   if (!payload) {
@@ -229,11 +309,61 @@ function handleCraneMovement(payload) {
 }
 
 // 4. 실시간 컨베이어 상태 수신 핸들러 (확장용 뼈대)
+// [수정] 4. 실시간 컨베이어 상태 수신 핸들러
 function handleConveyorStatus(payload) {
   if (!payload) {
     return
   }
-  console.log('[WorkStation' + wsNo + '] Conveyor status received:', payload)
+
+  // 페이로드가 단건 이벤트인 경우: { carrierName: "TRAY-01", positionId: "pos-31102", action: "MOVE" | "REMOVE" }
+  const carrierName = payload.carrierName || payload.trayId
+  const nextPos = payload.positionId || payload.locationId
+  const action = payload.action || 'MOVE'
+
+  if (!carrierName) {
+    return
+  }
+
+  // 트레이 배출/작업 완료로 인한 제거 이벤트인 경우
+  if (action === 'REMOVE') {
+    const filtered = []
+    for (let i = 0; i < trayList.value.length; i++) {
+      if (trayList.value[i].carrierName !== carrierName) {
+        filtered.push(trayList.value[i])
+      }
+    }
+    trayList.value = filtered
+    return
+  }
+
+  // 트레이 이동 또는 신규 진입 처리
+  let exists = false
+  const updatedList = []
+  for (let i = 0; i < trayList.value.length; i++) {
+    const item = trayList.value[i]
+    if (item.carrierName === carrierName) {
+      updatedList.push({
+        ...item,
+        positionId: nextPos,
+        state: payload.state || 'MOVING',
+      })
+      exists = true
+    } else {
+      updatedList.push(item)
+    }
+  }
+
+  // 신규 진입 트레이인 경우 리스트에 추가
+  if (!exists && nextPos) {
+    updatedList.push({
+      carrierName: carrierName,
+      positionId: nextPos,
+      state: payload.state || 'ENTER',
+    })
+  }
+
+  trayList.value = updatedList
+  console.log('[WorkStation' + wsNo + '] Tray moved:', carrierName, '->', nextPos)
 }
 
 // 5. 선택된 트레이 포지션 ID
@@ -388,6 +518,30 @@ function onRowClick(event, row) {
   }
 }
 
+// 더블클릭 시 호출되는 핸들러 (더미데이터 매핑)
+function handleTrayDblClick(carrierName) {
+  // 현재 트레이의 위치 조회
+  let currentPos = '-'
+  for (let i = 0; i < trayList.value.length; i++) {
+    if (trayList.value[i].carrierName === carrierName) {
+      currentPos = trayList.value[i].positionId
+      break
+    }
+  }
+
+  // 상세 정보 세팅 (현재는 더미데이터 바인딩)
+  selectedTrayDetail.value = {
+    carrierName: carrierName,
+    carrierType: 'INSERT_TRAY_A',
+    weightKg: 12.5,
+    orderId: 'ORD-20261013-001',
+    currentPosition: currentPos,
+    status: 'IN_TRANSIT',
+  }
+
+  trayDetailDialogVisible.value = true
+}
+
 // 라이프사이클: 웹소켓 토픽 구독, 초기 오더 조회 및 30초 자동 폴링 타이머 설정
 onMounted(function () {
   subscribe(craneTopic, handleCraneMovement)
@@ -433,5 +587,17 @@ onBeforeUnmount(function () {
 
 .order-tabs {
   border-bottom: none;
+}
+
+.tray-detail-table th.info-header {
+  width: 35%;
+  background-color: #f8fafc;
+  font-weight: 600 !important;
+  color: #475569;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.tray-detail-table td {
+  padding-left: 12px !important;
 }
 </style>

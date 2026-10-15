@@ -320,14 +320,13 @@ function handleCraneMovement(payload) {
   }
 }
 
-// 4. 실시간 컨베이어 상태 수신 핸들러 (확장용 뼈대)
-// [수정] 4. 실시간 컨베이어 상태 수신 핸들러
+// 4. 실시간 컨베이어 상태 수신 핸들러 (동일 포지션 점유 충돌 방지 및 고스트 트레이 자동 정리 적용)
 function handleConveyorStatus(payload) {
   if (!payload) {
     return
   }
 
-  // 페이로드가 단건 이벤트인 경우: { carrierName: "TRAY-01", positionId: "pos-31102", action: "MOVE" | "REMOVE" }
+  // 페이로드 정규화: { carrierName: "TRAY-01", positionId: "311-31101", action: "MOVE" | "REMOVE" }
   const carrierName = payload.carrierName || payload.trayId
   const nextPos = payload.positionId || payload.locationId
   const action = payload.action || 'MOVE'
@@ -336,7 +335,7 @@ function handleConveyorStatus(payload) {
     return
   }
 
-  // 트레이 배출/작업 완료로 인한 제거 이벤트인 경우
+  // 1. 트레이 배출/작업 완료로 인한 명시적 제거(REMOVE) 이벤트 처리
   if (action === 'REMOVE') {
     const filtered = []
     for (let i = 0; i < trayList.value.length; i++) {
@@ -348,11 +347,33 @@ function handleConveyorStatus(payload) {
     return
   }
 
-  // 트레이 이동 또는 신규 진입 처리
-  let exists = false
-  const updatedList = []
+  // 2. 패킷 유실 대비 포지션 선점 검사
+  // 새로 들어올 위치(nextPos)에 이미 다른 트레이(ghost tray)가 남아있다면 즉시 제거
+  const cleanedList = []
   for (let i = 0; i < trayList.value.length; i++) {
     const item = trayList.value[i]
+    if (item.carrierName !== carrierName && item.positionId === nextPos) {
+      console.warn(
+        '[WorkStation' +
+          wsNo +
+          '] 포지션 충돌 감지: ' +
+          nextPos +
+          ' 위치의 기존 트레이(' +
+          item.carrierName +
+          ')를 새 트레이(' +
+          carrierName +
+          ') 진입으로 인해 자동 정리합니다.',
+      )
+      continue
+    }
+    cleanedList.push(item)
+  }
+
+  // 3. 트레이 위치 갱신 또는 신규 진입 처리
+  let exists = false
+  const updatedList = []
+  for (let i = 0; i < cleanedList.length; i++) {
+    const item = cleanedList[i]
     if (item.carrierName === carrierName) {
       updatedList.push({
         ...item,
